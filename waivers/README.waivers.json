@@ -1,0 +1,55 @@
+{
+  "generated_by": "ticfinder",
+  "source": "BLOG_bpu_13_contradiction_detection.md",
+  "waivers": {
+    "d8abb4": {
+      "construction": "BORROWED_RIGOUR",
+      "line_when_waived": 1,
+      "pattern": "",
+      "text": "by construction"
+    },
+    "2dbccf": {
+      "construction": "ALTERNATIVE_FRAMING",
+      "line_when_waived": 1,
+      "pattern": "",
+      "text": "rather than"
+    },
+    "95a3c0": {
+      "construction": "ALTERNATIVE_FRAMING",
+      "line_when_waived": 1,
+      "pattern": "",
+      "text": "more than one..."
+    },
+    "68b1f9": {
+      "construction": "ALTERNATIVE_FRAMING",
+      "line_when_waived": 1,
+      "pattern": "",
+      "text": "more than one detector, ..."
+    },
+    "d46eb9": {
+      "construction": "TRICOLON",
+      "line_when_waived": 1,
+      "pattern": "",
+      "text": "the construction, ..."
+    },
+    "085788": {
+      "construction": "ALTERNATIVE_FRAMING",
+      "line_when_waived": 1,
+      "pattern": "",
+      "text": "rather than per..."
+    },
+    "785964": {
+      "construction": "PARTICIPIAL_TAIL",
+      "line_when_waived": 1,
+      "pattern": "",
+      "text": ", overriding their ..."
+    },
+    "eec9fe": {
+      "construction": "ALTERNATIVE_FRAMING",
+      "line_when_waived": 1,
+      "pattern": "",
+      "text": "rather than"
+    }
+  }
+}
+

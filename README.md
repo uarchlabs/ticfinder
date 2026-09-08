@@ -3,9 +3,9 @@
 Finds recurring LLM prose constructions in markdown or plain text, so a human
 can decide what to cut.
 
-ticfinder is not a grammar checker. Everything it flags is legitimate English.
-The premise is that these constructions *cluster* in LLM generated prose, and
-the clustering is what breaks reader flow.
+ticfinder does not detect bad grammar. ticfinder looks for structural patterns
+in legitimate English.  The premise is that these constructions *cluster* in LLM
+generated prose, and the clustering is what breaks reader flow.
 
 ## Install
 
@@ -37,8 +37,7 @@ Colour is ANSI escapes, and it switches off automatically when stdout is not a
 terminal, so `> out.log` and `| less` come out clean. `NO_COLOR` and
 `TERM=dumb` are honoured too. `--plain` forces it off, `--colour` forces it on.
 
-Note that `--ascii` does *not* remove colour: escape codes are themselves
-ASCII. The two flags do different jobs -- `--ascii` handles the text, `--plain`
+Note that `--ascii` does *not* remove colour since escape codes are ASCII. The two flags do different jobs -- `--ascii` handles the text, `--plain`
 handles the formatting.
 
 ## What it looks for
@@ -69,15 +68,12 @@ Phrasal (token patterns):
 
 ## Output encoding
 
-By default output is UTF-8, and flagged em dashes appear as em dashes. Pass
-`--ascii` for 7-bit output: the tool's own separators become ASCII and quoted
-source text is transliterated (em dash to `--`, curly quotes to straight, and
-so on), with anything unmapped escaped rather than dropped.
+By default output is UTF-8, and flagged em dashes appear as em dashes. Passing
+argument `--ascii` for 7-bit output ticfinder's separators will also become ASCII and quoted source text is transliterated (em dash to `--`, curly quotes to straight, and so on). Any patterns that are not mapped are passed through.
 
-ASCII mode also switches on automatically when `sys.stdout.encoding` isn't
-UTF-8, which is what happens under `PYTHONIOENCODING=ascii`, some CI runners,
-and slim Docker images. Without that guard, printing a flagged em dash raises
-`UnicodeEncodeError` and kills the run.
+ASCII mode also turns on automatically when `sys.stdout.encoding` isn't UTF-8.
+Python sets that at startup and some environments leave it as ASCII, in which
+case printing an em dash would crash the run.
 
 `--json` always writes UTF-8 to disk; `--ascii` additionally sets
 `ensure_ascii` so the file itself stays 7-bit.
@@ -93,10 +89,10 @@ findings highlighted in place, list on the right. Click either side to jump to
 the other. Uncheck a construction in the legend to hide it everywhere, which is
 how you read past a noisy detector without editing config.
 
-Highlight colour is confidence, not severity: rust = high, amber = medium,
+Highlight colour is reports confidence, rust = high, amber = medium,
 grey = low.
 
-Overlapping spans are resolved rather than nested -- highest confidence wins,
+Overlapping spans are resolved with highest confidence winning,
 then longest. The header reports how many were suppressed, so a large number
 there means two detectors are firing on the same text and one of them probably
 should not be.
@@ -110,9 +106,9 @@ findings themselves. Output wraps to your terminal width (clamped 60-120), so
 nothing runs off the screen or into a hard-to-read wrap.
 
 Findings are **grouped by construction**, most frequent first, so each header
-and note is printed once rather than once per hit. In positional order a note
-reprints every time its construction recurs -- on a real 3,500-word article
-that was 21% of the whole report.
+and note is printed only once. In positional order a note
+reprints every time its construction recurs. In a real 3,500-word article
+that is 21% of the whole report.
 
 | flag | effect |
 |---|---|
@@ -127,29 +123,36 @@ rest. Context is off by default because file and line already point your editor
 at it. When shown, the sentence is windowed *around* the match rather than
 truncated from its start, so the flagged text stays visible.
 
-Pass more than one file and a combined `ALL FILES` table is printed at the end
-with percentage shares. That is the view that tells you which two or three
-constructions dominate your writing -- which is where editing effort actually
-pays off.
+If more than one file is passed to the tool a combined`ALL FILES` table is
+printed at the end with percentage shares.  This view is useful to quickly
+determine which constructions dominate your writing.
 
-## Rates, not counts
+## Interpreting the numbers
 
-A single tricolon is good writing. Six on a page is a tic. Use `--stats` and
-watch `per_1000_words`. On a planted sample this scores ~109/1k; on plain human
-technical prose, ~9/1k. Your own numbers will differ — calibrate on your
-pre-LLM writing if you have any.
+Most of what the tool flags is fine in isolation and only becomes a problem
+when it repeats. One tricolon in an article is ordinary; six is a pattern. The
+count table and the `per_1000_words` figure in the header are reported to
+distinguish occasional findings from a pattern of excessive occurrence.
+
+There is no built-in threshold since a 'reasonable' rate depends on the
+subject matter and the register. If you have writing from before you started
+using an LLM, run the tool over it to get a baseline for your own prose.
+
+The waiver feature is offered to block reporting of structures that have
+already been scanned and are acceptable.
 
 ## Waivers
 
-Findings carry a short id. Review a document, fix what needs fixing, waive the
-rest:
+Each finding is assigned a short id. After reviewing a document and correcting
+what needs correcting, the remaining findings can be waived:
 
 ```bash
 ./tools/tic_finder.py posts/BLOG_bpu_13.md --waive 46df5f,b695e7
 ```
 
-Waived findings are hidden on later runs, so the reported count is work you
-have not looked at yet. Zero means covered.
+Waived findings are hidden on later runs, so the reported count is the number
+of findings not yet reviewed. A count of zero means every finding in the
+document has been either corrected or waived.
 
 ```
 posts/BLOG_bpu_13.md
@@ -167,9 +170,7 @@ posts/BLOG_bpu_13.md
 | `--no-waivers` | ignore waiver files entirely |
 
 The waiver path is derived from the source stem -- `BLOG_bpu_13.md` becomes
-`BLOG_bpu_13.waivers.json` -- so there is nothing to type and nothing to
-mistype. A mistyped explicit path would silently create an empty baseline and
-look exactly like lost work.
+`BLOG_bpu_13.waivers.json`. 
 
 ### The waiver file
 
@@ -194,37 +195,46 @@ look exactly like lost work.
 }
 ```
 
-Only the keys of `waivers` are load-bearing -- they are the finding ids, and
-matching is done on those alone. Everything inside each entry is there so the
-file is readable six months later: `construction` and `pattern` say which rule
-fired, `text` shows what was waived, and `line_when_waived` records where it
-was at the time. That line number is **not** used for matching and will go
-stale as the document changes; it is a breadcrumb, not a key.
+Only the keys of `waivers` are used for matching. They are the finding ids, and
+nothing else in the file affects whether a waiver applies.  Everything inside
+each entry is there so the file is readable six months later: `construction`
+and `pattern` say which rule fired, `text` shows what was waived, and
+`line_when_waived` records where it was at the time. That line number is
+**not** used for matching and will go stale as the document changes. The line
+number assists in locating the finding during interactive edits.
 
-`source` is checked on load and warns on mismatch. `pattern` is empty for
-findings that come from phrase lists rather than structural detectors.
+`source` is checked on file load and issues a warning on mismatch.  `pattern`
+names the specific detector that produced the finding.
 
-The file is safe to hand-edit -- delete an entry to unwaive it, or add one if
-you know the id. An empty `waivers` object is written rather than the file
-being removed, because "reviewed, nothing waived" and "never looked at" are
-different states.
+For constructions that have more than one detector, the pattern field indicates
+the detector. For example `CORRECTIVE_CONTRAST` has six detectors, the pattern
+field can be used to distinguish `cc_cleft` from `cc_parallel_sibling`, etc.. 
+
+Findings that come from a phrase list have no detector function behind them, so
+the field is empty.
+
+If every waiver is removed with `--unwaive`, the file is rewritten with an
+empty `waivers` object. A file with no waivers records that
+the document was reviewed; a missing file means it never was.
+
+Waiver files are only created or modified by `--waive` and `--unwaive`. A
+normal run reads them and writes nothing.
 
 ### Why ids are content hashes
 
 The id hashes the construction, pattern, matched text and surrounding
-sentence, whitespace-normalised. It deliberately excludes line and character
+sentence; with whitespace-normalised. The has excludes line and character
 offsets, so:
 
 - editing one paragraph does not invalidate waivers in another
-- rewrapping a paragraph keeps its waivers
-- actually changing a flagged sentence *does* drop the waiver, which is right --
-  it is a different sentence now
+- rewrapping a paragraph retains its waivers
+- ensures changing a flagged sentence **does** drop the waiver
 
-Waivers whose text has since disappeared are reported as **stale** rather than
-deleted, so the file does not silently accumulate dead entries.
+Waivers whose text has disappeared are reported as **stale** to avoid
+accumulation of old waivers.
 
 The waiver file records the source path it was written for and warns on
-mismatch, which covers the case of two directories holding the same filename.
+mismatch. This covers the case where two directories hold the same filename.
 
 ## When a rule is too noisy
 
@@ -238,8 +248,7 @@ the rest of its construction working.
 
 **Find out what to mute.** `--patterns` reports hits per pattern rather than
 per construction. A pattern with a large share is the first thing to check
-when the tool feels noisy -- it is usually one weak query, not the whole
-inventory.
+when the tool feels noisy.
 
 Patterns can carry their own confidence, overriding their construction's,
 because base rates inside one rhetorical family vary enormously. `not X but Y`
@@ -254,8 +263,7 @@ to mute separately needs its own id.
 
 ## Skipping regions
 
-Boilerplate you never edit -- author bios, licence blocks, standard footers --
-can be fenced off:
+There are pragmas which enable and disables ticfinder matching:
 
 ```markdown
 <!-- ticfinder_off -->
@@ -274,12 +282,11 @@ is less typing for a single paragraph. An unclosed `ticfinder_off` runs to the
 end of the file -- useful when all your boilerplate is at the bottom.
 
 `ticfinder_off`, `ticfinder-off` and `ticfinder off` are all accepted, in any
-case. The header reports how many regions were skipped, so a fence you forgot
-to close is visible rather than silent.
+case. The header reports how many regions were skipped.
 
 ## Phrase lists
 
-Word and phrase lists live in JSON, not in the code. Drop
+Word and phrase lists live in an external JSON file. Place a 
 `ticfinder-phrases.json` in the working directory or beside the script and it
 is picked up automatically; `--phrases FILE` overrides (repeatable),
 `--no-phrases` disables.
@@ -302,11 +309,11 @@ Two shorthands are accepted: a bare list of strings (everything becomes
 `leveraged` and `leveraging`. It costs a full parse of each phrase at startup,
 so use it for single words and leave it off for fixed multi-word phrases.
 
-Group by *why* a phrase is a problem rather than alphabetically. Each group is
-its own construction id with its own row in the summary and its own mute, so
-the grouping determines what you can act on. The shipped file has five:
-`BORROWED_RIGOUR`, `CONSULTANT_REGISTER`, `LLM_DICTION`, `EMPTY_FRAME`,
-`VAGUE_QUANTIFIER`.
+Phrases are best grouped by why they are a problem rather than alphabetically.
+Each group becomes its own construction id, with its own row in the summary and
+its own mute, so the grouping determines what can be acted on. The shipped file
+defines five: `BORROWED_RIGOUR`, `CONSULTANT_REGISTER`, `LLM_DICTION`,
+`EMPTY_FRAME`, and `VAGUE_QUANTIFIER`.
 
 ## Adding a construction
 
@@ -346,17 +353,19 @@ across a sentence boundary), asyndetic sibling phrases, negated apposition,
 fired in brackets, so a subtype that turns out to be noisy can be removed
 without touching the id.
 
-This split is the point. When phrasing drifts, add patterns and keep the id --
-counts, mutes and history all stay continuous.
-
 Two rules worth keeping:
 - The **note** field says what to check, not "this is bad". Every construction
   is legitimate somewhere.
 - One construction, many patterns. When surface forms drift, add patterns and
   keep the id. The id is what you report on and what you mute.
 
+<!-- ticfinder_off -->
+![Ticfinder Screenshot](images/ticfinder.png)
+<!-- ticfinder_on -->
+
 ## Known limits
 
+<!-- ticfinder_off -->
 - Markdown masking blanks code blocks, inline code, link targets, tables,
   blockquotes and HTML, preserving offsets so line numbers stay accurate.
 - `TRICOLON` and `ELEVATED_DICTION` are noisy by design; they are rate signals.
@@ -364,4 +373,5 @@ Two rules worth keeping:
   whether X was ever actually claimed earlier in the document. That check is
   the obvious next thing to build and the thing that would most improve
   precision.
+<!-- ticfinder_on -->
 
