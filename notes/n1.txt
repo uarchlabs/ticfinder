@@ -1,0 +1,27 @@
+I budget most of my time to the design: writing specifications, reviewing
+results, making tradeoffs, and driving the IA and PA. I use automation to
+reduce the time cost of sharing results through these articles, so I can stay
+focused on completing the design.
+
+I feed the PA my results analysis, the mapping between experiments and
+sessions, the session handoffs, and the IA generated results. I also give it a
+starting arc for the subject of the article. The PA does the analysis, scopes
+the possible article against my rough size constraints, and once we agree on
+the subject matter, populates the statistics, finds accurate references, and
+generates the first draft.
+
+I then read the article in full, checking the accuracy of claims, the clarity
+of generated diagrams, and cross checking references for hallucinations. The
+initial read through is two hours. Diagrams add anywhere from no time at all to
+an hour each if I have to create them myself. After that I make a judgement
+call on how much time to spend improving flow and wording.
+
+The draft always contains the well known LLM prose tics, and I decide whether
+to fix them now or come back in a clean pass. I recently started using spaCy to
+identify them, much like the grammar checkers in Word. These tics are
+grammatically correct, so the PA and I jointly write spaCy rules to detect them
+and annotate them in colored HTML.
+
+The process today is imperfect. It uses more of my time than I want and it does
+not catch everything. This is work in progress. Once there is enough of it, I
+will write an article and open up the repo with my spaCy extensions.
