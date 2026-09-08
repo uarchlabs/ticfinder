@@ -138,8 +138,30 @@ There is no built-in threshold since a 'reasonable' rate depends on the
 subject matter and the register. If you have writing from before you started
 using an LLM, run the tool over it to get a baseline for your own prose.
 
+Base rates also vary by document. On a technical article, six of eight
+`ALTERNATIVE_FRAMING` hits were real choices between real options, and every
+`CORRECTIVE_CONTRAST` survived the "was X actually claimed?" test. A domain
+term can trip a detector on its own: `mutually exclusive` is `ABSTRACT_ADVERB`
+and `by construction` is `BORROWED_RIGOUR`, and in a hardware document both
+mean exactly what they say. A high count in one construction is a prompt to
+read it, not evidence that it is wrong.
+
 The waiver feature is offered to block reporting of structures that have
 already been scanned and are acceptable.
+
+## Working through a document
+
+Rewriting to clear a finding can create another one. Splitting a
+`PARTICIPIAL_TAIL` into two sentences promotes whatever the tail contained
+into a main clause, and a three-item list there becomes a `TRICOLON`. The
+total can fall while a new finding appears, so **compare the finding set
+between runs, not the count.** `--compact` output diffs well for this.
+
+Because a finding id covers the sentence containing the match, rewriting a
+sentence retires its id and any waiver written against it. Waiving as you go
+therefore leaves stale entries behind. Work through the document first, one
+construction at a time, and take the waive list from a single clean run at
+the end.
 
 ## Waivers
 
@@ -368,6 +390,10 @@ Two rules worth keeping:
 <!-- ticfinder_off -->
 - Markdown masking blanks code blocks, inline code, link targets, tables,
   blockquotes and HTML, preserving offsets so line numbers stay accurate.
+  The quoted finding text is masked too, so a match spanning inline code
+  reads as nonsense: "reverted a TAGE epoch gate to alone", where the
+  source line ends with the inline code `prm_match`. Judge a finding from
+  the source line, not from the quoted text.
 - `TRICOLON` and `ELEVATED_DICTION` are noisy by design; they are rate signals.
 - Licensing checks are not implemented. `NEG_ANTITHESIS` cannot yet tell you
   whether X was ever actually claimed earlier in the document. That check is
