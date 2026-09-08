@@ -1,0 +1,144 @@
+{
+  "generated_by": "ticfinder",
+  "source": "BPU_blog_14_work_in_progress.md",
+  "waivers": {
+    "040f42": {
+      "construction": "ALTERNATIVE_FRAMING",
+      "line_when_waived": 433,
+      "pattern": "af_rather_instead",
+      "text": "rather than"
+    },
+    "15ece9": {
+      "construction": "TRICOLON",
+      "line_when_waived": 69,
+      "pattern": "tricolon",
+      "text": "epoch, target, allocation, aging and prediction-side"
+    },
+    "1b66ab": {
+      "construction": "ABSTRACT_ADVERB",
+      "line_when_waived": 240,
+      "pattern": "abstract_adverb",
+      "text": "mutually exclusive"
+    },
+    "293b7a": {
+      "construction": "TRICOLON",
+      "line_when_waived": 112,
+      "pattern": "tricolon",
+      "text": "primary update, alternate update, and allocation"
+    },
+    "2dff5d": {
+      "construction": "TRICOLON",
+      "line_when_waived": 101,
+      "pattern": "tricolon",
+      "text": "the collapsed data, selector and address"
+    },
+    "30e8f2": {
+      "construction": "CORRECTIVE_CONTRAST",
+      "line_when_waived": 380,
+      "pattern": "cc_negated_apposition",
+      "text": "the test, not the RTL"
+    },
+    "656ee5": {
+      "construction": "ALTERNATIVE_FRAMING",
+      "line_when_waived": 417,
+      "pattern": "af_rather_instead",
+      "text": "instead of the counter value"
+    },
+    "72c34a": {
+      "construction": "TRICOLON",
+      "line_when_waived": 412,
+      "pattern": "tricolon",
+      "text": "It confirmed `age = (lcl_epoch - EPC) mod 4`, and an effective usefulness of the raw value at age 0,"
+    },
+    "773f0d": {
+      "construction": "TRICOLON",
+      "line_when_waived": 271,
+      "pattern": "tricolon",
+      "text": "Then the gate was deliberately corrupted to `(prm_match | alt_match)`, both non-provider checks fail"
+    },
+    "7d0225": {
+      "construction": "ALTERNATIVE_FRAMING",
+      "line_when_waived": 199,
+      "pattern": "af_rather_instead",
+      "text": "rather than"
+    },
+    "8bd2df": {
+      "construction": "ALTERNATIVE_FRAMING",
+      "line_when_waived": 360,
+      "pattern": "af_less_than",
+      "text": "more planning documents in its manifest than it read, and after"
+    },
+    "8c80c0": {
+      "construction": "BORROWED_RIGOUR",
+      "line_when_waived": 240,
+      "pattern": "",
+      "text": "by construction"
+    },
+    "aa038c": {
+      "construction": "CORRECTIVE_CONTRAST",
+      "line_when_waived": 137,
+      "pattern": "cc_parallel_sibling",
+      "text": "in            , not against the controller suite"
+    },
+    "aa174f": {
+      "construction": "CORRECTIVE_CONTRAST",
+      "line_when_waived": 420,
+      "pattern": "cc_negated_apposition",
+      "text": "a 32-bit input port, not a static parameter"
+    },
+    "ab247e": {
+      "construction": "TRICOLON",
+      "line_when_waived": 289,
+      "pattern": "tricolon",
+      "text": "BP-056 reverted a TAGE epoch gate to             alone, watched two tests fail with the epoch field "
+    },
+    "ae51a2": {
+      "construction": "TRICOLON",
+      "line_when_waived": 518,
+      "pattern": "tricolon",
+      "text": "the             non-fast path for both units; rollback and history recompute, which move to cluster "
+    },
+    "b03224": {
+      "construction": "TRICOLON",
+      "line_when_waived": 378,
+      "pattern": "tricolon",
+      "text": "counter, usefulness, allocation, epoch and target"
+    },
+    "ba836c": {
+      "construction": "CORRECTIVE_CONTRAST",
+      "line_when_waived": 585,
+      "pattern": "cc_cleft",
+      "text": "The pattern is not carelessness in execution; it is the absence of the authority document at the mom"
+    },
+    "ba9ad2": {
+      "construction": "ALTERNATIVE_FRAMING",
+      "line_when_waived": 582,
+      "pattern": "af_rather_instead",
+      "text": "instead of demonstrating it"
+    },
+    "c55ba4": {
+      "construction": "TRICOLON",
+      "line_when_waived": 95,
+      "pattern": "tricolon",
+      "text": "The TAGE controller drove ten separate update and allocation buses dimensioned                , one "
+    },
+    "cbee0b": {
+      "construction": "ALTERNATIVE_FRAMING",
+      "line_when_waived": 357,
+      "pattern": "af_rather_instead",
+      "text": "Rather than correct one document"
+    },
+    "f46f57": {
+      "construction": "BORROWED_RIGOUR",
+      "line_when_waived": 267,
+      "pattern": "",
+      "text": "by construction"
+    },
+    "fc816e": {
+      "construction": "TRICOLON",
+      "line_when_waived": 1,
+      "pattern": "",
+      "text": "introducing a defect..."
+    }
+  }
+}
