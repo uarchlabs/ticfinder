@@ -47,6 +47,22 @@ def mask_markdown(text: str, stats: dict = None) -> str:
     def blank(m):
         return re.sub(r"[^\n]", " ", m.group(0))
 
+    def unquote(m):
+        """Keep inline-code content, blank only its delimiters.
+
+        Inline code sits mid-sentence and usually *is* a noun there:
+        'aging ran with `tage_enable_aging` and `ittage_enable_aging` held
+        at zero'. Blanking the identifiers leaves a hole the parser reads
+        across, inventing a verb coordination that is not in the source.
+        Substituting filler distorts the parse a different way. Keeping the
+        text and dropping the backticks is the only option that leaves the
+        sentence as the author wrote it.
+        """
+        t = m.group(0)
+        if "\n" in t:
+            return blank(m)
+        return " " + t[1:-1] + " " if len(t) >= 2 else blank(m)
+
     M = re.MULTILINE
     D = re.DOTALL
 
@@ -77,7 +93,7 @@ def mask_markdown(text: str, stats: dict = None) -> str:
     patterns = [
         (r"^```.*?^```", M | D),          # fenced code
         (r"^~~~.*?^~~~", M | D),          # alt fenced code
-        (r"`[^`\n]+`", 0),               # inline code
+        (r"`[^`\n]+`", 0, unquote),      # inline code: keep, drop ticks
         (r"^ {4,}\S[^\n]*$", M),         # indented code
         (r"!\[[^\]]*\]\([^)]*\)", 0),    # images
         (r"\]\([^)]*\)", 0),            # link targets (keep link text)
@@ -86,8 +102,10 @@ def mask_markdown(text: str, stats: dict = None) -> str:
         (r"^\s*[-*_]{3,}\s*$", M),       # horizontal rules
         (r"<[^>\n]+>", 0),               # html tags
     ]
-    for pat, flags in patterns:
-        text = re.sub(pat, blank, text, flags=flags)
+    for entry in patterns:
+        pat, flags = entry[0], entry[1]
+        fn = entry[2] if len(entry) > 2 else blank
+        text = re.sub(pat, fn, text, flags=flags)
     return text
 
 
@@ -234,7 +252,13 @@ def run_construction(cid, doc, nlp, disabled=()):
             hits = fn(doc, nlp)
         except Exception:
             continue
-        for span, sub in hits:
+        for hit in hits:
+            # A pattern may return (span, subtype) or, when confidence
+            # varies per finding, (span, subtype, confidence).
+            if len(hit) == 3:
+                span, sub, hconf = hit
+            else:
+                (span, sub), hconf = hit, None
             if span.end <= span.start or not span.text.strip():
                 continue        # a zero-width span highlights nothing
             key = (span.start, span.end)
@@ -243,7 +267,7 @@ def run_construction(cid, doc, nlp, disabled=()):
             seen = [(a, b) for a, b in seen
                     if not (key[0] <= a and b <= key[1])]
             seen.append(key)
-            out.append((span, sub, pconf or base, pname))
+            out.append((span, sub, hconf or pconf or base, pname))
     return out
 
 
@@ -343,65 +367,6 @@ PRAGMA_RE = re.compile(
     re.IGNORECASE)
 
 
-def parse_pragmas(raw):
-    """Find suppression regions declared in HTML comments.
-
-    <!-- ticfinder_off -->  ...  <!-- ticfinder_on -->
-        suppress everything between the two.
-
-    <!-- ticfinder_off CORRECTIVE_CONTRAST,EM_DASH -->
-        suppress only those constructions until the matching _on.
-
-    <!-- ticfinder_ignore -->
-        suppress the following line.
-
-    <!-- ticfinder_ignore TRICOLON -->
-        suppress that construction on the following line.
-
-    Returns (regions, warnings) where each region is
-    (start, end, frozenset_of_ids_or_None). None means "everything".
-    """
-    regions, warnings = [], []
-    open_at = None            # (offset, ids)
-
-    for m in PRAGMA_RE.finditer(raw):
-        verb = m.group("verb").lower()
-        args = m.group("args").replace(",", " ").split()
-        ids = frozenset(a.upper() for a in args) or None
-
-        if verb in ("off", "disable"):
-            if open_at is not None:
-                warnings.append(
-                    f"line {raw.count(chr(10), 0, m.start()) + 1}: "
-                    f"nested ticfinder_off; the earlier one is still open")
-            open_at = (m.end(), ids)
-
-        elif verb in ("on", "enable"):
-            if open_at is None:
-                warnings.append(
-                    f"line {raw.count(chr(10), 0, m.start()) + 1}: "
-                    f"ticfinder_on without a matching ticfinder_off")
-                continue
-            regions.append((open_at[0], m.start(), open_at[1]))
-            open_at = None
-
-        elif verb == "ignore":
-            nl = raw.find("\n", m.end())
-            if nl == -1:
-                continue
-            end = raw.find("\n", nl + 1)
-            regions.append((nl + 1, len(raw) if end == -1 else end, ids))
-
-    if open_at is not None:
-        line = raw.count("\n", 0, open_at[0]) + 1
-        warnings.append(
-            f"line {line}: ticfinder_off never closed; suppressing to end of "
-            f"file. Add <!-- ticfinder_on --> if that was not intended.")
-        regions.append((open_at[0], len(raw), open_at[1]))
-
-    return regions, warnings
-
-
 def suppressed(finding, regions):
     """True if a finding falls inside a region that gates its construction.
 
@@ -433,17 +398,52 @@ def sent_context(span, doc):
     return span.sent.text.strip().replace("\n", " ")
 
 
-def conj_chain(tok):
-    """spaCy chains coordination: A -conj-> B -conj-> C. Return [A,B,C]."""
-    chain = [tok]
-    cur = tok
-    while True:
-        nxt = [c for c in cur.children if c.dep_ == "conj"]
-        if not nxt:
-            break
-        cur = nxt[0]
-        chain.append(cur)
-    return chain
+def conj_chain(tok, follow_appos=False):
+    """All conjuncts of a coordination, in text order.
+
+    spaCy produces several shapes for the same coordination and which one you
+    get is not predictable: a chain (A -conj-> B -conj-> C), flat (A with
+    conj children B and C), or, for comma-separated noun series, a mix where
+    the middle item lands as `appos`. 'a counter, a usefulness field, and a
+    target' parses as counter -appos-> field -conj-> target.
+
+    follow_appos picks up that third shape. Callers that use it should
+    require a coordinator in the span, so ordinary apposition ('Sam, my
+    editor, called') is not read as a series.
+    """
+    def bracketed(t):
+        """A parenthetical gloss -- 'a counter (CTR)' -- is also `appos`,
+        and following it would inflate the series with its own labels."""
+        prev = t.doc[t.i - 1] if t.i else None
+        return prev is not None and prev.text in ("(", "[", "{")
+
+    def crosses_break(a, b):
+        """A colon, semicolon or dash ends the series.
+
+        The parser will happily hang a conjunct across one -- in 'checks
+        failed ... and passed after, with the values showing the exact
+        corruption: expected c000, actual e000, and expected c000' it makes
+        both `expected`s conjuncts of `failed`. They are a separate list
+        introduced by the colon.
+        """
+        lo, hi = (a.i, b.i) if a.i < b.i else (b.i, a.i)
+        return any(t.text in (":", ";", "\u2014", "\u2013")
+                   for t in a.doc[lo:hi])
+
+    links = {"conj", "appos"} if follow_appos else {"conj"}
+    out, stack = [tok], [tok]
+    while stack:
+        cur = stack.pop()
+        for c in cur.children:
+            if c.dep_ not in links:
+                continue
+            if c.dep_ == "appos" and bracketed(c):
+                continue
+            if crosses_break(cur, c):
+                continue
+            out.append(c)
+            stack.append(c)
+    return sorted(set(out), key=lambda t: t.i)
 
 
 # ---------------------------------------------------------------- detectors
@@ -451,7 +451,8 @@ def conj_chain(tok):
 @construction(
     "CORRECTIVE_CONTRAST", "Corrective contrast (rejects X, asserts Y)",
     "One rhetorical move with many surface forms: 'not X but Y', 'it's not X, "
-    "it's Y', 'X, not Y', 'rather than X, Y'. Legitimate when X was actually "
+    "it's Y', 'X, not Y', 'a feature, not a bug'. Legitimate when X was "
+    "actually "
     "claimed by someone. Check the document for where X was raised -- if "
     "nowhere, the contrast is manufactured and the sentence is doing rhythm, "
     "not argument.",
@@ -759,20 +760,139 @@ def participial_tail(doc, nlp):
 
 
 @construction(
-    "TRICOLON", "Three-part coordination",
-    "Rate-based, not binary. One is fine. Several per page is the tic.",
+    "TRICOLON", "Coordination of three or more",
+    "Every coordination is reported, labelled by how list-like it looks: "
+    "figure, list-like, or enumeration. Ordinary lists share the parse of a "
+    "rhetorical tricolon and no test separates them reliably, so the label is "
+    "a hint and the judgement is yours. Filter with --off tricolon or waive "
+    "the enumerations.",
     "low")
 def tricolon(doc, nlp):
+    """Coordination of three or more items, classified but not suppressed.
+
+    Ordinary enumerations have the same parse as a rhetorical tricolon, and
+    no test separates them reliably. Rather than guess and hide the ones it
+    guesses wrong, this reports every coordination and labels how
+    list-like it looks, so the reviewer decides. The subtype is in the
+    finding label and drives confidence:
+
+        figure       few enumeration signals -- probably rhetorical
+        list-like    some signals
+        enumeration  several signals -- probably an ordinary list
+
+    Genuine parse errors are still dropped: a coordination with no commas is
+    a compound, not a series.
+    """
+    ENUM_CUES = {
+        "example", "examples", "condition", "conditions", "type", "types",
+        "kind", "kinds", "category", "categories", "field", "fields",
+        "format", "formats", "option", "options", "value", "values",
+        "state", "states", "component", "components", "element", "elements",
+        "item", "items", "column", "columns", "parameter", "parameters",
+        "flag", "flags", "mode", "modes", "stage", "stages", "step", "steps",
+        "case", "cases", "rule", "rules", "table", "tables", "entry",
+        "entries", "list", "signal", "signals", "port", "ports",
+    }
+    ENUM_VERBS = {"include", "comprise", "consist", "contain", "hold",
+                  "specify", "list", "define", "cover", "support", "accept"}
     out = []
     seen = set()
     for tok in doc:
-        if any(c.dep_ == "conj" for c in tok.children) and tok.dep_ != "conj":
-            chain = conj_chain(tok)
-            if len(chain) >= 3 and chain[0].i not in seen:
-                seen.add(chain[0].i)
-                out.append((doc[chain[0].left_edge.i:
-                                chain[-1].right_edge.i + 1],
-                            f"{len(chain)}-part {tok.pos_}"))
+        if tok.dep_ == "conj":
+            continue
+        if tok.dep_ == "appos" and any(c.dep_ == "conj"
+                                       for c in tok.head.children):
+            continue        # the head owns the series; it will be the root
+        if not any(c.dep_ in ("conj", "appos") for c in tok.children):
+            continue
+        chain = conj_chain(tok, follow_appos=True)
+        if len(chain) < 3 or chain[0].i in seen:
+            continue
+
+        span = doc[chain[0].left_edge.i:chain[-1].right_edge.i + 1]
+
+        # A series needs a coordinator. Without one this is apposition --
+        # 'Postgres, the primary store, went down'.
+        if not any(t.dep_ == "cc" for t in span):
+            continue
+
+        # Not a judgement call: a series is punctuated. Without commas this
+        # is a compound, and often a parse error -- spaCy makes 'table' a
+        # conjunct of 'TAGE' in 'a TAGE or ITTAGE table entry'.
+        if sum(1 for t in span if t.text == ",") < len(chain) - 2:
+            continue
+
+        widths = []
+        for i, c in enumerate(chain):
+            lo, hi = c.left_edge.i, c.right_edge.i
+            if i + 1 < len(chain):
+                hi = min(hi, chain[i + 1].left_edge.i - 1)
+            widths.append(max(1, hi - lo + 1))
+
+        score = 0
+        if len(chain) > 3:
+            score += 1                      # a catalogue, not a triad
+        if sum(1 for c in chain
+               if any(k.dep_ in ("det", "poss") for k in c.children)) >= 2:
+            score += 1                      # items are referents
+        if sum(1 for c in chain
+               if any(k.dep_ in ("amod", "compound", "nmod")
+                      for k in c.children)) >= len(chain) - 1:
+            score += 1                      # a taxonomy being listed
+        lead = doc[tok.sent.start:chain[0].i]
+        low = lead.text.lower()
+        if any(t.lemma_.lower() in ENUM_CUES or t.lemma_.lower() in ENUM_VERBS
+               for t in lead) or any(
+                   k in low for k in ("such as", "e.g.", "i.e.", "namely",
+                                      "including", "for example",
+                                      "for instance")):
+            score += 2                      # strongest single signal
+        if max(widths) > 5 or max(widths) - min(widths) > 3:
+            score += 1                      # uneven members: narration
+
+        if score >= 3:
+            kind, conf = "enumeration", "low"
+        elif score >= 1:
+            kind, conf = "list-like", "low"
+        else:
+            kind, conf = "figure", "med"
+
+        seen.add(chain[0].i)
+        out.append((span, f"{len(chain)}-part {tok.pos_}, {kind}", conf))
+    return out
+
+
+@pattern("TRICOLON", confidence="med")
+def tricolon_parataxis(doc, nlp):
+    """Asyndetic clause tricolon: 'He came, he saw, he conquered.'
+
+    No coordinator, so spaCy uses parataxis/ccomp rather than conj. Requires
+    three short clauses of similar length -- long paratactic runs are
+    ordinary comma-spliced narration, not a figure.
+    """
+    out = []
+    for root in doc:
+        kids = [c for c in root.children
+                if c.dep_ in ("parataxis", "ccomp") and c.pos_ == "VERB"]
+        if len(kids) < 1:
+            continue
+        clauses = sorted(kids + [root], key=lambda t: t.i)
+        if len(clauses) < 3:
+            continue
+        def own_width(t):
+            kid_spans = {i for k in t.children
+                         if k.dep_ in ("parataxis", "ccomp")
+                         for i in range(k.left_edge.i, k.right_edge.i + 1)}
+            return len([x for x in t.subtree if x.i not in kid_spans
+                        and not x.is_punct])
+        widths = [own_width(c) for c in clauses]
+        if max(widths) > 4:
+            continue                # long clauses: narration, not a figure
+        if any(any(k.dep_ == "cc" for k in c.children) for c in clauses):
+            continue                # has a coordinator; the conj pattern owns it
+        lo = min(c.left_edge.i for c in clauses)
+        hi = max(c.right_edge.i for c in clauses)
+        out.append((doc[lo:hi + 1], "3 clauses, asyndetic"))
     return out
 
 
@@ -782,23 +902,54 @@ def tricolon(doc, nlp):
     "verbal tic by the third instance.",
     "high")
 def disguise_metaphor(doc, nlp):
-    verbs = {"wrap", "dress", "disguise", "masquerade", "cloak", "clothe",
-             "mask", "package", "veil", "drape", "wear", "hide",
-             "sell", "pass"}
+    """A thing described as disguised as another thing.
+
+    'A bug wrapped in an excuse trenchcoat.'
+
+    Verbs split into two groups. `masquerade`, `disguise`, `pose` and
+    `dress up as` are metaphorical on their own. `wrap`, `wear`, `cloak` and
+    `veil` are used literally all the time -- 'wrapped in brown paper' -- so
+    those additionally require a garment or covering noun as the object.
+    """
+    ALWAYS = {"masquerade", "disguise", "pose", "parade", "pass"}
+    NEEDS_GARMENT = {"wrap", "wear", "cloak", "clothe", "veil", "drape",
+                     "dress", "mask", "package"}
+    GARMENT = {"trenchcoat", "coat", "costume", "clothing", "clothes",
+               "disguise", "mask", "veil", "cloak", "guise", "garb", "suit",
+               "dress", "uniform", "wrapper", "cover", "camouflage",
+               "outfit", "robe", "shroud", "skin", "packaging", "wrapping"}
     out = []
     for tok in doc:
-        if tok.lemma_ not in verbs or tok.tag_ not in ("VBN", "VBG"):
+        if tok.tag_ not in ("VBN", "VBG"):
             continue
-        ok = False
+        lemma = tok.lemma_
+        if lemma not in ALWAYS and lemma not in NEEDS_GARMENT:
+            continue
+        objs, as_frame = [], False
         for c in tok.children:
             if c.dep_ == "prep" and c.lemma_ in ("in", "as", "up"):
-                ok = True
-            if c.dep_ == "dobj" and tok.lemma_ in ("wear", "sell"):
-                ok = True
-        if ok and tok.dep_ in ("acl", "advcl", "relcl", "ROOT", "conj",
-                               "xcomp", "ccomp"):
-            out.append((doc[tok.head.left_edge.i:tok.right_edge.i + 1],
-                        tok.lemma_))
+                if c.lemma_ == "as":
+                    as_frame = True
+                objs += [g for g in c.children if g.dep_ == "pobj"]
+                for g in c.children:
+                    if g.dep_ == "prep":
+                        if g.lemma_ == "as":
+                            as_frame = True
+                        objs += [h for h in g.children if h.dep_ == "pobj"]
+            elif c.dep_ == "dobj":
+                objs.append(c)
+        if not objs:
+            continue
+        # 'X as Y' asserts a false identity and is always the construction.
+        # 'X in Y' is literal half the time -- 'wrapped in brown paper' --
+        # so it needs a garment or covering to qualify.
+        if not as_frame and lemma in NEEDS_GARMENT and not any(
+                o.lemma_.lower() in GARMENT for o in objs):
+            continue
+        if tok.dep_ not in ("acl", "advcl", "relcl", "ROOT", "conj",
+                            "xcomp", "ccomp"):
+            continue
+        out.append((doc[tok.head.left_edge.i:tok.right_edge.i + 1], lemma))
     return out
 
 

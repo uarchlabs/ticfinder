@@ -24,7 +24,7 @@ better still if you can afford the install.
 ```bash
 python3 ticfinder.py article.md
 python3 ticfinder.py posts/*.md --stats
-python3 ticfinder.py article.md --only NEG_ANTITHESIS,PARTICIPIAL_TAIL
+python3 ticfinder.py article.md --only CORRECTIVE_CONTRAST,PARTICIPIAL_TAIL
 python3 ticfinder.py article.md --model sm     # sm/md/lg/trf shorthand
 python3 ticfinder.py posts/*.md --json findings.json
 python3 ticfinder.py posts/*.md --summary       # counts only, no findings
@@ -46,25 +46,29 @@ Structural (dependency parse):
 
 | id | what |
 |---|---|
-| `CORRECTIVE_CONTRAST` | rejects X, asserts Y — six surface forms |
+| `CORRECTIVE_CONTRAST` | rejects X, asserts Y — four surface forms |
+| `ALTERNATIVE_FRAMING` | rather than / instead of / less…than |
 | `NEG_ESCALATION` | didn't X, and couldn't have |
 | `ABSTRACT_ADVERB` | structurally unable, fundamentally different |
 | `EMPHATIC_REFLEXIVE` | the document itself |
 | `PARTICIPIAL_TAIL` | `, making it easier to…` tacked on the end |
-| `TRICOLON` | three-part coordination |
+| `TRICOLON` | coordination of three or more |
 | `DISGUISE_METAPHOR` | X wrapped in / wearing / masquerading as Y |
 
-Phrasal (token patterns):
+Phrasal (token patterns, built in):
 
 | id | what |
 |---|---|
 | `FRAME_MARKER` | throat-clearing, advance organizers |
 | `HOLLOW_BOOSTER` | unearned assertions of importance |
 | `CLOSER` | summative wrap-ups |
-| `TECH_METAPHOR` | load-bearing, blast radius, heavy lifting |
-| `ELEVATED_DICTION` | delve, tapestry, realm, testament |
 | `HEDGE_STACK` | two hedges on one claim |
 | `EM_DASH` | split by function; pivot uses ranked high |
+
+Word and phrase lists are not built in. They live in
+`ticfinder-phrases.json`, which ships with five groups: `BORROWED_RIGOUR`,
+`CONSULTANT_REGISTER`, `LLM_DICTION`, `EMPTY_FRAME` and `VAGUE_QUANTIFIER`.
+See [Phrase lists](#phrase-lists).
 
 ## Output encoding
 
@@ -85,9 +89,11 @@ python3 ticfinder.py posts/*.md --html report/
 ```
 
 Writes one self-contained HTML file per article: source on the left with
-findings highlighted in place, list on the right. Click either side to jump to
-the other. Uncheck a construction in the legend to hide it everywhere, which is
-how you read past a noisy detector without editing config.
+findings highlighted in place, list on the right. Each card in the right panel
+carries the finding id and line number, so an id can be selected and pasted
+straight into `--waive`. Click either side to jump to the other. Uncheck a
+construction in the legend to hide it everywhere, which is how you read past a
+noisy detector without editing config.
 
 Highlight colour is reports confidence, rust = high, amber = medium,
 grey = low.
@@ -148,6 +154,22 @@ read it, not evidence that it is wrong.
 
 The waiver feature is offered to block reporting of structures that have
 already been scanned and are acceptable.
+
+`TRICOLON` is the clearest case of a construction that has to be read rather
+than counted. Ordinary lists share the parse of a rhetorical tricolon, so every
+coordination of three or more is reported and labelled by how list-like it
+looks:
+
+| label | meaning |
+|---|---|
+| `figure` | few enumeration signals; probably rhetorical |
+| `list-like` | some signals |
+| `enumeration` | several signals; probably an ordinary list |
+
+The label comes from item count, determiners on the items, premodifiers, a cue
+word in the lead-in (`conditions`, `formats`, `include`, `such as`), and
+whether the members are short and of similar length. `figure` is reported at
+medium confidence and the other two at low. The label is a hint, not a verdict.
 
 ## Working through a document
 
@@ -229,7 +251,7 @@ number assists in locating the finding during interactive edits.
 names the specific detector that produced the finding.
 
 For constructions that have more than one detector, the pattern field indicates
-the detector. For example `CORRECTIVE_CONTRAST` has six detectors, the pattern
+the detector. For example `CORRECTIVE_CONTRAST` has four detectors, the pattern
 field can be used to distinguish `cc_cleft` from `cc_parallel_sibling`, etc.. 
 
 Findings that come from a phrase list have no detector function behind them, so
@@ -306,6 +328,9 @@ end of the file -- useful when all your boilerplate is at the bottom.
 `ticfinder_off`, `ticfinder-off` and `ticfinder off` are all accepted, in any
 case. The header reports how many regions were skipped.
 
+Suppression is all-or-nothing for a region. There is no way to disable a single
+construction inside a fence; use `--off` for that.
+
 ## Phrase lists
 
 Word and phrase lists live in an external JSON file. Place a 
@@ -352,7 +377,15 @@ def my_tic(doc, nlp):
     return out
 ```
 
-Phrasal ones are entries in `PHRASE_PATTERNS` using spaCy `Matcher` syntax.
+A third element sets the confidence for that finding alone, overriding the
+construction's. This is how `TRICOLON` reports `figure` above `enumeration`:
+
+```python
+    out.append((span, "figure", "med"))
+```
+
+Phrasal ones are entries in `PHRASE_PATTERNS` using spaCy `Matcher` syntax,
+though a phrase list in JSON is usually the better home for a word list.
 
 ### Constructions vs patterns
 
@@ -368,18 +401,53 @@ def cc_coordinated(doc, nlp): ...      # not X but Y
 def cc_parallel_sibling(doc, nlp): ... # X, not Y
 ```
 
-`CORRECTIVE_CONTRAST` currently has six patterns because the same move parses
-six different ways -- coordinated with `but`, two-clause cleft (including
-across a sentence boundary), asyndetic sibling phrases, negated apposition,
-`rather than` / `instead of`, and `less...than`. Findings report which pattern
-fired in brackets, so a subtype that turns out to be noisy can be removed
-without touching the id.
+`CORRECTIVE_CONTRAST` currently has four patterns because the same move parses
+four different ways -- coordinated with `but`, two-clause cleft (including
+across a sentence boundary), asyndetic sibling phrases, and negated
+apposition. Findings report which pattern fired in brackets, so a subtype that
+turns out to be noisy can be removed without touching the id.
+
+`@pattern` takes an optional confidence applying to every finding it produces:
+
+```python
+@pattern("TRICOLON", confidence="med")
+def tricolon_parataxis(doc, nlp): ...
+```
 
 Two rules worth keeping:
 - The **note** field says what to check, not "this is bad". Every construction
   is legitimate somewhere.
 - One construction, many patterns. When surface forms drift, add patterns and
   keep the id. The id is what you report on and what you mute.
+
+## Tests
+
+```bash
+./tests.py              # everything
+./tests.py detectors    # one section
+./tests.py -v           # show every check, not just failures
+```
+
+Exits non-zero on failure, so it works as a make target or pre-commit hook.
+Six sections:
+
+| section | what it protects |
+|---|---|
+| `registry` | every construction and pattern is still wired up |
+| `detectors` | labelled cases: does each construction fire where it should |
+| `masking` | offsets preserved, right regions blanked, pragmas honoured |
+| `spans` | no detector emits an inverted, empty or zero-width span |
+| `waivers` | ids survive edits and reflowing elsewhere in the document |
+| `cli` | flags parse, widths respected, HTML marks do not nest |
+
+`detectors` is the section that matters. Each row is a construction, an
+expected yes or no, and a sentence. Both halves earn their place: the negative
+cases are what stop a detector being loosened until it fires on ordinary
+English. When a miss or a false positive turns up in real writing, add the
+sentence as a row before changing any code.
+
+`registry` exists because a careless edit once deleted three constructions
+silently. The tool ran fine and simply stopped reporting them.
 
 <!-- ticfinder_off -->
 ![Ticfinder Screenshot](images/ticfinder.png)
@@ -394,10 +462,11 @@ Two rules worth keeping:
   reads as nonsense: "reverted a TAGE epoch gate to alone", where the
   source line ends with the inline code `prm_match`. Judge a finding from
   the source line, not from the quoted text.
-- `TRICOLON` and `ELEVATED_DICTION` are noisy by design; they are rate signals.
-- Licensing checks are not implemented. `NEG_ANTITHESIS` cannot yet tell you
-  whether X was ever actually claimed earlier in the document. That check is
-  the obvious next thing to build and the thing that would most improve
+- `TRICOLON` and the phrase-list constructions are noisy by design; they are
+  rate signals.
+- Licensing checks are not implemented. `CORRECTIVE_CONTRAST` cannot yet tell
+  you whether X was ever actually claimed earlier in the document. That check
+  is the obvious next thing to build and the thing that would most improve
   precision.
 <!-- ticfinder_on -->
 

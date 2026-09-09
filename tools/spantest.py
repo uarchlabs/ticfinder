@@ -48,7 +48,8 @@ for cid in mod.CONSTRUCTIONS:
             fails += 1
             print(f"FAIL {cid}.{pname}: raised {e!r}")
             continue
-        for span, sub in hits:
+        for hit in hits:
+            span = hit[0]
             if span.end <= span.start:
                 fails += 1
                 print(f"FAIL {cid}.{pname}: inverted/empty span "

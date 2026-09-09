@@ -19,3 +19,5 @@ f2:
 	rm -f reports/*
 	$(TIC) $(TIC_OPTS) $(F2_WVR) $(F2)
 
+regress:
+	./tools/tests.py
