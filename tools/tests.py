@@ -211,6 +211,16 @@ CASES = [
      "Some had never been driven at all: aging ran with "
      "`tage_enable_aging` and `ittage_enable_aging` held at zero in every "
      "test written to that point, so the entire epoch mechanism was dark."),
+    # a construction named between backticks is a mention, not a use
+    ("CORRECTIVE_CONTRAST", False,
+     "The detector matches `not X but Y` in coordinated form."),
+    ("CORRECTIVE_CONTRAST", False,
+     "The `X, not Y` pattern needs no coordinator."),
+    # ...but a construction that straddles inline code still counts
+    ("CORRECTIVE_CONTRAST", True,
+     "We check not `tage_enable` but `ittage_enable` in the epoch path."),
+    ("CORRECTIVE_CONTRAST", True,
+     "The detector matches not X but Y in coordinated form."),
     # a conjunct must not hang across a colon
     ("TRICOLON", False,
      "Both extended checks failed before the fix and passed after, with the "
@@ -253,10 +263,17 @@ def test_detectors(nlp):
         if cid not in tf.CONSTRUCTIONS:
             check("detectors", f"{cid} missing", False)
             continue
-        # Cases containing markdown must be masked first, or the backticks
-        # reach the parser and the case tests the wrong thing.
-        src = tf.mask_markdown(text) if "`" in text else text
-        got = bool(tf.run_construction(cid, nlp(src), nlp))
+        # Cases containing markdown go through analyse(), which applies
+        # masking AND the inline-code suppression that run_construction
+        # alone does not see.
+        if "`" in text:
+            with tempfile.TemporaryDirectory() as d:
+                pth = Path(d) / "c.md"
+                pth.write_text(text + "\n", encoding="utf-8")
+                found, _ = tf.analyse(str(pth), nlp, only={cid})
+            got = any(x.construction == cid for x in found)
+        else:
+            got = bool(tf.run_construction(cid, nlp(text), nlp))
         check("detectors", f"{cid} {'fires' if want else 'silent'}",
               got == want, f"want={want} got={got}: {text[:70]}")
 
@@ -374,6 +391,30 @@ def test_waivers(nlp):
           f"lost {sorted(a - b)}")
     check("waivers", "ids survive reflowing", a <= c,
           f"lost {sorted(a - c)}")
+    # stale entries must be listed, not just counted
+    with tempfile.TemporaryDirectory() as d:
+        src = Path(d) / "a.md"
+        src.write_text(base, encoding="utf-8")
+        f, _ = tf.analyse(str(src), nlp)
+        for x in f:
+            x.fp = tf.fingerprint(x)
+        wp = tf.waiver_path(str(src))
+        tf.save_waivers(wp, str(src),
+                        {x.fp: {"construction": x.construction,
+                                "pattern": x.pattern,
+                                "line_when_waived": x.line,
+                                "text": x.text} for x in f})
+        src.write_text("Nothing here at all.\n", encoding="utf-8")
+        w, warn = tf.load_waivers(wp, str(src))
+        f2, _ = tf.analyse(str(src), nlp)
+        live = {tf.fingerprint(x) for x in f2}
+        stale = set(w) - live
+        check("waivers", "orphaned waivers are detectable",
+              len(stale) == len(w) and len(stale) > 0,
+              f"{len(stale)} stale of {len(w)}")
+        check("waivers", "stale entries retain text for reporting",
+              all(w[fp].get("text") for fp in stale))
+
     check("waivers", "ids are 6 hex chars",
           all(len(x) == 6 and all(ch in "0123456789abcdef" for ch in x)
               for x in a))

@@ -47,6 +47,8 @@ def mask_markdown(text: str, stats: dict = None) -> str:
     def blank(m):
         return re.sub(r"[^\n]", " ", m.group(0))
 
+    code_spans = []
+
     def unquote(m):
         """Keep inline-code content, blank only its delimiters.
 
@@ -61,7 +63,11 @@ def mask_markdown(text: str, stats: dict = None) -> str:
         t = m.group(0)
         if "\n" in t:
             return blank(m)
-        return " " + t[1:-1] + " " if len(t) >= 2 else blank(m)
+        if len(t) < 2:
+            return blank(m)
+        # Offsets are stable because the backticks become spaces in place.
+        code_spans.append((m.start() + 1, m.end() - 1))
+        return " " + t[1:-1] + " "
 
     M = re.MULTILINE
     D = re.DOTALL
@@ -106,6 +112,8 @@ def mask_markdown(text: str, stats: dict = None) -> str:
         pat, flags = entry[0], entry[1]
         fn = entry[2] if len(entry) > 2 else blank
         text = re.sub(pat, fn, text, flags=flags)
+    if stats is not None:
+        stats["code_spans"] = code_spans
     return text
 
 
@@ -1245,11 +1253,39 @@ def analyse(path, nlp, only=None, extra=(), disabled=()):
     raw = Path(path).read_text(encoding="utf-8")
     pragma = {}
     masked = mask_markdown(raw, pragma)
+    code_spans = pragma.get("code_spans", [])
+
+    def in_code(start, end):
+        """True when a finding lies entirely inside inline code.
+
+        Inline code keeps its text so the sentence still parses, but a
+        construction written between backticks is being *named*, not used --
+        `not X but Y` in a document about the tool is an example, not a tic.
+        A finding that straddles the boundary still reports, because there
+        the parse genuinely runs through the identifier.
+        """
+        return any(a <= start and end <= b for a, b in code_spans)
+
+    def trimmed(span):
+        """Character range of a span ignoring leading/trailing whitespace.
+
+        Backticks are replaced by spaces, so a finding that covers exactly
+        the code content still reports end_char two past it.
+        """
+        lo, hi = span.start_char, span.end_char
+        while lo < hi and masked[lo].isspace():
+            lo += 1
+        while hi > lo and masked[hi - 1].isspace():
+            hi -= 1
+        return lo, hi
     doc = nlp(masked)
 
     findings = []
 
     def add(cid, label, span, note, conf, sub="", pname=""):
+        if in_code(*trimmed(span)):
+            return          # a construction named between backticks is an
+                            # example, not a tic
         findings.append(Finding(
             construction=cid,
             label=label + (f" [{sub}]" if sub else ""),
@@ -1438,6 +1474,11 @@ def report(path, findings, stats, plain=False, show_stats=False,
         if stats.get("waiver_file"):
             line += f" [{stats['waiver_file']}]"
         print(a(f"  {c['d']}{line}{c['0']}"))
+        for e in stats.get("stale_entries", []):
+            txt = " ".join(str(e["text"]).split())
+            room = max(20, W - 34)
+            print(a(f"    {c['d']}{e['fp']}  was L{e['line']}  "
+                    f"{e['construction']}: {txt[:room]}{c['0']}"))
     if stats.get("pragma_regions"):
         n = stats["pragma_regions"]
         print(a(f"  {c['d']}{n} region{'s' if n != 1 else ''} skipped via "
@@ -1588,6 +1629,9 @@ def main():
                          "input file")
     ap.add_argument("--no-waivers", action="store_true",
                     help="ignore waiver files entirely")
+    ap.add_argument("--prune-stale", action="store_true",
+                    help="remove waivers whose text is no longer in the "
+                         "document")
     ap.add_argument("--compact", action="store_true",
                     help="one line per finding")
     ap.add_argument("--by-position", action="store_true",
@@ -1730,9 +1774,25 @@ def main():
 
         seen_fps = {x.fp for x in f}
         stale = held - seen_fps
+        st["stale_entries"] = [
+            {"fp": fp,
+             "construction": waivers.get(fp, {}).get("construction", "?"),
+             "text": waivers.get(fp, {}).get("text", ""),
+             "line": waivers.get(fp, {}).get("line_when_waived", "?")}
+            for fp in sorted(stale)]
         st["waived"] = len(held & seen_fps)
         st["stale"] = len(stale)
         st["waiver_file"] = str(wpath) if held else ""
+
+        if args.prune_stale and stale and not args.no_waivers:
+            for fp in stale:
+                waivers.pop(fp, None)
+            held -= stale
+            st["stale"] = 0
+            st["stale_entries"] = []
+            dirty = True
+            print(f"  pruned {len(stale)} stale waiver"
+                  f"{'s' if len(stale) != 1 else ''} from {wpath}")
 
         if dirty:
             save_waivers(wpath, p, waivers)

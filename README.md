@@ -212,6 +212,7 @@ posts/BLOG_bpu_13.md
 | `--waiver-dir DIR` | keep waiver files in DIR instead of beside the source |
 | `--waiver-file F` | explicit path; single input file only |
 | `--no-waivers` | ignore waiver files entirely |
+| `--prune-stale` | drop waivers whose text is gone from the document |
 
 The waiver path is derived from the source stem -- `BLOG_bpu_13.md` becomes
 `BLOG_bpu_13.waivers.json`. 
@@ -275,7 +276,23 @@ offsets, so:
 - ensures changing a flagged sentence **does** drop the waiver
 
 Waivers whose text has disappeared are reported as **stale** to avoid
-accumulation of old waivers.
+accumulation of old waivers. Each one is listed with its id, the construction,
+the line it was waived at and the text that was waived:
+
+```
+posts/BLOG_bpu_13.md
+  1,240 words * 4 findings (3.2 per 1k words)
+  3 waived, 2 stale (no longer in the text) [posts/BLOG_bpu_13.waivers.json]
+    0416fb  was L5   FRAME_MARKER: It is worth noting
+    46df5f  was L1   TRICOLON: fast, correct, and easy to extend
+```
+
+The id is what `--unwaive` takes, so a stale entry can be removed without
+opening the file. `--prune-stale` drops all of them in one pass.
+
+Stale entries are never removed automatically. A waiver goes stale because the
+sentence changed, and that is either a rewrite worth recording or an accidental
+revert worth noticing; the tool cannot tell which.
 
 The waiver file records the source path it was written for and warns on
 mismatch. This covers the case where two directories hold the same filename.
@@ -456,12 +473,18 @@ silently. The tool ran fine and simply stopped reporting them.
 ## Known limits
 
 <!-- ticfinder_off -->
-- Markdown masking blanks code blocks, inline code, link targets, tables,
-  blockquotes and HTML, preserving offsets so line numbers stay accurate.
-  The quoted finding text is masked too, so a match spanning inline code
-  reads as nonsense: "reverted a TAGE epoch gate to alone", where the
-  source line ends with the inline code `prm_match`. Judge a finding from
-  the source line, not from the quoted text.
+- Markdown masking blanks code blocks, link targets, tables, blockquotes
+  and HTML, preserving offsets so line numbers stay accurate. Inline code is
+  the exception: only its backticks are removed and the content is kept,
+  because blanking an identifier mid-sentence left a hole the parser read
+  across and invented coordinations that were not in the source. A finding
+  lying entirely inside inline code is then dropped, so naming a construction
+  as `not X but Y` does not flag it; one that straddles the boundary still
+  reports.
+- Quoted text is not suppressed. `"this is not a bug but a feature"` reports,
+  because quotation marks do too many jobs to read as a mention marker. Use
+  backticks when naming a construction, or fence a long quotation with
+  `ticfinder_off`.
 - `TRICOLON` and the phrase-list constructions are noisy by design; they are
   rate signals.
 - Licensing checks are not implemented. `CORRECTIVE_CONTRAST` cannot yet tell
@@ -469,4 +492,5 @@ silently. The tool ran fine and simply stopped reporting them.
   is the obvious next thing to build and the thing that would most improve
   precision.
 <!-- ticfinder_on -->
+
 
