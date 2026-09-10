@@ -697,6 +697,76 @@ def neg_escalation(doc, nlp):
 
 
 @construction(
+    "GAPPED_ANTITHESIS", "Gapped antithetical coordination",
+    "Two opposed predicates sharing a subject, the second elliptical: "
+    "'failed before the fix and passed after'. Compresses a before/after "
+    "contrast into one balanced clause. Legitimate when the contrast is the "
+    "point; a tic when it is doing rhythm and the reader has to unpack the "
+    "ellipsis to get an ordinary fact.",
+    "high")
+def gapped_antithesis(doc, nlp):
+    """Coordinated verbs, second one gapped, predicates opposed.
+
+    Distinguished from ordinary coordination ('we ran the tests and shipped
+    the release') by two things: the second conjunct has no subject of its
+    own, and either the verbs are a known opposed pair or their adjuncts
+    form a before/after style pair.
+    """
+    OPPOSED = [
+        {"pass", "fail"}, {"work", "break"}, {"succeed", "fail"},
+        {"allow", "deny"}, {"accept", "reject"}, {"enable", "disable"},
+        {"increment", "decrement"}, {"set", "clear"}, {"open", "close"},
+        {"start", "stop"}, {"add", "remove"}, {"include", "exclude"},
+        {"hit", "miss"}, {"match", "mismatch"}, {"rise", "fall"},
+        {"gain", "lose"}, {"win", "lose"}, {"grow", "shrink"},
+        {"increase", "decrease"}, {"improve", "regress"},
+        {"connect", "disconnect"}, {"lock", "unlock"}, {"fail", "recover"},
+    ]
+    TIME_PAIRS = [
+        {"before", "after"}, {"previously", "now"}, {"then", "now"},
+        {"first", "then"}, {"initially", "subsequently"},
+        {"once", "now"}, {"formerly", "now"},
+    ]
+
+    def adjuncts(v):
+        out = set()
+        for c in v.children:
+            if c.dep_ in ("prep", "advmod", "npadvmod"):
+                out.add(c.lower_)
+        return out
+
+    out = []
+    for v2 in doc:
+        if v2.dep_ != "conj" or v2.pos_ != "VERB":
+            continue
+        kids = {c.dep_ for c in v2.children}
+        if kids & {"nsubj", "nsubjpass"}:
+            continue                    # its own subject: not gapped
+        if kids & {"dobj", "obj"}:
+            # 'opened the file and closed it again' is sequential narration,
+            # not ellipsis. Real gapping omits the shared argument.
+            continue
+        v1 = v2.head
+        if v1.pos_ != "VERB":
+            continue
+        pair = {v1.lemma_.lower(), v2.lemma_.lower()}
+        opposed = any(pair == o for o in OPPOSED)
+        a1, a2 = adjuncts(v1), adjuncts(v2)
+        mirrored = any(t & a1 and t & a2 and (t & a1) != (t & a2)
+                       for t in TIME_PAIRS)
+        if not (opposed or mirrored):
+            continue
+        # Ordinary coordination of two actions on objects is not this
+        # construction; the tell is adverbial framing, not transitivity.
+        if not mirrored and not (a1 or a2):
+            continue
+        lo = min(v1.left_edge.i, v2.left_edge.i)
+        out.append((doc[lo:v2.right_edge.i + 1],
+                    "before/after" if mirrored else "opposed verbs"))
+    return out
+
+
+@construction(
     "ABSTRACT_ADVERB", "Abstract adverb + adjective",
     "'structurally unable', 'fundamentally different'. The adverb adds a "
     "claim of rigour without narrowing the adjective. Usually deletable.",
@@ -837,6 +907,10 @@ def tricolon(doc, nlp):
                 hi = min(hi, chain[i + 1].left_edge.i - 1)
             widths.append(max(1, hi - lo + 1))
 
+        # Structural parallelism, per the classical definition of isocolon:
+        # members of the same length and the same internal shape. Morari's
+        # threshold is that matching POS pairs must cover at least 55% of
+        # the span for a valid isocolon; below that it is an ordinary list.
         score = 0
         if len(chain) > 3:
             score += 1                      # a catalogue, not a triad
@@ -1629,6 +1703,9 @@ def main():
                          "input file")
     ap.add_argument("--no-waivers", action="store_true",
                     help="ignore waiver files entirely")
+    ap.add_argument("--gen-waivers", action="store_true",
+                    help="write a waiver file covering every current "
+                         "finding; refuses to run if the file already exists")
     ap.add_argument("--prune-stale", action="store_true",
                     help="remove waivers whose text is no longer in the "
                          "document")
@@ -1719,6 +1796,22 @@ def main():
         sys.exit("--waiver-file takes a single input file; use --waiver-dir "
                  "for multiple files")
 
+    if args.gen_waivers:
+        if args.waive or args.unwaive or args.no_waivers:
+            sys.exit("--gen-waivers cannot be combined with --waive, "
+                     "--unwaive or --no-waivers")
+        # Check every target before writing any of them, so a run over
+        # several files does not half-complete.
+        existing = [str(waiver_path(f, args.waiver_dir, args.waiver_file))
+                    for f in args.files
+                    if waiver_path(f, args.waiver_dir,
+                                   args.waiver_file).exists()]
+        if existing:
+            sys.exit("waiver file already exists:\n  " +
+                     "\n  ".join(existing) +
+                     "\n\nRefusing to overwrite. Remove it, or use "
+                     "--waive all to add to it.")
+
     waive_ids = {x.strip() for x in args.waive.split(",")} if args.waive \
         else set()
     unwaive_ids = {x.strip() for x in args.unwaive.split(",")} \
@@ -1771,6 +1864,17 @@ def main():
                 dirty = True
                 print(f"  waived {len(take)} finding"
                       f"{'s' if len(take) != 1 else ''} -> {wpath}")
+
+        if args.gen_waivers:
+            waivers = {x.fp: {"construction": x.construction,
+                              "pattern": x.pattern,
+                              "line_when_waived": x.line,
+                              "text": x.text[:100]} for x in f}
+            save_waivers(wpath, p, waivers)
+            held = set(waivers)
+            print(f"  wrote {len(waivers)} waiver"
+                  f"{'s' if len(waivers) != 1 else ''} -> {wpath}")
+            dirty = False
 
         seen_fps = {x.fp for x in f}
         stale = held - seen_fps

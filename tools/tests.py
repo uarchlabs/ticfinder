@@ -58,6 +58,7 @@ EXPECTED = {
                             "cc_parallel_sibling", "cc_negated_apposition"],
     "ALTERNATIVE_FRAMING": ["af_rather_instead", "af_less_than"],
     "NEG_ESCALATION": ["neg_escalation"],
+    "GAPPED_ANTITHESIS": ["gapped_antithesis"],
     "ABSTRACT_ADVERB": ["abstract_adverb"],
     "EMPHATIC_REFLEXIVE": ["emphatic_reflexive"],
     "PARTICIPIAL_TAIL": ["participial_tail"],
@@ -138,6 +139,25 @@ CASES = [
     ("ALTERNATIVE_FRAMING", True,
      "This is less about speed than about trust."),
     ("ALTERNATIVE_FRAMING", False, "We patched the caller and moved on."),
+
+    # -- gapped antithetical coordination --------------------------------
+    ("GAPPED_ANTITHESIS", True,
+     "The modified test failed before the fix and passed after."),
+    ("GAPPED_ANTITHESIS", True, "It worked locally but broke in CI."),
+    ("GAPPED_ANTITHESIS", True,
+     "The build passed on Monday and failed on Tuesday."),
+    ("GAPPED_ANTITHESIS", True,
+     "The gate was closed before the patch and opened after."),
+    ("GAPPED_ANTITHESIS", True,
+     "The check succeeded in simulation but failed on hardware."),
+    ("GAPPED_ANTITHESIS", False, "We ran the tests and shipped the release."),
+    ("GAPPED_ANTITHESIS", False,
+     "The parser reads the header and writes the payload."),
+    ("GAPPED_ANTITHESIS", False, "We failed to reproduce it and moved on."),
+    # sequential narration, not ellipsis: the second verb has its own object
+    ("GAPPED_ANTITHESIS", False, "She opened the file and closed it again."),
+    ("GAPPED_ANTITHESIS", False, "We added the flag and removed the old one."),
+    ("GAPPED_ANTITHESIS", False, "It reads from Redis and writes to Postgres."),
 
     # -- negation escalation --------------------------------------------
     ("NEG_ESCALATION", True,
@@ -463,6 +483,29 @@ def test_cli():
         r = run("--plain")
         check("cli", "piped output has no ANSI escapes",
               "\033" in r.stdout is False or "\033" not in r.stdout)
+
+        # --gen-waivers: writes once, then refuses
+        gw = d / "gw.md"
+        gw.write_text("The parser is fast, correct, and easy to extend.\n",
+                      encoding="utf-8")
+        r1 = subprocess.run(
+            [sys.executable, str(SCRIPT), str(gw), "--gen-waivers"],
+            capture_output=True, text=True, env=env, cwd=str(d))
+        check("cli", "--gen-waivers writes a file", r1.returncode == 0,
+              r1.stderr[-200:])
+        wf = d / "gw.waivers.json"
+        check("cli", "--gen-waivers file exists", wf.exists())
+        r2 = subprocess.run(
+            [sys.executable, str(SCRIPT), str(gw), "--gen-waivers"],
+            capture_output=True, text=True, env=env, cwd=str(d))
+        check("cli", "--gen-waivers refuses to overwrite",
+              r2.returncode != 0, r2.stdout[-200:])
+        r3 = subprocess.run(
+            [sys.executable, str(SCRIPT), str(gw), "--gen-waivers",
+             "--no-waivers"],
+            capture_output=True, text=True, env=env, cwd=str(d))
+        check("cli", "--gen-waivers rejects conflicting flags",
+              r3.returncode != 0)
 
         # bad phrase file fails loudly
         bad = d / "bad.json"

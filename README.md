@@ -7,6 +7,12 @@ ticfinder does not detect bad grammar. ticfinder looks for structural patterns
 in legitimate English.  The premise is that these constructions *cluster* in LLM
 generated prose, and the clustering is what breaks reader flow.
 
+ticfinder's purpose is to make re-writes of LLM generated output more efficient
+by identifying known, annoying/cringe quirks.
+
+It is not intended as an AI-detector defeat tool, nor is it a watermark
+scrubber.
+
 ## Install
 
 ```bash
@@ -49,6 +55,7 @@ Structural (dependency parse):
 | `CORRECTIVE_CONTRAST` | rejects X, asserts Y — four surface forms |
 | `ALTERNATIVE_FRAMING` | rather than / instead of / less…than |
 | `NEG_ESCALATION` | didn't X, and couldn't have |
+| `GAPPED_ANTITHESIS` | failed before the fix and passed after |
 | `ABSTRACT_ADVERB` | structurally unable, fundamentally different |
 | `EMPHATIC_REFLEXIVE` | the document itself |
 | `PARTICIPIAL_TAIL` | `, making it easier to…` tacked on the end |
@@ -171,6 +178,19 @@ word in the lead-in (`conditions`, `formats`, `include`, `such as`), and
 whether the members are short and of similar length. `figure` is reported at
 medium confidence and the other two at low. The label is a hint, not a verdict.
 
+Structural isomorphism was tried as a signal and removed. The classical
+definition of isocolon is members of equal length and identical shape, and
+Morari proposes a 55% POS-match threshold, but neither separates figure from
+enumeration in technical prose: ordinary lists are parallel too -- that is what
+makes them lists -- and POS mistags break identity for genuinely parallel
+figures. The determiner and cue-word signals discriminate better.
+
+A high `TRICOLON` count is expected rather than alarming. A 2026 study of
+rhetorical miscalibration found tricolon to be the strongest single
+differentiator between LLM and human writing (p < 0.001), at 7.13 per document
+against 3.73 for human experts, and characterised it as structural filler
+deployed independently of argumentative occasion.
+
 ## Working through a document
 
 Rewriting to clear a finding can create another one. Splitting a
@@ -212,10 +232,20 @@ posts/BLOG_bpu_13.md
 | `--waiver-dir DIR` | keep waiver files in DIR instead of beside the source |
 | `--waiver-file F` | explicit path; single input file only |
 | `--no-waivers` | ignore waiver files entirely |
+| `--gen-waivers` | write a waiver file covering every current finding |
 | `--prune-stale` | drop waivers whose text is gone from the document |
 
 The waiver path is derived from the source stem -- `BLOG_bpu_13.md` becomes
 `BLOG_bpu_13.waivers.json`. 
+
+`--gen-waivers` writes a waiver file covering every finding currently
+reported, which is the quickest way to establish a baseline on a document you
+have already reviewed elsewhere. It refuses to run if the waiver file exists,
+exiting non-zero without writing anything -- including when several files are
+passed and only one of them already has a waiver file, so a batch run never
+half-completes. It honours `--only`, `--off`, `--waiver-dir` and
+`--waiver-file`, and cannot be combined with `--waive`, `--unwaive` or
+`--no-waivers`. To add to an existing file, use `--waive all` instead.
 
 ### The waiver file
 
