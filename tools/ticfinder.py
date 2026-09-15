@@ -201,10 +201,19 @@ def save_waivers(path, src, waivers):
     # document was reviewed and currently holds no waivers, which is not the
     # same as never having been looked at -- and the tool should not remove
     # files the user created.
+    # Order entries by the line they were waived at, not by hash. The file
+    # is read by people, and hash order puts unrelated findings next to each
+    # other. Entries within a line keep a stable secondary sort so the file
+    # does not churn between runs.
+    def line_of_entry(item):
+        v = item[1].get("line_when_waived")
+        return (v if isinstance(v, int) else 10 ** 9, item[0])
+
+    ordered = dict(sorted(waivers.items(), key=line_of_entry))
     p.write_text(json.dumps(
-        {"source": Path(src).as_posix(),
-         "generated_by": "ticfinder",
-         "waivers": waivers}, indent=2, sort_keys=True), encoding="utf-8")
+        {"generated_by": "ticfinder",
+         "source": Path(src).as_posix(),
+         "waivers": ordered}, indent=2, sort_keys=False), encoding="utf-8")
 
 
 # ---------------------------------------------------------------- registry
