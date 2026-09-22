@@ -7,12 +7,6 @@ ticfinder does not detect bad grammar. ticfinder looks for structural patterns
 in legitimate English.  The premise is that these constructions *cluster* in LLM
 generated prose, and the clustering is what breaks reader flow.
 
-ticfinder's purpose is to make re-writes of LLM generated output more efficient
-by identifying known, annoying/cringe quirks.
-
-It is not intended as an AI-detector defeat tool, nor is it a watermark
-scrubber.
-
 ## Install
 
 ```bash
@@ -232,7 +226,7 @@ posts/BLOG_bpu_13.md
 | `--waiver-dir DIR` | keep waiver files in DIR instead of beside the source |
 | `--waiver-file F` | explicit path; single input file only |
 | `--no-waivers` | ignore waiver files entirely |
-| `--gen-waivers` | write a waiver file covering every current finding |
+| `--gen-waivers [STATE]` | write a waiver file covering every finding, `enabled` (default) or `disabled` |
 | `--prune-stale` | drop waivers whose text is gone from the document |
 
 The waiver path is derived from the source stem -- `BLOG_bpu_13.md` becomes
@@ -240,7 +234,9 @@ The waiver path is derived from the source stem -- `BLOG_bpu_13.md` becomes
 
 `--gen-waivers` writes a waiver file covering every finding currently
 reported, which is the quickest way to establish a baseline on a document you
-have already reviewed elsewhere. It refuses to run if the waiver file exists,
+have already reviewed elsewhere. `--gen-waivers disabled` writes the same file
+with every entry inactive, which gives you the full list to work through
+without suppressing anything yet. It refuses to run if the waiver file exists,
 exiting non-zero without writing anything -- including when several files are
 passed and only one of them already has a waiver file, so a batch run never
 half-completes. It honours `--only`, `--off`, `--waiver-dir` and
@@ -270,6 +266,21 @@ half-completes. It honours `--only`, `--off`, `--waiver-dir` and
 }
 ```
 
+### Enabling and disabling
+
+Each entry carries an `enabled` flag. A waiver suppresses its finding only
+while the flag is true; set it to `false` and the finding reports again, but
+the entry stays in the file with its id, text and line intact. Flipping the
+flag is a one-character edit, which makes it the cheapest way to re-examine a
+decision without losing the record of having made it.
+
+An entry with no `enabled` field counts as enabled, so waiver files written
+before the field existed keep working unchanged.
+
+Disabled entries are still tracked: the header reports how many are disabled,
+and a disabled waiver whose text has since disappeared is still reported as
+stale.
+
 Only the keys of `waivers` are used for matching. They are the finding ids, and
 nothing else in the file affects whether a waiver applies.  Everything inside
 each entry is there so the file is readable six months later: `construction`
@@ -277,6 +288,10 @@ and `pattern` say which rule fired, `text` shows what was waived, and
 `line_when_waived` records where it was at the time. That line number is
 **not** used for matching and will go stale as the document changes. The line
 number assists in locating the finding during interactive edits.
+
+Entries are written in line order, so the file reads in the same sequence as
+the document. Within a line the order is by id, so a resave that changes
+nothing produces an identical file and the diff stays clean.
 
 `source` is checked on file load and issues a warning on mismatch.  `pattern`
 names the specific detector that produced the finding.
@@ -522,5 +537,4 @@ silently. The tool ran fine and simply stopped reporting them.
   is the obvious next thing to build and the thing that would most improve
   precision.
 <!-- ticfinder_on -->
-
 

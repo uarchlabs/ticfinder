@@ -194,6 +194,16 @@ def load_waivers(path, src):
     return data.get("waivers", {}), warn
 
 
+def is_enabled(entry):
+    """A waiver suppresses only when enabled.
+
+    A missing `enabled` field counts as enabled, so waiver files written
+    before the field existed keep working.
+    """
+    return bool(entry.get("enabled", True)) if isinstance(entry, dict) \
+        else True
+
+
 def save_waivers(path, src, waivers):
     p = Path(path)
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -1547,10 +1557,12 @@ def report(path, findings, stats, plain=False, show_stats=False,
             f"{stats['sentences']} sentences {sep} "
             f"{stats['findings']} findings "
             f"({stats['per_1000_words']} per 1k words){c['0']}"))
-    if stats.get("waived") or stats.get("stale"):
+    if stats.get("waived") or stats.get("stale") or stats.get("disabled"):
         bits = []
         if stats.get("waived"):
             bits.append(f"{stats['waived']} waived")
+        if stats.get("disabled"):
+            bits.append(f"{stats['disabled']} waivers disabled")
         if stats.get("stale"):
             bits.append(f"{stats['stale']} stale (no longer in the text)")
         line = ", ".join(bits)
@@ -1712,9 +1724,11 @@ def main():
                          "input file")
     ap.add_argument("--no-waivers", action="store_true",
                     help="ignore waiver files entirely")
-    ap.add_argument("--gen-waivers", action="store_true",
+    ap.add_argument("--gen-waivers", nargs="?", const="enabled",
+                    choices=["enabled", "disabled"], metavar="STATE",
                     help="write a waiver file covering every current "
-                         "finding; refuses to run if the file already exists")
+                         "finding, all enabled (the default) or all "
+                         "disabled; refuses to run if the file exists")
     ap.add_argument("--prune-stale", action="store_true",
                     help="remove waivers whose text is no longer in the "
                          "document")
@@ -1837,7 +1851,8 @@ def main():
             else load_waivers(wpath, p)
         if warn:
             print(f"  warning: {warn}")
-        held = set(waivers)
+        all_ids = set(waivers)
+        held = {fp for fp, v in waivers.items() if is_enabled(v)}
         dirty = False
 
         if unwaive_ids and not args.no_waivers:
@@ -1849,6 +1864,7 @@ def main():
                 for fp in drop:
                     waivers.pop(fp, None)
                 held -= drop
+                all_ids -= drop
                 dirty = True
                 print(f"  removed {len(drop)} waiver"
                       f"{'s' if len(drop) != 1 else ''} from {wpath}")
@@ -1867,26 +1883,31 @@ def main():
                         "construction": live[fp].construction,
                         "pattern": live[fp].pattern,
                         "line_when_waived": live[fp].line,
+                        "enabled": True,
                         "text": live[fp].text[:100],
                     }
                 held |= take
+                all_ids |= take
                 dirty = True
                 print(f"  waived {len(take)} finding"
                       f"{'s' if len(take) != 1 else ''} -> {wpath}")
 
         if args.gen_waivers:
+            on = args.gen_waivers == "enabled"
             waivers = {x.fp: {"construction": x.construction,
                               "pattern": x.pattern,
                               "line_when_waived": x.line,
+                              "enabled": on,
                               "text": x.text[:100]} for x in f}
             save_waivers(wpath, p, waivers)
-            held = set(waivers)
-            print(f"  wrote {len(waivers)} waiver"
+            all_ids = set(waivers)
+            held = set(waivers) if on else set()
+            print(f"  wrote {len(waivers)} {args.gen_waivers} waiver"
                   f"{'s' if len(waivers) != 1 else ''} -> {wpath}")
             dirty = False
 
         seen_fps = {x.fp for x in f}
-        stale = held - seen_fps
+        stale = all_ids - seen_fps
         st["stale_entries"] = [
             {"fp": fp,
              "construction": waivers.get(fp, {}).get("construction", "?"),
@@ -1894,6 +1915,7 @@ def main():
              "line": waivers.get(fp, {}).get("line_when_waived", "?")}
             for fp in sorted(stale)]
         st["waived"] = len(held & seen_fps)
+        st["disabled"] = len((all_ids - held) & seen_fps)
         st["stale"] = len(stale)
         st["waiver_file"] = str(wpath) if held else ""
 
@@ -1901,6 +1923,7 @@ def main():
             for fp in stale:
                 waivers.pop(fp, None)
             held -= stale
+            all_ids -= stale
             st["stale"] = 0
             st["stale_entries"] = []
             dirty = True

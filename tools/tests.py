@@ -507,6 +507,51 @@ def test_cli():
         check("cli", "--gen-waivers rejects conflicting flags",
               r3.returncode != 0)
 
+        # --gen-waivers state: enabled suppresses, disabled does not
+        st = d / "state.md"
+        st.write_text("The parser is fast, correct, and easy to extend.\n",
+                      encoding="utf-8")
+        import json as _json
+        for state, expect_suppressed in (("enabled", True),
+                                         ("disabled", False)):
+            wf = d / "state.waivers.json"
+            if wf.exists():
+                wf.unlink()
+            r = subprocess.run(
+                [sys.executable, str(SCRIPT), str(st), "--gen-waivers",
+                 state, "--ascii", "--plain", "--summary"],
+                capture_output=True, text=True, env=env, cwd=str(d))
+            check("cli", f"--gen-waivers {state} runs", r.returncode == 0,
+                  r.stderr[-200:])
+            if wf.exists():
+                got = _json.loads(wf.read_text())["waivers"]
+                want = state == "enabled"
+                check("cli", f"--gen-waivers {state} sets enabled={want}",
+                      all(v.get("enabled") is want for v in got.values()))
+            r2 = subprocess.run(
+                [sys.executable, str(SCRIPT), str(st), "--ascii", "--plain",
+                 "--summary"],
+                capture_output=True, text=True, env=env, cwd=str(d))
+            suppressed = "0 findings" in r2.stdout
+            check("cli", f"{state} waivers "
+                         f"{'suppress' if expect_suppressed else 'do not suppress'}",
+                  suppressed == expect_suppressed, r2.stdout[:200])
+
+        # a waiver file with no `enabled` field still suppresses
+        wf = d / "state.waivers.json"
+        obj = _json.loads(wf.read_text())
+        for v in obj["waivers"].values():
+            v.pop("enabled", None)
+            v["enabled"] = None
+            del v["enabled"]
+        wf.write_text(_json.dumps(obj), encoding="utf-8")
+        r3 = subprocess.run(
+            [sys.executable, str(SCRIPT), str(st), "--ascii", "--plain",
+             "--summary"],
+            capture_output=True, text=True, env=env, cwd=str(d))
+        check("cli", "missing enabled field defaults to enabled",
+              "0 findings" in r3.stdout, r3.stdout[:200])
+
         # bad phrase file fails loudly
         bad = d / "bad.json"
         bad.write_text('{"constructions":[{"id":"X","confidence":"urgent",'
@@ -573,4 +618,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
