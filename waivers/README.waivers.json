@@ -1,55 +1,174 @@
 {
   "generated_by": "ticfinder",
-  "source": "BLOG_bpu_13_contradiction_detection.md",
+  "source": "README.md",
   "waivers": {
+    "a892c1": {
+      "construction": "TRICOLON",
+      "pattern": "tricolon",
+      "line_when_waived": 36,
+      "enabled": false,
+      "text": "Colour is ANSI escapes, and it switches off automatically when stdout is not a terminal, so  > out.l"
+    },
+    "53b07d": {
+      "construction": "EMPHATIC_REFLEXIVE",
+      "pattern": "emphatic_reflexive",
+      "line_when_waived": 84,
+      "enabled": false,
+      "text": "so the file itself"
+    },
     "d8abb4": {
       "construction": "BORROWED_RIGOUR",
-      "line_when_waived": 1,
       "pattern": "",
+      "line_when_waived": 115,
+      "enabled": true,
       "text": "by construction"
     },
     "2dbccf": {
       "construction": "ALTERNATIVE_FRAMING",
-      "line_when_waived": 1,
-      "pattern": "",
+      "pattern": "af_rather_instead",
+      "line_when_waived": 130,
+      "enabled": true,
       "text": "rather than"
     },
-    "95a3c0": {
+    "9800ed": {
       "construction": "ALTERNATIVE_FRAMING",
-      "line_when_waived": 1,
-      "pattern": "",
-      "text": "more than one..."
+      "pattern": "af_less_than",
+      "line_when_waived": 133,
+      "enabled": false,
+      "text": "more than one file is passed to"
+    },
+    "af8643": {
+      "construction": "TRICOLON",
+      "pattern": "tricolon",
+      "line_when_waived": 170,
+      "enabled": false,
+      "text": "The label comes from item count, determiners on the items, premodifiers, a cue word in the lead-in ("
+    },
+    "2ade37": {
+      "construction": "CORRECTIVE_CONTRAST",
+      "pattern": "cc_negated_apposition",
+      "line_when_waived": 173,
+      "enabled": false,
+      "text": "a hint, not a verdict"
+    },
+    "f56351": {
+      "construction": "ALTERNATIVE_FRAMING",
+      "pattern": "af_rather_instead",
+      "line_when_waived": 182,
+      "enabled": false,
+      "text": "rather than alarming"
+    },
+    "73df72": {
+      "construction": "CORRECTIVE_CONTRAST",
+      "pattern": "cc_negated_apposition",
+      "line_when_waived": 194,
+      "enabled": false,
+      "text": "runs, not the count"
+    },
+    "34063a": {
+      "construction": "TRICOLON",
+      "pattern": "tricolon",
+      "line_when_waived": 198,
+      "enabled": false,
+      "text": "Work through the document first, one construction at a time, and take the waive list from a single c"
+    },
+    "d4efd6": {
+      "construction": "TRICOLON",
+      "pattern": "tricolon",
+      "line_when_waived": 243,
+      "enabled": false,
+      "text": "file , and cannot be combined with  --waive ,  --unwaive  or"
+    },
+    "d4fbb4": {
+      "construction": "TRICOLON",
+      "pattern": "tricolon",
+      "line_when_waived": 271,
+      "enabled": false,
+      "text": "A waiver suppresses its finding only while the flag is true; set it to  false  and the finding repor"
     },
     "68b1f9": {
       "construction": "ALTERNATIVE_FRAMING",
-      "line_when_waived": 1,
-      "pattern": "",
-      "text": "more than one detector, ..."
+      "pattern": "af_less_than",
+      "line_when_waived": 299,
+      "enabled": true,
+      "text": "more than one detector, the pattern"
     },
     "d46eb9": {
       "construction": "TRICOLON",
-      "line_when_waived": 1,
-      "pattern": "",
-      "text": "the construction, ..."
+      "pattern": "tricolon",
+      "line_when_waived": 315,
+      "enabled": true,
+      "text": "the construction, pattern, matched text and surrounding sentence"
     },
-    "085788": {
+    "21f09b": {
+      "construction": "TRICOLON",
+      "pattern": "tricolon",
+      "line_when_waived": 324,
+      "enabled": false,
+      "text": "its id, the construction, the line it was waived at and the text that was waived"
+    },
+    "fc0ebf": {
       "construction": "ALTERNATIVE_FRAMING",
-      "line_when_waived": 1,
-      "pattern": "",
-      "text": "rather than per..."
+      "pattern": "af_rather_instead",
+      "line_when_waived": 355,
+      "enabled": false,
+      "text": "rather than"
     },
-    "785964": {
+    "f3e999": {
       "construction": "PARTICIPIAL_TAIL",
-      "line_when_waived": 1,
-      "pattern": "",
-      "text": ", overriding their ..."
+      "pattern": "participial_tail",
+      "line_when_waived": 359,
+      "enabled": false,
+      "text": ", overriding their construction's"
+    },
+    "326834": {
+      "construction": "ALTERNATIVE_FRAMING",
+      "pattern": "af_less_than",
+      "line_when_waived": 364,
+      "enabled": false,
+      "text": "That is also why  rather than  /  instead of  /  less...than  live under  ALTERNATIVE_FRAMING"
+    },
+    "cdf59b": {
+      "construction": "ALTERNATIVE_FRAMING",
+      "pattern": "af_rather_instead",
+      "line_when_waived": 365,
+      "enabled": false,
+      "text": "rather than"
+    },
+    "a8d2ce": {
+      "construction": "TRICOLON",
+      "pattern": "tricolon",
+      "line_when_waived": 390,
+      "enabled": false,
+      "text": "ticfinder_off ,  ticfinder-off  and  ticfinder"
     },
     "eec9fe": {
       "construction": "ALTERNATIVE_FRAMING",
-      "line_when_waived": 1,
-      "pattern": "",
+      "pattern": "af_rather_instead",
+      "line_when_waived": 421,
+      "enabled": true,
       "text": "rather than"
+    },
+    "b2d26a": {
+      "construction": "PARTICIPIAL_TAIL",
+      "pattern": "participial_tail",
+      "line_when_waived": 442,
+      "enabled": false,
+      "text": ", overriding the construction's"
+    },
+    "a02837": {
+      "construction": "TRICOLON",
+      "pattern": "tricolon",
+      "line_when_waived": 467,
+      "enabled": false,
+      "text": "coordinated with  but , two-clause cleft (including across a sentence boundary), asyndetic sibling p"
+    },
+    "f3f436": {
+      "construction": "TRICOLON",
+      "pattern": "tricolon",
+      "line_when_waived": 505,
+      "enabled": false,
+      "text": "a construction, an expected yes or no, and a sentence"
     }
   }
 }
-

@@ -1,0 +1,15 @@
+# Low Cost Return Address Stack Repair Through Pop History Buffering
+
+Abstract: Return address stacks provide highly accurate target prediction for function returns, but speculative updates on mispredicted paths corrupt the stack contents. Checkpointing the top of stack pointer and top entry repairs the common case at low cost, however it fails when wrong path execution pops and subsequently overwrites entries below the top of stack. We present a small pop history buffer which records entries removed by speculative pops and restores them on misprediction recovery. In our experimental results on SPECint 2017 we show a reduction of X% to Y% in return mispredictions over top of stack checkpointing, at a storage cost of Z bits.
+
+# Introduction
+
+Function returns are the most frequent class of indirect branch in integer workloads. Their targets are highly predictable given the call history, and a hardware stack of return addresses captures this structure directly. However the stack must be updated speculatively at prediction time to be useful, and in a deeply pipelined machine a large fraction of predictions occur on paths that are later discarded.
+
+Jourdan et al. [X] characterized the corruption of branch prediction structures caused by mispredicted path execution and showed the return address stack is particularly sensitive. Skadron et al. [X] present a repair mechanism in which each predicted branch saves the top of stack pointer and the contents of the top entry. On misprediction the saved values are restored. The strength of this approach is its cost; two fields per in-flight branch recover nearly all of the accuracy lost to wrong path corruption. This strength is also the source of its limitation. A wrong path sequence which pops an entry and then pushes a new one overwrites a location below the saved top of stack, and that location is not recoverable from the checkpoint.
+
+Full checkpointing of the stack removes this limitation but scales with stack depth and the number of in-flight branches, which is not practical for wide machines with large instruction windows.
+
+In our work we extend the top of stack repair scheme with a pop history buffer. Entries removed by speculative pops are recorded in the buffer and tagged with the sequence number of the popping branch. On recovery the buffer restores overwritten entries in reverse order. The buffer is sized to the depth of wrong path pop sequences observed in practice, not to the stack depth, and so the storage cost remains small.
+
+In the following section we cover related work in more detail. In Section 3 we describe the pop history buffer and its interaction with the existing checkpoint. In Section 4 we present experimental results. The last section provides a summary.

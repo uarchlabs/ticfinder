@@ -1,0 +1,91 @@
+{
+  "generated_by": "ticfinder",
+  "source": "BLOG_bpu_13_contradiction_detection.md",
+  "waivers": {
+    "f3286e": {
+      "construction": "TRICOLON",
+      "line_when_waived": 1,
+      "pattern": "tricolon",
+      "text": "when a given..."
+    },
+    "998c04": {
+      "construction": "ALTERNATIVE_FRAMING",
+      "line_when_waived": 4,
+      "pattern": "",
+      "text": "instead of..."
+    },
+    "94d007": {
+      "construction": "TRICOLON",
+      "line_when_waived": 0,
+      "pattern": "",
+      "text": "On the rows..."
+    },
+    "555fbf": {
+      "construction": "ALTERNATIVE_FRAMING",
+      "line_when_waived": 0,
+      "pattern": "",
+      "text": "instead of..."
+    },
+    "db648a": {
+      "construction": "CLOSER",
+      "line_when_waived": 0,
+      "pattern": "",
+      "text": "in short..."
+    },
+    "437d11": {
+      "construction": "TRICOLON",
+      "line_when_waived": 0,
+      "pattern": "",
+      "text": "which share the"
+    },
+    "c00317": {
+      "construction": "TRICOLON",
+      "line_when_waived": 0,
+      "pattern": "",
+      "text": "e.g. TAGE,..."
+    },
+    "512f3c": {
+      "construction": "BORROWED_RIGOR",
+      "line_when_waived": 0,
+      "pattern": "",
+      "text": "failure mode"
+    },
+    "1290b2": {
+      "construction": "ALTERNATIVE_FRAMING",
+      "line_when_waived": 0,
+      "pattern": "",
+      "text": "rather than"
+    },
+    "4a8e02": {
+      "construction": "ALTERNATIVE_FRAMING",
+      "line_when_waived": 0,
+      "pattern": "",
+      "text": "rather than"
+    },
+    "3500da": {
+      "construction": "PARTICIPIAL_TAIL",
+      "line_when_waived": 0,
+      "pattern": "",
+      "text": "inventing a tage_bim.sv..."
+    },
+    "c2ed99": {
+      "construction": "TRICOLON",
+      "line_when_waived": 0,
+      "pattern": "",
+      "text": "guess, or ..."
+    },
+    "cc8697": {
+      "construction": "ALTERNATIVE_FRAMING",
+      "line_when_waived": 0,
+      "pattern": "",
+      "text": "rather than stopping"
+    },
+    "e34b58": {
+      "construction": "TRICOLON",
+      "line_when_waived": 0,
+      "pattern": "",
+      "text": "when the IA results..."
+    }
+  }
+}
+
