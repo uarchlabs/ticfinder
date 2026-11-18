@@ -397,13 +397,11 @@ Done:
 
 Planned:
 
-4. **Masking fixes for plain-text corpora** (TF-003, phase 1). Keep the
-   indented-code rule away from `.txt` files, or let the code masker
-   decide indented lines. Score code lines with trailing `#` or `//`
-   comments on the code part. Add the `name : value.call(arg)` DSL form.
-   Expect harvest to stay unchanged, since the blogs are markdown; confirm
-   it, then recheck the per-file masked percentages on the specs. Commit
-   before phase 2.
+4. **Masking fixes for plain-text corpora** (TF-003, phase 1). Done: the
+   indented-code rule applies to markdown files only, code lines with
+   trailing `#` or `//` comments are scored on the code part as well, and
+   `name : value.call(arg)` DSL lines are blanked. Harvest is unchanged.
+   Results in section 10.
 5. **Role-specific licensing for `TRICOLON`** (TF-003, phase 2; 5.2).
    Score each list member as a referent (identifier shape, proper noun,
    defined term that recurs as the same noun phrase) or a quality. The
@@ -564,3 +562,91 @@ Spot-check, by random sample and per file:
 line with a trailing `#` or `//` comment on the code part only; (3) add
 the `name : value` DSL form. Each needs test rows from the failure kinds
 above, written without quoting the specs.
+
+
+## 10. TF-003 results (2026-11-18)
+
+### Phase 1: masking fixes
+
+**Baseline.** `make regress` passed. Harvest matched section 9 on every
+row. `labels.jsonl` was byte-identical to the committed file. The
+specs aggregates matched TF-002 exactly (97,901 / 87,301 / 81,921 words;
+words counted as runs of ASCII letters).
+
+**Changes.** Each one has test rows that failed before it.
+
+1. `mask_markdown(..., markdown=True)`. With `markdown=False` the 4-space
+   indented-code rule is skipped and indented lines go to the code masker.
+   `analyse()` sets it from the file suffix with `is_markdown_path()`:
+   `.md`, `.markdown`, `.mdown`, `.mkd` and `.mkdn` are markdown, and any
+   other suffix, or none, is plain text. The default is markdown, so
+   `harvest.py`, which calls `mask_markdown(text)` directly and writes its
+   temporary files as `.md`, behaves as before.
+2. Trailing comments. A line is scored twice, on the whole line and on
+   the part before a trailing `//` or `#`, and it is code when either
+   reads as code. The whole line is blanked, comment included. The marker
+   must follow whitespace; `#` must also be followed by whitespace, which
+   keeps "TD #104" and URLs out. Scoring only the code part lost 5 lines
+   that had scored as code with their comment, hence both.
+3. DSL statements. `name : obj.call(arg)` and `name : a.b(c).d(e)`, with
+   one or two name words and one or more call chains, are blanked
+   wherever they sit, like the dense-symbol lines. Glossary lines
+   ("Term: a description") and "Note: ..." lines have no call chain and
+   are kept.
+
+**Harvest.** Identical before and after: summary and `labels.jsonl` byte
+for byte. The blogs are markdown, so the indented-code rule still applies
+to them, and they have no DSL lines or code lines with trailing comments
+outside fences.
+
+**Public files.** The masked text of all 32 pacino blogs, `notes/`,
+README, `samples/` and every waivered document is unchanged. Per-file
+shares for the harvest blogs, `notes/` and README are the section 9
+figures. No waiver goes stale in `$PACINO/waivers` or `waivers/`; the 3
+stale entries in `waivers/BLOG_bpu_13_contradiction_detection.waivers.json`
+predate TF-002.
+
+**Specs corpus.** Aggregates only, 36 text files.
+
+| measure | TF-002 | TF-003 phase 1 |
+|---|---|---|
+| words, raw | 97,901 | 97,901 |
+| words after markdown masking | 87,301 | 96,053 |
+| words after code masking | 81,921 | 89,371 |
+| words removed by the code masker | 5,380 | 6,682 |
+| markdown-masked % per file (min / median / max, over 40) | 0.0 / 3.2 / 55.2, 3 | 0.0 / 0.7 / 49.2, 1 |
+| code-masked % per file (min / median / max, over 40) | 0.0 / 0.3 / 33.5, 0 | 0.0 / 0.6 / 34.6, 0 |
+| total masked % per file (min / median / max, over 40) | 0.0 / 9.2 / 55.2, 3 | 0.0 / 2.2 / 49.2, 1 |
+
+The one file over 40% is a `.md` file with 14 fenced blocks, so its
+masking is correct. By line: 1,592 lines were blanked by the
+indented-code rule before. Of these, 1,069 are now kept, 126 are blanked
+by the code masker, and 397 are still markdown-masked (the two `.md`
+files). The code masker blanks 79 lines it kept before, and keeps 4 it
+blanked before. Those 4 were judged by their neighbours, and the
+neighbours changed when indented prose came back.
+
+Spot-check, random samples of 40, nothing quoted:
+
+- Lines restored from the indented-code rule: 30 prose or headings, 7
+  code, 3 table or layout cells. About a fifth of the restored lines are
+  code the masker does not catch: shell commands, single assignments,
+  mnemonic listings and comment lines. The code-masked share still rose:
+  the code masker now blanks 126 of the formerly indented lines and 79
+  lines it kept before.
+- Lines newly blanked by the code masker: 40 of 40 code, from two
+  samples. No new over-masking was found.
+- Kept lines with code signals: 17 of 40 code. TF-002 found 11 of 40, but
+  its pool held no indented lines. About half of the remaining misses are
+  whole-line comment and rule lines (`//...`, `# ----`). The rest are
+  assembly lines, bit-encoding rows, pseudocode and fragments.
+
+**Verdict.** The phase 1 hypothesis holds on each of its three failure
+conditions: (1) harvest is unchanged; (2) the code-masked share rose;
+(3) the spot-checks found no new over-masking. One qualification: about
+190 code lines came back with the indented prose, an estimate from 7 of
+40 sampled.
+
+**Deferred.** Whole-line comment and rule lines are the largest
+remaining kind of missed code. Next come assembly lines and bit-encoding
+rows. All need test rows written without quoting the specs.

@@ -97,6 +97,38 @@ _HEADING_RE = re.compile(r"^#{1,6}\s")
 # A line ending like this closes a sentence or introduces a listing, so the
 # next line starts fresh.
 _LINE_CLOSES = (".", ":", ";", "!", "?")
+# A trailing comment marker (TF-003): "//" or "#" after whitespace that
+# follows some text. "#" must also be followed by whitespace or the end of
+# the line, which keeps "TD #104" out; "//" after whitespace is never a URL
+# ("https://" has ":" before it), and specs often write "//comment" with no
+# space. A code line that ends in a prose comment carries enough plain
+# words to fail the prose guard, so the line is scored on the part before
+# the marker.
+_TRAILING_COMMENT_RE = re.compile(r"(?<=\S)\s+(?://|#(?=\s|$))")
+# DSL statements of the form "name : obj.call(arg)" or "name : a.b(c).d(e)",
+# one or two name words, then one or more call chains (TF-003). The keywords
+# in them read as plain words ("memory", "port"), so the token features
+# score them as half prose; the shape is unambiguous, so they are blanked
+# wherever they sit. "Term: a description" and "Note: see above." have no
+# call chain and do not match.
+_CALL_CHAIN = r"[A-Za-z_]\w*(?:\.\w+\([^()\n]*\))+"
+_DSL_RE = re.compile(
+    r"^(?:[A-Za-z_][\w.]*\s+)?[A-Za-z_][\w.\[\]]*\s*:\s*"
+    + _CALL_CHAIN + r"(?:\s+" + _CALL_CHAIN + r")*\s*$")
+# Suffixes that get markdown syntax rules. Everything else is plain text,
+# where the 4-space indented-code rule does not apply (TF-003).
+MARKDOWN_SUFFIXES = frozenset({".md", ".markdown", ".mdown", ".mkd", ".mkdn"})
+
+
+def is_markdown_path(path) -> bool:
+    """True when the file's suffix marks it as markdown."""
+    return Path(path).suffix.lower() in MARKDOWN_SUFFIXES
+
+
+def _code_part(line):
+    """The line up to a trailing comment marker, or the whole line."""
+    m = _TRAILING_COMMENT_RE.search(line)
+    return line[:m.start()] if m else line
 
 
 def _nonws(s):
@@ -126,12 +158,8 @@ def _balanced_only(s):
     return "".join(ch for ch, k in zip(s, keep) if k)
 
 
-def _line_features(line):
+def _line_features(s):
     """(tokens, keywords, identifiers, prose words, symbols, non-space)."""
-    s = line.strip()
-    if not s or _HEADING_RE.match(s):
-        return None
-    s = _LIST_MARK_RE.sub("", s)
     toks = s.split()
     if not toks:
         return None
@@ -143,24 +171,36 @@ def _line_features(line):
     return len(toks), kw, ids, prose, sym, max(_nonws(s), 1)
 
 
-def code_dense(line: str) -> bool:
-    """True for a line that is code regardless of position (see
-    CODE_SYM_STRONG)."""
-    f = _line_features(line)
+def _variants(line):
+    """The texts a line is scored on: the whole line, and the part before
+    a trailing comment when it has one. A line is code when either reads
+    as code, so stripping a comment can only add lines: a line that
+    scored as code with its comment ("x { a b }; //line 8") still does."""
+    s = line.strip()
+    if not s or _HEADING_RE.match(s):
+        return []
+    s = _LIST_MARK_RE.sub("", s).strip()
+    code = _code_part(s).rstrip()
+    return [s] if code == s else [s, code]
+
+
+def _dense(s):
+    if _DSL_RE.match(s):
+        return True
+    f = _line_features(s)
     if f is None:
         return False
     n, _, _, prose, sym, nw = f
     return (sym >= CODE_SYM_STRONG_MIN and sym / nw >= CODE_SYM_STRONG
             and prose / n <= CODE_STRONG_PROSE_MAX
-            and line.rstrip().endswith(CODE_ENDINGS))
+            and s.endswith(CODE_ENDINGS))
 
 
-def code_like(line: str) -> bool:
-    """True when one line reads as code rather than prose."""
-    f = _line_features(line)
+def _like(s):
+    f = _line_features(s)
     if f is None:
         return False
-    if code_dense(line):
+    if _dense(s):
         return True
     n, kw, ids, prose, sym, nw = f
     if prose / n > CODE_PROSE_MAX:
@@ -170,6 +210,17 @@ def code_like(line: str) -> bool:
     if ids >= 2 and ids / n >= CODE_ID_SHARE:
         return True
     return kw >= 1 and ids >= 1
+
+
+def code_dense(line: str) -> bool:
+    """True for a line that is code regardless of position (see
+    CODE_SYM_STRONG and _DSL_RE)."""
+    return any(_dense(s) for s in _variants(line))
+
+
+def code_like(line: str) -> bool:
+    """True when one line reads as code rather than prose."""
+    return any(_like(s) for s in _variants(line))
 
 
 def mask_code_lines(text: str, code_spans=()) -> str:
@@ -216,11 +267,17 @@ def mask_code_lines(text: str, code_spans=()) -> str:
 
 
 def mask_markdown(text: str, stats: dict = None,
-                  code_mask: bool = True) -> str:
+                  code_mask: bool = True, markdown: bool = True) -> str:
     """Blank out regions that aren't the author's prose, preserving offsets.
 
     Every masked region is replaced with spaces of identical length, so
     character offsets into the masked string stay valid in the original.
+
+    markdown=False is for plain-text input: the 4-space indented-code rule
+    is markdown syntax, and in plain text indentation is layout, so it is
+    skipped and the code masker judges indented lines like any other.
+    analyse() sets it from the file suffix (is_markdown_path). The default
+    keeps the markdown behaviour for callers that pass no type (harvest.py).
 
     Flags are PER PATTERN. DOTALL must apply only to the fenced-code
     patterns: with DOTALL on a line-oriented pattern, `.*$` runs greedily to
@@ -285,7 +342,7 @@ def mask_markdown(text: str, stats: dict = None,
         (r"^```.*?^```", M | D),          # fenced code
         (r"^~~~.*?^~~~", M | D),          # alt fenced code
         (r"`[^`\n]+`", 0, unquote),      # inline code: keep, drop ticks
-        (r"^ {4,}\S[^\n]*$", M),         # indented code
+        (r"^ {4,}\S[^\n]*$", M, blank, "md"),   # indented code (markdown only)
         (r"!\[[^\]]*\]\([^)]*\)", 0),    # images
         (r"\]\([^)]*\)", 0),            # link targets (keep link text)
         (r"^\s*\|[^\n]*\|\s*$", M),     # table rows
@@ -294,6 +351,8 @@ def mask_markdown(text: str, stats: dict = None,
         (r"<[^>\n]+>", 0),               # html tags
     ]
     for entry in patterns:
+        if len(entry) > 3 and entry[3] == "md" and not markdown:
+            continue
         pat, flags = entry[0], entry[1]
         fn = entry[2] if len(entry) > 2 else blank
         text = re.sub(pat, fn, text, flags=flags)
@@ -1577,7 +1636,8 @@ def analyse(path, nlp, only=None, extra=(), disabled=(), code_mask=None):
     raw = Path(path).read_text(encoding="utf-8")
     pragma = {}
     masked = mask_markdown(raw, pragma,
-                           CODE_MASK if code_mask is None else code_mask)
+                           CODE_MASK if code_mask is None else code_mask,
+                           markdown=is_markdown_path(path))
     code_spans = pragma.get("code_spans", [])
 
     def in_code(start, end):

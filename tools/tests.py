@@ -487,7 +487,92 @@ MASK_KEEP = [
      "## Debt\n\n[TD# 43](#td-43-a), [TD# 44](#td-44-a), and\n"
      "[TD# 45](#td-45-a) were opened in session-036.\n",
      ["[TD# 43", "[TD# 44", "were opened"], ["#td-43-a"]),
+
+    # Trailing comments (TF-003). The part before the comment marker is
+    # scored; when it is code the whole line goes, comment included.
+    ("code: line ending in a // comment",
+     "The counter update is:\n\n"
+     "next_cnt = cnt_q + incr_i;   // count up on every valid beat\n\n"
+     "Reset clears it.\n",
+     ["The counter update is:", "Reset clears it."],
+     ["next_cnt", "every valid beat"]),
+    ("code: line ending in a # comment",
+     "The pop is:\n\n"
+     "head_q = fifo_pop(fetch_fifo)   # oldest entry first, if any\n\n"
+     "It never blocks.\n",
+     ["The pop is:", "It never blocks."],
+     ["fifo_pop", "oldest entry first"]),
+    ("code: line ending in a // comment with no space after the marker",
+     "The enable is:\n\n"
+     "wr_en_q <= wr_i & ~full_q; //gated by the full flag\n\n"
+     "It is registered.\n",
+     ["The enable is:", "It is registered."], ["wr_en_q", "gated by"]),
+    # Negative rows: a "#" or "//" that is not a comment marker.
+    ("prose: ticket number with #",
+     "We closed TD #104 after the review and moved to the next item.\n",
+     ["We closed TD #104 after the review and moved to the next item."], []),
+    ("prose: line with a URL",
+     "The draft is at https://example.com/specs/bpu.html for review.\n",
+     ["The draft is at https://example.com/specs/bpu.html for review."], []),
+    ("prose: markdown heading",
+     "## Results for the cache # sweep\n\nThe sweep ran twice.\n",
+     ["## Results for the cache # sweep", "The sweep ran twice."], []),
+
+    # DSL statements, name : value.call(arg) (TF-003). Unambiguous in
+    # shape, so they are blanked wherever they sit, also after a label
+    # line with no closing punctuation.
+    ("code: DSL name : value.call(arg) lines",
+     "Buffer setup\n"
+     "buffer  : rxFifo.depth(16)\n"
+     "port    : rxFifo.attach(busA)   # receive side\n\n"
+     "Both are optional.\n",
+     ["Buffer setup", "Both are optional."],
+     ["rxFifo", "busA", "receive side"]),
+    ("code: DSL name : a.b(c).d(e) chain",
+     "Bank setup\n"
+     "bank : sramX.size(64KB).ports(2)\n\n"
+     "That is the default.\n",
+     ["Bank setup", "That is the default."], ["sramX", "64KB"]),
+    # Negative rows: glossary and note lines share the "name :" shape.
+    ("prose: glossary line",
+     "Glossary\n"
+     "Victim buffer: a small store that holds lines evicted from the cache.\n",
+     ["Victim buffer: a small store that holds lines evicted from the "
+      "cache."], []),
+    ("prose: note line",
+     "Note: see the section above.\n",
+     ["Note: see the section above."], []),
 ]
+
+# Rows that depend on the input type (TF-003). The 4-space indented-code
+# rule is markdown syntax; in plain text indentation is layout, so indented
+# lines are left to the code masker. (name, src, markdown, keep, gone,
+# which masker must have done the blanking: "md", "code" or None)
+MASK_TYPED = [
+    ("plain: indented prose kept",
+     "The cache has two modes.\n\n"
+     "    In the first mode the tags are compared in parallel\n"
+     "    and the hit way is selected late in the cycle.\n\n"
+     "That is all.\n", False,
+     ["In the first mode the tags are compared in parallel",
+      "and the hit way is selected late in the cycle."], [], None),
+    ("plain: indented code blanked by the code masker",
+     "The update is:\n\n"
+     "    cnt_q <= cnt_q + 1;\n"
+     "    if (rst_i) cnt_q <= 0;\n\n"
+     "Done.\n", False,
+     ["The update is:", "Done."], ["cnt_q", "rst_i"], "code"),
+    ("markdown: indented code blanked by the markdown rule",
+     "Intro.\n\n    code_here()\n\nOutro.\n", True,
+     ["Intro", "Outro"], ["code_here"], "md"),
+    ("markdown: indented prose still blanked by the markdown rule",
+     "Intro.\n\n    In the first mode the tags are compared.\n\nOutro.\n",
+     True, ["Intro", "Outro"], ["first mode"], "md"),
+]
+
+# File type from the suffix: markdown suffixes get markdown syntax rules.
+MARKDOWN_SUFFIXES = [("a.md", True), ("a.markdown", True), ("a.MD", True),
+                     ("a.txt", False), ("notes", False), ("a.text", False)]
 
 # The same rows with the code masker off: positive rows keep their code.
 MASK_OFF_KEEP = [
@@ -518,6 +603,39 @@ def test_masking():
         check("masking", f"{name}: length preserved", len(m) == len(src))
         for t in keep:
             check("masking", f"{name}: kept {t!r}", t in m)
+
+    for name, src, md, keep, gone, by in MASK_TYPED:
+        st = {}
+        try:
+            m = tf.mask_markdown(src, st, markdown=md)
+        except TypeError as e:
+            check("masking", f"{name}: markdown= accepted", False, str(e))
+            continue
+        check("masking", f"{name}: length preserved", len(m) == len(src))
+        nl_ok = all(m[i] == "\n" for i, ch in enumerate(src) if ch == "\n")
+        check("masking", f"{name}: newlines preserved", nl_ok)
+        for t in keep:
+            check("masking", f"{name}: kept {t!r}", t in m)
+        for t in gone:
+            check("masking", f"{name}: masked {t!r}", t not in m)
+        if by == "code":
+            check("masking", f"{name}: blanked by the code masker",
+                  st.get("code_masked_chars", 0) > 0
+                  and st.get("md_masked_chars") == 0, str(st))
+        elif by == "md":
+            check("masking", f"{name}: blanked by the markdown rule",
+                  st.get("md_masked_chars", 0) > 0, str(st))
+    # harvest.py calls mask_markdown(text) with no type: markdown is the
+    # default, so its behaviour for .md files is unchanged.
+    src = "Intro.\n\n    In the first mode the tags are compared.\n"
+    check("masking", "mask_markdown defaults to markdown input",
+          "first mode" not in tf.mask_markdown(src))
+    fn = getattr(tf, "is_markdown_path", None)
+    check("masking", "is_markdown_path exists", fn is not None)
+    if fn is not None:
+        for p, want in MARKDOWN_SUFFIXES:
+            check("masking", f"is_markdown_path({p!r}) is {want}",
+                  fn(Path(p)) is want)
 
     # Split statistics: markdown and code masking are counted separately,
     # over non-whitespace characters.
@@ -813,6 +931,27 @@ def test_cli():
                   str(split[True]))
             check("cli", "md_masked_pct reported",
                   "md_masked_pct" in split[True])
+
+        # analyse() takes the input type from the suffix: indented prose is
+        # markdown-masked in a .md file and kept in a .txt file (TF-003).
+        ind = (prose + "    In the first mode the tags are compared in "
+               "parallel\n    and the hit way is selected late.\n\n" + prose)
+        md_pct = {}
+        for suf in (".md", ".txt"):
+            p = d / f"ind{suf}"
+            p.write_text(ind, encoding="utf-8")
+            jo = d / f"ind{suf}.json"
+            r = subprocess.run(
+                [sys.executable, str(SCRIPT), str(p), "--no-waivers",
+                 "--json", str(jo)],
+                capture_output=True, text=True, env=env, cwd=str(d))
+            if jo.exists():
+                md_pct[suf] = _json.loads(jo.read_text())[str(p)][
+                    "stats"].get("md_masked_pct")
+        check("cli", "indented prose markdown-masked in .md",
+              (md_pct.get(".md") or 0) > 0, str(md_pct))
+        check("cli", "indented prose kept in .txt",
+              md_pct.get(".txt") == 0, str(md_pct))
 
         # bad phrase file fails loudly
         bad = d / "bad.json"
