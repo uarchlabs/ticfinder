@@ -140,10 +140,11 @@ python3 eval/harvest.py $PACINO --waiver-dir waivers --docs <blogs>   # see road
 
 ## Data handling
 
-- The author's pre-LLM specifications are private. Read them from the
-  path the user gives in the session; it is separate from
-  `$WRITING_SAMPLES`. Never copy them into this repo, commit them, or
-  quote them in notes or commit messages. Report aggregates only.
+- The author's pre-LLM specifications are private. They are in
+  `$WRITING_SAMPLES`, mixed in with the other non-LLM writing samples,
+  so treat every file there as private. Never copy them into this repo,
+  commit them, or quote them in notes or commit messages. Report
+  aggregates only.
 - arXiv full texts carry mixed licenses: use them for counts, don't
   commit them. Cache corpora outside the repo or under a git-ignored
   directory.

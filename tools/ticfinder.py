@@ -22,7 +22,7 @@ import json
 import re
 import sys
 from collections import Counter
-from dataclasses import dataclass, asdict, field
+from dataclasses import dataclass, asdict, field, replace
 from pathlib import Path
 
 import spacy
@@ -33,7 +33,190 @@ MODEL = "en_core_web_md"
 
 # ---------------------------------------------------------------- markdown
 
-def mask_markdown(text: str, stats: dict = None) -> str:
+# ------------------------------------------------------- code-aware masker
+#
+# Code that is not fenced or backticked (port listings, identifier runs,
+# expressions, register tables written as plain lines) parses as English
+# and feeds the detectors nonsense lists and appositions. The masker scores
+# each line on three features from roadmap 5.6 and blanks code-like lines
+# that cannot be the middle of a prose sentence.
+#
+# Thresholds were set on the 32 pacino blogs, their first drafts, notes/,
+# README.md and samples/: the lowest values that still catch every
+# standalone expression or listing line found there, then checked against
+# the negative rows in tests.py (prose with one or two identifiers, prose
+# lists, parenthetical abbreviations, wrapped identifier lines).
+
+# Characters that are rare in prose and common in code.
+CODE_SYMBOLS = frozenset(";{}()=[]<>")
+# Symbol share of a line's non-space characters. A prose line with two
+# parenthetical abbreviations, "a counter (CTR), a field (USE)", sits near
+# 0.11, so this alone is never enough; the prose guard below decides.
+CODE_SYM_DENSITY = 0.06
+CODE_SYM_MIN = 2
+# Share of a line's tokens that are identifier-shaped.
+CODE_ID_SHARE = 0.5
+# A code-like line must have at most this share of plain words. Register
+# rows with a one- or two-word description column reach 0.33; prose lines
+# that name several identifiers ("lp_set renamed to lp_idx, and ...") sit
+# at 0.5 and above.
+CODE_PROSE_MAX = 0.35
+# A line this dense in balanced symbols that also ends the way code lines
+# end is code whatever its token mix and position: netlist instances such
+# as "dff r0b4(.clk(clk),.q(q0[4]),...);" split into two tokens, so the cell
+# name alone is half the tokens, and in plain-text specs they often follow
+# an unpunctuated label line. Set from the specs spot-check (TF-002 step 7):
+# every such kept line was above 0.15, and no line of prose in the blogs,
+# drafts, notes/ or README reaches it with a code ending. The full-stop
+# ending is excluded so a wrapped prose line like "PC[11:3] to PC[9:1]."
+# still needs sentence context.
+CODE_SYM_STRONG = 0.15
+CODE_SYM_STRONG_MIN = 4
+CODE_STRONG_PROSE_MAX = 0.5
+CODE_ENDINGS = (";", ")", "{", "}", ",")
+# Port, declaration and register-access keywords. These count as neither
+# prose nor identifiers; one plus an identifier-shaped token marks a
+# declaration line.
+CODE_KEYWORDS = frozenset("""
+    input output inout logic wire reg bit byte int integer module endmodule
+    assign always always_ff always_comb always_latch parameter localparam
+    typedef struct enum union packed signed unsigned begin end if else case
+    endcase function endfunction task endtask void return const static
+    uint8_t uint16_t uint32_t uint64_t int8_t int16_t int32_t int64_t
+    RW RO WO W1C RW1C W1S RC
+    """.split())
+# identifier shapes: snake_case, camelCase, letters+digit suffix (pc_p1,
+# ST0), [N:M] ranges, hex literals, Verilog sized literals (3'b011)
+_IDENT_RE = re.compile(
+    r"^\W*(?:[A-Za-z]\w*_\w+|[a-z]+[A-Z]\w*|[A-Za-z]+\d+\w*"
+    r"|\w*\[[\w+-]+:[\w+-]+\]\W*|0x[0-9a-fA-F_]+|\d+'[bhdo][0-9a-fA-F_xz]+)"
+    r"\W*$")
+_PROSE_RE = re.compile(r"^[(\"'\[]*(?:[A-Za-z][a-z]+|a|I)[.,;:!?)\"'\]]*$")
+_LIST_MARK_RE = re.compile(r"^(?:[-*+]|\d+[.)])\s+")
+_HEADING_RE = re.compile(r"^#{1,6}\s")
+# A line ending like this closes a sentence or introduces a listing, so the
+# next line starts fresh.
+_LINE_CLOSES = (".", ":", ";", "!", "?")
+
+
+def _nonws(s):
+    return sum(1 for ch in s if not ch.isspace())
+
+
+def _balanced_only(s):
+    """Drop brackets and parens that have no partner on the line.
+
+    Masking blanks a link target but keeps the link text's "[", and a
+    wrapped prose line can open a parenthesis it closes on the next line.
+    Code on one line balances its brackets, so only balanced pairs count.
+    """
+    pairs = {"]": "[", ")": "(", "}": "{"}
+    keep = [True] * len(s)
+    stack = []
+    for i, ch in enumerate(s):
+        if ch in "([{":
+            stack.append(i)
+        elif ch in pairs:
+            if stack and s[stack[-1]] == pairs[ch]:
+                stack.pop()
+            else:
+                keep[i] = False
+    for i in stack:
+        keep[i] = False
+    return "".join(ch for ch, k in zip(s, keep) if k)
+
+
+def _line_features(line):
+    """(tokens, keywords, identifiers, prose words, symbols, non-space)."""
+    s = line.strip()
+    if not s or _HEADING_RE.match(s):
+        return None
+    s = _LIST_MARK_RE.sub("", s)
+    toks = s.split()
+    if not toks:
+        return None
+    kw = sum(1 for t in toks if t.strip(",;") in CODE_KEYWORDS)
+    ids = sum(1 for t in toks if _IDENT_RE.match(t))
+    prose = sum(1 for t in toks
+                if _PROSE_RE.match(t) and t.strip(",;") not in CODE_KEYWORDS)
+    sym = sum(1 for ch in _balanced_only(s) if ch in CODE_SYMBOLS)
+    return len(toks), kw, ids, prose, sym, max(_nonws(s), 1)
+
+
+def code_dense(line: str) -> bool:
+    """True for a line that is code regardless of position (see
+    CODE_SYM_STRONG)."""
+    f = _line_features(line)
+    if f is None:
+        return False
+    n, _, _, prose, sym, nw = f
+    return (sym >= CODE_SYM_STRONG_MIN and sym / nw >= CODE_SYM_STRONG
+            and prose / n <= CODE_STRONG_PROSE_MAX
+            and line.rstrip().endswith(CODE_ENDINGS))
+
+
+def code_like(line: str) -> bool:
+    """True when one line reads as code rather than prose."""
+    f = _line_features(line)
+    if f is None:
+        return False
+    if code_dense(line):
+        return True
+    n, kw, ids, prose, sym, nw = f
+    if prose / n > CODE_PROSE_MAX:
+        return False
+    if sym >= CODE_SYM_MIN and sym / nw >= CODE_SYM_DENSITY:
+        return True
+    if ids >= 2 and ids / n >= CODE_ID_SHARE:
+        return True
+    return kw >= 1 and ids >= 1
+
+
+def mask_code_lines(text: str, code_spans=()) -> str:
+    """Blank code-like lines that are not part of a prose sentence.
+
+    Works on runs of non-blank lines (blocks). A code-like line is blanked
+    when it starts its block, follows a line that closes a sentence or ends
+    with a colon, or follows another blanked line. A line whose sentence
+    runs on into a prose line that starts lower-case is kept. Lines that
+    contain inline code are kept: the author marked up the code there, and
+    inline code keeps its text (see unquote in mask_markdown).
+    """
+    lines = text.split("\n")
+    offs, o = [], 0
+    for ln in lines:
+        offs.append(o)
+        o += len(ln) + 1
+
+    def has_inline(i):
+        a, b = offs[i], offs[i] + len(lines[i])
+        return any(s < b and e > a for s, e in code_spans)
+
+    like = [code_like(ln) and not has_inline(i) for i, ln in enumerate(lines)]
+    out = list(lines)
+    prev_blank = True        # start of file is a block boundary
+    prev_masked = False
+    for i, ln in enumerate(lines):
+        s = ln.strip()
+        if not s:
+            prev_blank, prev_masked = True, False
+            continue
+        dense = like[i] and code_dense(ln)
+        ok = like[i] and (dense or prev_blank or prev_masked
+                          or lines[i - 1].rstrip().endswith(_LINE_CLOSES))
+        if (ok and not dense and not s.endswith(_LINE_CLOSES)
+                and i + 1 < len(lines)):
+            nxt = lines[i + 1].strip()
+            if nxt and not like[i + 1] and nxt[0].islower():
+                ok = False   # the sentence continues into prose
+        if ok:
+            out[i] = re.sub(r"\S", " ", ln)
+        prev_blank, prev_masked = False, ok
+    return "\n".join(out)
+
+
+def mask_markdown(text: str, stats: dict = None,
+                  code_mask: bool = True) -> str:
     """Blank out regions that aren't the author's prose, preserving offsets.
 
     Every masked region is replaced with spaces of identical length, so
@@ -79,10 +262,12 @@ def mask_markdown(text: str, stats: dict = None) -> str:
     n_regions = 0
     skipped_chars = 0
 
+    raw_nonws = _nonws(text)
+
     def count_blank(m):
         nonlocal n_regions, skipped_chars
         n_regions += 1
-        skipped_chars += len(m.group(0).strip())
+        skipped_chars += _nonws(m.group(0))
         return blank(m)
 
     text = re.sub(OFF + r".*?" + ON, count_blank, text, flags=D | re.I)
@@ -112,8 +297,16 @@ def mask_markdown(text: str, stats: dict = None) -> str:
         pat, flags = entry[0], entry[1]
         fn = entry[2] if len(entry) > 2 else blank
         text = re.sub(pat, fn, text, flags=flags)
+    md_nonws = _nonws(text)
+    if code_mask:
+        text = mask_code_lines(text, code_spans)
     if stats is not None:
         stats["code_spans"] = code_spans
+        # Non-whitespace characters, so blanking in place is counted
+        # wherever it happens in the file.
+        stats["nonws_chars"] = raw_nonws
+        stats["md_masked_chars"] = raw_nonws - skipped_chars - md_nonws
+        stats["code_masked_chars"] = md_nonws - _nonws(text)
     return text
 
 
@@ -156,6 +349,17 @@ def fingerprint(f):
     raw = "\u0000".join([f.construction, f.pattern or "",
                           norm(f.text), norm(f.context)])
     return hashlib.sha1(raw.encode("utf-8")).hexdigest()[:6]
+
+
+# Ids written before TF-001 hashed only the first 240 characters of the
+# sentence. legacy_fingerprint() reproduces them so --migrate-waivers can
+# rekey old waiver files.
+LEGACY_CONTEXT_CHARS = 240
+
+
+def legacy_fingerprint(f):
+    """The pre-TF-001 id: fingerprint() over a sentence cut at 240 chars."""
+    return fingerprint(replace(f, context=f.context[:LEGACY_CONTEXT_CHARS]))
 
 
 def waiver_path(src, waiver_dir=None, explicit=None):
@@ -264,11 +468,20 @@ def pattern(cid, confidence=None):
     return deco
 
 
+# Re-raise detector exceptions instead of warning. Set by --strict and by
+# the test suite.
+STRICT = False
+
+
 def run_construction(cid, doc, nlp, disabled=()):
     """Run every pattern for a construction, dropping duplicate spans.
 
     Patterns overlap by design -- the same sentence can satisfy two of them.
     The construction reports once, tagged with the pattern that found it.
+
+    A pattern that throws is reported on stderr and skipped, so one bad
+    pattern does not take down the run. Under STRICT it re-raises: a crash
+    that only warns still looks like "found nothing" to a test.
     """
     base = CONSTRUCTIONS[cid]["confidence"]
     seen, out = [], []
@@ -277,7 +490,12 @@ def run_construction(cid, doc, nlp, disabled=()):
             continue
         try:
             hits = fn(doc, nlp)
-        except Exception:
+        except Exception as e:
+            if STRICT:
+                raise
+            print(f"  warning: {cid}.{pname} raised "
+                  f"{type(e).__name__}: {e}; its findings are missing",
+                  file=sys.stderr)
             continue
         for hit in hits:
             # A pattern may return (span, subtype) or, when confidence
@@ -1143,6 +1361,11 @@ PHRASE_PATTERNS = {
 
 # ---------------------------------------------------------------- em dash
 
+# "never" was tried and left out: across the pacino blogs, notes and README
+# its only new hit was "never again -- fixed by ...", which is not a pivot.
+NEGATORS = {"not", "n't"}
+
+
 def em_dash_findings(doc, raw, offset_base=0):
     """Em dashes, split by function. The pivot use is the high-signal one."""
     out = []
@@ -1150,11 +1373,14 @@ def em_dash_findings(doc, raw, offset_base=0):
         if tok.text not in ("—", "–"):
             continue
         after = doc[tok.i + 1:min(tok.i + 6, len(doc))].text.lower()
-        before = doc[max(0, tok.i - 5):tok.i].text.lower()
+        # Negation is tested on tokens within the sentence. A substring test
+        # on the text labelled "another --", "nothing --" and "notes --" as
+        # pivots at high confidence.
+        before = doc[max(tok.sent.start, tok.i - 5):tok.i]
         if re.search(r"\b(it|that|this)\s*('s|s| is| was)\b", after):
             sub = "pivot (— it's Y)"
             conf = "high"
-        elif "not" in before or "n't" in before:
+        elif any(t.lower_ in NEGATORS for t in before):
             sub = "pivot (not X — Y)"
             conf = "high"
         elif sum(1 for t in doc[tok.sent.start:tok.sent.end]
@@ -1342,10 +1568,16 @@ def load_model(name):
     return nlp
 
 
-def analyse(path, nlp, only=None, extra=(), disabled=()):
+# --no-code-mask sets this False; analyse() callers that do not pass
+# code_mask (harvest.py) follow it.
+CODE_MASK = True
+
+
+def analyse(path, nlp, only=None, extra=(), disabled=(), code_mask=None):
     raw = Path(path).read_text(encoding="utf-8")
     pragma = {}
-    masked = mask_markdown(raw, pragma)
+    masked = mask_markdown(raw, pragma,
+                           CODE_MASK if code_mask is None else code_mask)
     code_spans = pragma.get("code_spans", [])
 
     def in_code(start, end):
@@ -1383,7 +1615,10 @@ def analyse(path, nlp, only=None, extra=(), disabled=()):
             construction=cid,
             label=label + (f" [{sub}]" if sub else ""),
             text=span.text.strip().replace("\n", " "),
-            context=span.sent.text.strip().replace("\n", " ")[:240],
+            # The full sentence: fingerprint() hashes it, so truncating
+            # here let an edit past the cut keep a waiver live. Display
+            # code trims it with window().
+            context=span.sent.text.strip().replace("\n", " "),
             line=line_of(raw, span.start_char),
             start=span.start_char, end=span.end_char,
             note=note, confidence=conf, pattern=pname))
@@ -1434,13 +1669,20 @@ def analyse(path, nlp, only=None, extra=(), disabled=()):
 
     findings.sort(key=lambda f: f.start)
 
-    kept = len(masked.strip())
-    orig = len(raw.strip())
-    # Deliberate <!-- ticfinder_off --> regions are not accidental loss, so
-    # they must not trigger the "did the masker eat my file" warning.
-    orig_auto = max(orig - pragma.get("pragma_chars", 0), 1)
-    masked_pct = 100 * (1 - kept / orig_auto) if orig else 0
-    masked_pct = max(0.0, min(100.0, masked_pct))
+    # Counted over non-whitespace characters: masking blanks in place, so
+    # a length ratio only moved when the masked text touched an end of the
+    # file. Deliberate <!-- ticfinder_off --> regions are not accidental
+    # loss, so they are left out of both sides and cannot trigger the "did
+    # the masker eat my file" warning.
+    denom = max(pragma.get("nonws_chars", 0)
+                - pragma.get("pragma_chars", 0), 1)
+
+    def pct(n):
+        return round(max(0.0, min(100.0, 100 * n / denom)), 1)
+    md_pct = pct(pragma.get("md_masked_chars", 0))
+    code_pct = pct(pragma.get("code_masked_chars", 0))
+    masked_pct = pct(pragma.get("md_masked_chars", 0)
+                     + pragma.get("code_masked_chars", 0))
 
     words = sum(1 for t in doc if t.is_alpha)
     sents = list(doc.sents)
@@ -1453,7 +1695,9 @@ def analyse(path, nlp, only=None, extra=(), disabled=()):
         "sentence_len_stdev": round(var, 1),
         "findings": len(findings),
         "per_1000_words": round(len(findings) / max(words, 1) * 1000, 1),
-        "masked_pct": round(masked_pct, 1),
+        "masked_pct": masked_pct,
+        "md_masked_pct": md_pct,
+        "code_masked_pct": code_pct,
         "pragma_regions": pragma.get("pragma_regions", 0),
     }
     return findings, stats
@@ -1565,6 +1809,10 @@ def report(path, findings, stats, plain=False, show_stats=False,
             bits.append(f"{stats['disabled']} waivers disabled")
         if stats.get("stale"):
             bits.append(f"{stats['stale']} stale (no longer in the text)")
+        if stats.get("legacy"):
+            bits.append(f"{stats['legacy']} of them old-style ids for "
+                        f"sentences over {LEGACY_CONTEXT_CHARS} chars "
+                        f"(--migrate-waivers rekeys them)")
         line = ", ".join(bits)
         if stats.get("waiver_file"):
             line += f" [{stats['waiver_file']}]"
@@ -1585,6 +1833,9 @@ def report(path, findings, stats, plain=False, show_stats=False,
     if show_stats:
         print(a(f"  {c['d']}mean sentence {stats['mean_sentence_len']} words, "
                 f"stdev {stats['sentence_len_stdev']}{c['0']}"))
+        print(a(f"  {c['d']}masked {stats['masked_pct']}% of non-space "
+                f"text: markdown {stats['md_masked_pct']}%, code "
+                f"{stats['code_masked_pct']}%{c['0']}"))
 
     if not findings:
         print(a(f"  {c['d']}clean{c['0']}\n"))
@@ -1729,6 +1980,11 @@ def main():
                     help="write a waiver file covering every current "
                          "finding, all enabled (the default) or all "
                          "disabled; refuses to run if the file exists")
+    ap.add_argument("--migrate-waivers", action="store_true",
+                    help="rekey waivers written with the old id, which "
+                         "hashed only the first 240 characters of the "
+                         "sentence; check the listed sentences, since an "
+                         "edit past that point was not detected before")
     ap.add_argument("--prune-stale", action="store_true",
                     help="remove waivers whose text is no longer in the "
                          "document")
@@ -1759,9 +2015,17 @@ def main():
     ap.add_argument("--ascii", action="store_true",
                     help="ASCII-only output (auto-enabled if stdout can't "
                          "encode UTF-8)")
+    ap.add_argument("--no-code-mask", action="store_true",
+                    help="turn off the code-aware masker (unfenced code "
+                         "lines); markdown masking still applies")
+    ap.add_argument("--strict", action="store_true",
+                    help="stop on the first detector exception instead of "
+                         "warning and skipping that pattern")
     args = ap.parse_args()
 
-    global ASCII_MODE
+    global ASCII_MODE, STRICT, CODE_MASK
+    STRICT = args.strict
+    CODE_MASK = not args.no_code_mask
     enc = (sys.stdout.encoding or "ascii").lower()
     ASCII_MODE = args.ascii or enc not in ("utf-8", "utf8")
 
@@ -1906,8 +2170,29 @@ def main():
                   f"{'s' if len(waivers) != 1 else ''} -> {wpath}")
             dirty = False
 
+        # Old ids differ from new ones only for sentences over 240 chars.
+        legacy = {}
+        for x in f:
+            old = legacy_fingerprint(x)
+            if old != x.fp and old in all_ids and x.fp not in all_ids:
+                legacy[old] = x
+        if args.migrate_waivers and legacy and not args.no_waivers:
+            for old, x in sorted(legacy.items(), key=lambda kv: kv[1].line):
+                entry = waivers.pop(old)
+                waivers[x.fp] = entry
+                if old in held:
+                    held.discard(old)
+                    held.add(x.fp)
+                all_ids.discard(old)
+                all_ids.add(x.fp)
+                print(f"  migrated {old} -> {x.fp}  L{x.line} "
+                      f"{x.construction}: {x.text[:60]}")
+            legacy = {}
+            dirty = True
+
         seen_fps = {x.fp for x in f}
         stale = all_ids - seen_fps
+        st["legacy"] = len(legacy)
         st["stale_entries"] = [
             {"fp": fp,
              "construction": waivers.get(fp, {}).get("construction", "?"),

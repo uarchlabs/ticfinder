@@ -277,6 +277,20 @@ TRICOLON_KINDS = [
      "the usual place."),
 ]
 
+# Em-dash subtype. The 'not X -- Y' pivot must key on a negation token, not
+# on the letters "not" anywhere in the preceding words.
+EM_DASH_KINDS = [
+    ("pivot (not X — Y)", "The fault is not in the RTL — it lives in the test."),
+    ("pivot (not X — Y)", "We don't ship that path — we simulate it."),
+    # "never" is not a negator here (TF-001: its one corpus hit was this)
+    ("single break",
+     "The flag was evaluated once and never again — fixed by gating it."),
+    ("paired aside", "We added another — smaller — table."),
+    ("single break", "There was nothing — the log was empty."),
+    ("single break", "Read the release notes — they cover the change."),
+    ("single break", "The annotated trace — shown below."),
+]
+
 
 def test_detectors(nlp):
     for cid, want, text in CASES:
@@ -317,6 +331,39 @@ def test_detectors(nlp):
         check("detectors", f"tricolon kind {want}", got == want,
               f"want={want} got={got}: {text[:70]}")
 
+    for want, text in EM_DASH_KINDS:
+        doc = nlp(text)
+        subs = [h[1] for h in tf.em_dash_findings(doc, text)]
+        got = subs[0] if subs else "none"
+        check("detectors", f"em dash {want}: {text[:30]}", got == want,
+              f"want={want} got={got}: {text[:70]}")
+
+    # A pattern that throws must not look like a pattern that found nothing.
+    def _boom(doc, nlp):
+        raise RuntimeError("deliberate test failure")
+    pats = tf.CONSTRUCTIONS["TRICOLON"]["patterns"]
+    pats.append(("_boom", _boom, None))
+    try:
+        import contextlib
+        import io
+        err = io.StringIO()
+        saved, tf.STRICT = tf.STRICT, False
+        with contextlib.redirect_stderr(err):
+            tf.run_construction("TRICOLON", nlp("A, B, and C."), nlp)
+        check("detectors", "crashing pattern warns on stderr",
+              "_boom" in err.getvalue() and "deliberate" in err.getvalue(),
+              repr(err.getvalue()[:120]))
+        tf.STRICT = True
+        raised = False
+        try:
+            tf.run_construction("TRICOLON", nlp("A, B, and C."), nlp)
+        except RuntimeError:
+            raised = True
+        check("detectors", "crashing pattern raises under strict", raised)
+    finally:
+        tf.STRICT = saved
+        pats.remove(("_boom", _boom, None))
+
 
 # ----------------------------------------------------------------- masking
 
@@ -351,6 +398,102 @@ MASK_KEEP = [
     ("pragma skip one block",
      "<!-- ticfinder_skip -->\nSKIPPED\n\nKept after.\n",
      ["Kept after"], ["SKIPPED"]),
+
+    # Code-aware masker: code that is not fenced or backticked. Positive
+    # rows must be blanked; prose around them must survive.
+    ("code: port listing line",
+     "The fetch stage has two ports.\n\n"
+     "input  logic [31:0] pc_i, output logic valid_o\n\n"
+     "Both are registered.\n",
+     ["The fetch stage has two ports", "Both are registered"],
+     ["pc_i", "valid_o", "[31:0]"]),
+    ("code: port listing run",
+     "The ports are:\n"
+     "  input  logic        clk_i,\n"
+     "  input  logic [31:0] pc_i,\n"
+     "  output logic        valid_o\n\n"
+     "That is all.\n",
+     ["The ports are:", "That is all"], ["clk_i", "pc_i", "valid_o"]),
+    ("code: identifier run",
+     "These are the stage signals.\n\nfoo_bar_p1, baz_q2, qux_r3\n\n"
+     "They are all registered.\n",
+     ["These are the stage signals", "They are all registered"],
+     ["foo_bar_p1", "baz_q2", "qux_r3"]),
+    ("code: expression lines",
+     "The update rule is:\n\n"
+     "  bit_out  = ghr_mem[(ghist_ptr + H) % GHR_WIDTH];\n"
+     "  if (stall_i) { cnt_q = cnt_q; }\n\n"
+     "where H is the history depth.\n",
+     ["The update rule is:", "where H is the history depth"],
+     ["ghr_mem", "stall_i", "cnt_q"]),
+    ("code: register table as plain lines",
+     "The block has three registers.\n\n"
+     "CTRL     0x00  [7:0]   RW  enable\n"
+     "STATUS   0x04  [3:0]   RO  busy\n"
+     "DATA     0x08  [31:0]  RW  payload\n\n"
+     "Reset clears all three.\n",
+     ["The block has three registers", "Reset clears all three"],
+     ["0x04", "STATUS", "payload"]),
+
+    # Netlist instance lines: two tokens (cell name, port map), so a
+    # token-share prose guard reads the cell name as half prose. Dense
+    # balanced symbols and a code ending (;) override it. Found in the
+    # specs spot-check (TF-002 step 7).
+    ("code: netlist instance lines",
+     "The cells are:\n\n"
+     "dff r3b2(.clk(clk),.q(q3[2]),.e(wen[3]),.d(di[2]));\n"
+     "inv iwa1 (.y(wa0_[1]), .a(wa0[1]));\n\n"
+     "Done.\n",
+     ["The cells are:", "Done."], ["r3b2", "iwa1", "wa0_"]),
+    # ... and after a label line with no closing punctuation.
+    ("code: dense line after an unpunctuated label",
+     "Register file cells\n"
+     "dff r0b4(.clk(clk),.q(q0[4]),.e(wen[0]),.d(di[4]));\n",
+     ["Register file cells"], ["r0b4", "wen[0]"]),
+
+    # Negative rows: prose that mentions code must be kept whole.
+    # A wrapped prose line dense in brackets that ends the sentence with a
+    # full stop (BLOG_bpu_21 line 414).
+    ("prose: wrapped bracket-dense line ending a sentence",
+     "Each SC table's 9-bit index moves from\nPC[11:3] to PC[9:1].\n",
+     ["PC[11:3] to PC[9:1]."], []),
+    ("prose: one backticked identifier",
+     "The `ftq_enq` signal stalls when the queue is full.\n",
+     ["ftq_enq", "signal stalls when the queue is full."], ["`"]),
+    ("prose: one bare identifier",
+     "The ftq_enq signal stalls when the queue is full.\n",
+     ["The ftq_enq signal stalls when the queue is full."], []),
+    ("prose: two bare identifiers",
+     "Raising ftq_enq while ftq_full_q is high drops the entry.\n",
+     ["Raising ftq_enq while ftq_full_q is high drops the entry."], []),
+    ("prose: list of ordinary words",
+     "The design is small, fast, and easy to test.\n",
+     ["The design is small, fast, and easy to test."], []),
+    ("prose: parenthetical abbreviations",
+     "Each entry holds a counter (CTR), a usefulness field (USE)\n"
+     "and an epoch field (EPC).\n",
+     ["a counter (CTR), a usefulness field (USE)",
+      "and an epoch field (EPC)."], []),
+    # A wrapped prose line can be mostly identifiers. It is the middle of
+    # a sentence, so blanking it would leave a hole the parser reads across.
+    ("prose: wrapped identifier line mid-sentence",
+     "The testbench has the shared tasks (tb_msg, tb_info, tb_warn,\n"
+     "tb_error, tb_pf, start_test, stop_test, assert_reset),\n"
+     "and the top level.\n",
+     ["tb_error, tb_pf, start_test, stop_test, assert_reset),"], []),
+    # Link targets are blanked but the link text keeps its "[", which is
+    # markdown, not a code symbol (BLOG_bpu_11 line 280).
+    ("prose: line of link texts",
+     "## Debt\n\n[TD# 43](#td-43-a), [TD# 44](#td-44-a), and\n"
+     "[TD# 45](#td-45-a) were opened in session-036.\n",
+     ["[TD# 43", "[TD# 44", "were opened"], ["#td-43-a"]),
+]
+
+# The same rows with the code masker off: positive rows keep their code.
+MASK_OFF_KEEP = [
+    ("code mask off: identifier run",
+     "These are the stage signals.\n\nfoo_bar_p1, baz_q2, qux_r3\n",
+     ["foo_bar_p1, baz_q2, qux_r3"]),
 ]
 
 
@@ -365,6 +508,30 @@ def test_masking():
             check("masking", f"{name}: kept {t!r}", t in m)
         for t in gone:
             check("masking", f"{name}: masked {t!r}", t not in m)
+    for name, src, keep in MASK_OFF_KEEP:
+        try:
+            m = tf.mask_markdown(src, code_mask=False)
+        except TypeError as e:
+            check("masking", f"{name}: code_mask=False accepted", False,
+                  str(e))
+            continue
+        check("masking", f"{name}: length preserved", len(m) == len(src))
+        for t in keep:
+            check("masking", f"{name}: kept {t!r}", t in m)
+
+    # Split statistics: markdown and code masking are counted separately,
+    # over non-whitespace characters.
+    st = {}
+    src = ("Prose line here.\n\n```\nfenced_x = 1\n```\n\n"
+           "foo_bar_p1, baz_q2, qux_r3\n")
+    tf.mask_markdown(src, st)
+    nonws = lambda s: sum(1 for ch in s if not ch.isspace())
+    check("masking", "stats: md_masked_chars counts the fence",
+          st.get("md_masked_chars") == nonws("```\nfenced_x = 1\n```"),
+          str(st.get("md_masked_chars")))
+    check("masking", "stats: code_masked_chars counts the code line",
+          st.get("code_masked_chars") == nonws("foo_bar_p1, baz_q2, qux_r3"),
+          str(st.get("code_masked_chars")))
 
 
 # ------------------------------------------------------------------- spans
@@ -435,6 +602,49 @@ def test_waivers(nlp):
         check("waivers", "stale entries retain text for reporting",
               all(w[fp].get("text") for fp in stale))
 
+    # An edit anywhere in the flagged sentence must change its id, including
+    # past character 240 of a long sentence.
+    head = "The parser is fast, correct, and easy to extend"
+    pad = (", which matters because the downstream stages consume its "
+           "output directly and any delay in the front end shows up as "
+           "stalls in every later pass of the pipeline that depends on it "
+           "and in the reports that are generated at the very end")
+    long_a = head + pad + " of the nightly run.\n"
+    long_b = head + pad + " of the weekly run.\n"
+    assert long_a.index("nightly") > 240
+    fa, fb = fps(long_a), fps(long_b)
+    check("waivers", "edit past char 240 changes the id",
+          bool(fa) and not (fa & fb), f"shared {sorted(fa & fb)}")
+
+    # Old-style ids (sentence cut at 240 chars) are reported on a normal
+    # run without touching the file, and rekeyed by --migrate-waivers.
+    with tempfile.TemporaryDirectory() as d:
+        src = Path(d) / "long.md"
+        src.write_text(long_a, encoding="utf-8")
+        f, _ = tf.analyse(str(src), nlp)
+        x = next(x for x in f if len(x.context) > 240)
+        old, new = tf.legacy_fingerprint(x), tf.fingerprint(x)
+        check("waivers", "legacy id differs for a long sentence", old != new)
+        wp = tf.waiver_path(str(src))
+        tf.save_waivers(wp, str(src), {old: {
+            "construction": x.construction, "pattern": x.pattern,
+            "line_when_waived": x.line, "enabled": True, "text": x.text}})
+        before = wp.read_text(encoding="utf-8")
+        env = dict(os.environ)
+        env["COLUMNS"] = "100"
+        r = subprocess.run([sys.executable, str(SCRIPT), str(src), "--plain"],
+                           capture_output=True, text=True, env=env, cwd=d)
+        check("waivers", "normal run reports old-style ids",
+              "--migrate-waivers" in r.stdout, r.stdout[-300:])
+        check("waivers", "normal run leaves the waiver file alone",
+              wp.read_text(encoding="utf-8") == before)
+        r = subprocess.run([sys.executable, str(SCRIPT), str(src), "--plain",
+                            "--migrate-waivers"],
+                           capture_output=True, text=True, env=env, cwd=d)
+        w, _ = tf.load_waivers(wp, str(src))
+        check("waivers", "--migrate-waivers rekeys old ids",
+              new in w and old not in w, f"{sorted(w)} {r.stderr[-200:]}")
+
     check("waivers", "ids are 6 hex chars",
           all(len(x) == 6 and all(ch in "0123456789abcdef" for ch in x)
               for x in a))
@@ -467,7 +677,8 @@ def test_cli():
         for flags in ([], ["--compact"], ["--summary"], ["--context"],
                       ["--explain"], ["--by-position"], ["--patterns"],
                       ["--stats"], ["--ascii"], ["--plain"],
-                      ["--only", "TRICOLON"], ["--off", "TRICOLON"]):
+                      ["--only", "TRICOLON"], ["--off", "TRICOLON"],
+                      ["--no-code-mask"], ["--stats", "--no-code-mask"]):
             r = run(*flags)
             check("cli", f"runs with {flags or ['(no flags)']}",
                   r.returncode == 0, r.stderr[-300:])
@@ -552,6 +763,57 @@ def test_cli():
         check("cli", "missing enabled field defaults to enabled",
               "0 findings" in r3.stdout, r3.stdout[:200])
 
+        # masked_pct counts masking anywhere in the file, not just at the
+        # ends. Blanking is in place, so a length ratio over strip() only
+        # moved when the masked text touched the start or end of the file.
+        mp = d / "mp.md"
+        prose = ("The parser reads each line and reports what it finds "
+                 "in the text.\n\n")
+        fence = "```\n" + "".join(f"x{i} = y{i} + z{i}\n"
+                                  for i in range(12)) + "```\n\n"
+        mp_src = prose * 3 + fence + prose * 3
+        mp.write_text(mp_src, encoding="utf-8")
+        nonws = lambda s: sum(1 for ch in s if not ch.isspace())
+        want = 100 * nonws(fence) / nonws(mp_src)
+        jout = d / "mp.json"
+        r = subprocess.run(
+            [sys.executable, str(SCRIPT), str(mp), "--no-waivers",
+             "--json", str(jout)],
+            capture_output=True, text=True, env=env, cwd=str(d))
+        got = None
+        if jout.exists():
+            got = _json.loads(jout.read_text())[str(mp)]["stats"].get(
+                "masked_pct")
+        check("cli", "masked_pct counts a fenced block mid-file",
+              got is not None and abs(got - want) < 2.0,
+              f"got {got}, want ~{want:.1f}")
+
+        # --json carries the split; --no-code-mask turns the code part off
+        cm = d / "cm.md"
+        cm.write_text(prose + "foo_bar_p1, baz_q2, qux_r3\n\n" + prose,
+                      encoding="utf-8")
+        split = {}
+        for flag in ([], ["--no-code-mask"]):
+            jo = d / "cm.json"
+            r = subprocess.run(
+                [sys.executable, str(SCRIPT), str(cm), "--no-waivers",
+                 "--json", str(jo), *flag],
+                capture_output=True, text=True, env=env, cwd=str(d))
+            check("cli", f"code mask json runs with {flag or ['(none)']}",
+                  r.returncode == 0, r.stderr[-200:])
+            if jo.exists():
+                split[bool(flag)] = _json.loads(jo.read_text())[str(cm)][
+                    "stats"]
+        if len(split) == 2:
+            check("cli", "--json reports code_masked_pct",
+                  split[False].get("code_masked_pct", 0) > 0,
+                  str(split[False]))
+            check("cli", "--no-code-mask reports code_masked_pct 0",
+                  split[True].get("code_masked_pct") == 0,
+                  str(split[True]))
+            check("cli", "md_masked_pct reported",
+                  "md_masked_pct" in split[True])
+
         # bad phrase file fails loudly
         bad = d / "bad.json"
         bad.write_text('{"constructions":[{"id":"X","confidence":"urgent",'
@@ -603,6 +865,8 @@ def main():
                  f"available: {', '.join(SECTIONS)}")
 
     nlp = tf.load_model("en_core_web_md")
+    # A detector that throws must fail the suite, not pass as "silent".
+    tf.STRICT = True
     for name in todo:
         print(f"\n{name}")
         SECTIONS[name](nlp)
