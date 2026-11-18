@@ -12,13 +12,19 @@ version (the LLM draft) against the current version:
 
 Usage:
   eval/harvest.py REPO --docs blogs/A.md blogs/B.md --waiver-dir waivers \
-      --out eval/labels.jsonl
+      --out eval/labels.jsonl [--by-subtype]
+  eval/harvest.py --summary-only eval/labels.jsonl [--by-subtype]
+
+--summary-only regroups an existing labels file without running ticfinder
+or reading REPO. --by-subtype splits each pattern row by subtype (see
+subtype()).
 """
 
 import argparse
 import difflib
 import importlib.util
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -26,10 +32,74 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-spec = importlib.util.spec_from_file_location(
-    "tf", HERE.parent / "tools" / "ticfinder.py")
-tf = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(tf)
+tf = None
+
+
+def load_tf():
+    """Import ticfinder (and spaCy) only when findings are produced."""
+    global tf
+    spec = importlib.util.spec_from_file_location(
+        "tf", HERE.parent / "tools" / "ticfinder.py")
+    tf = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(tf)
+
+
+_BRACKET = re.compile(r"\[([^\[\]]*)\]\s*$")
+# A leading member-count field, as TRICOLON writes it: "3-part NOUN, " or
+# "3 clauses, ".
+_COUNT_FIELD = re.compile(r"^\d+(?:-part \S+| clauses),\s*")
+
+
+def subtype(label_text):
+    """Subtype of a finding, from the bracketed tail of its label_text.
+
+    Rule: take the last [...] group at the end of the label. If it starts
+    with a member-count field ("3-part NOUN, " or "3 clauses, "), drop that
+    field and keep the rest, so "[3-part NOUN, list-like]" groups as
+    "list-like" and member count and part of speech do not split rows.
+    Otherwise the whole bracket is the subtype: "[rather than]",
+    "[paired aside]", and also "[X, not Y]" and "[cleft, across
+    sentences]", whose commas are part of the name. Splitting on every
+    comma would merge "X, not Y" with "not Y". A label with no bracketed
+    tail gives "-".
+    """
+    m = _BRACKET.search(label_text or "")
+    if not m:
+        return "-"
+    return _COUNT_FIELD.sub("", m.group(1).strip()) or "-"
+
+
+def summarise(rows, by_subtype=False):
+    """Print the per construction / pattern (/ subtype) summary."""
+    agg = defaultdict(Counter)
+    for r in rows:
+        key = (r["construction"], r["pattern"] or "-")
+        if by_subtype:
+            key += (subtype(r["label_text"]),)
+        lab = r["label"] if r["label"] != "removed" else \
+            "removed_" + r["removal"]
+        agg[key][lab] += 1
+    sub_hdr = f" {'subtype':<24}" if by_subtype else ""
+    print(f"\n{'construction':<22} {'pattern':<24}{sub_hdr} {'rewr':>5} "
+          f"{'del':>5} {'acc':>5} {'open':>5} {'prec*':>6}")
+    if by_subtype:
+        # rows of one pattern stay together: pattern total, then subtype size
+        ptot = Counter()
+        for k, n in agg.items():
+            ptot[k[:2]] += sum(n.values())
+        order = sorted(agg.items(), key=lambda kv: (
+            -ptot[kv[0][:2]], kv[0][:2], -sum(kv[1].values()), kv[0][2]))
+    else:
+        order = sorted(agg.items(), key=lambda kv: -sum(kv[1].values()))
+    for key, n in order:
+        c, p = key[:2]
+        sub = f" {key[2]:<24}" if by_subtype else ""
+        tp, fp = n["removed_rewritten"], n["accepted"]
+        prec = f"{tp / (tp + fp):.2f}" if tp + fp else "  -"
+        print(f"{c:<22} {p:<24}{sub} {tp:>5} {n['removed_deleted']:>5} "
+              f"{fp:>5} {n['open']:>5} {prec:>6}")
+    print("\nprec* = rewritten / (rewritten + accepted); deleted sentences "
+          "excluded as ambiguous evidence.")
 
 
 def git(repo, *args):
@@ -65,12 +135,29 @@ def best_match(ctx, sentences):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("repo")
-    ap.add_argument("--docs", nargs="+", required=True)
+    ap.add_argument("repo", nargs="?")
+    ap.add_argument("--docs", nargs="+")
     ap.add_argument("--waiver-dir", default=None)
     ap.add_argument("--out", default=str(HERE / "labels.jsonl"))
     ap.add_argument("--model", default="en_core_web_md")
+    ap.add_argument("--by-subtype", action="store_true",
+                    help="group the summary by construction, pattern and "
+                         "subtype")
+    ap.add_argument("--summary-only", metavar="LABELS",
+                    help="print the summary for an existing labels.jsonl; "
+                         "runs no ticfinder and writes nothing")
     args = ap.parse_args()
+
+    if args.summary_only:
+        rows = [json.loads(line) for line in
+                Path(args.summary_only).read_text(encoding="utf-8")
+                .splitlines() if line.strip()]
+        summarise(rows, args.by_subtype)
+        return
+    if not args.repo or not args.docs:
+        ap.error("REPO and --docs are required unless --summary-only "
+                 "is given")
+    load_tf()
 
     nlp = tf.load_model(args.model)
     extra = []
@@ -118,22 +205,7 @@ def main():
     Path(args.out).write_text(
         "".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
 
-    # per construction / pattern summary
-    agg = defaultdict(Counter)
-    for r in rows:
-        key = (r["construction"], r["pattern"] or "-")
-        lab = r["label"] if r["label"] != "removed" else \
-            "removed_" + r["removal"]
-        agg[key][lab] += 1
-    print(f"\n{'construction':<22} {'pattern':<24} {'rewr':>5} {'del':>5} "
-          f"{'acc':>5} {'open':>5} {'prec*':>6}")
-    for (c, p), n in sorted(agg.items(), key=lambda kv: -sum(kv[1].values())):
-        tp, fp = n["removed_rewritten"], n["accepted"]
-        prec = f"{tp / (tp + fp):.2f}" if tp + fp else "  -"
-        print(f"{c:<22} {p:<24} {tp:>5} {n['removed_deleted']:>5} "
-              f"{fp:>5} {n['open']:>5} {prec:>6}")
-    print("\nprec* = rewritten / (rewritten + accepted); deleted sentences "
-          "excluded as ambiguous evidence.")
+    summarise(rows, args.by_subtype)
 
 
 if __name__ == "__main__":

@@ -387,6 +387,10 @@ the base-rate work: the blog `TRICOLON` false positives are prose lists,
 which masking cannot reach. They also added masking fixes and a public
 corpus ahead of the LR steps (5.3).
 
+Tidied after TF-004. Step numbers are kept stable because task files
+cite them, so they do not give the order of work. The order is listed
+after the steps.
+
 Done:
 
 1. Drop `harvest.py` into `ticfinder/eval/`, run it, and confirm the
@@ -394,31 +398,57 @@ Done:
 2. Fix section 3 bugs 1 to 3, with a `tests.py` case for each (TF-001).
 3. Build the code-aware masker and check the masked percentage on the
    specs and the blogs (TF-002, section 9).
-
-Planned:
-
 4. **Masking fixes for plain-text corpora** (TF-003, phase 1). Done: the
    indented-code rule applies to markdown files only, code lines with
    trailing `#` or `//` comments are scored on the code part as well, and
    `name : value.call(arg)` DSL lines are blanked. Harvest is unchanged.
    Results in section 10.
 5. **Role-specific licensing for `TRICOLON`** (TF-003, phase 2; 5.2).
-   Score each list member as a referent (identifier shape, proper noun,
-   defined term that recurs as the same noun phrase) or a quality. The
-   main measure is accepted findings removed (84 now); rewritten labels
-   (19) are too few for a tight precision estimate. Then
+   Null result: the referent score does not separate accepted from
+   rewritten findings, and no code was added (section 10). The
+   clause-versus-noun split it exposed needs fresh labels. Next come
    `CORRECTIVE_CONTRAST`, `ALTERNATIVE_FRAMING` and `PARTICIPIAL_TAIL`.
-6. **arXiv before and after LLMs** (TF-004, can run alongside TF-003).
-   Pull `cs.AR` abstracts for 2018 to 2021 and 2025 to 2026 into a
-   git-ignored cache. Compare rates per construction with confidence
-   intervals. It touches no detector code.
+6. **arXiv before and after LLMs** (TF-004). Done: 955 and 2,627
+   primary `cs.AR` abstracts. `PARTICIPIAL_TAIL` rose 3.1 times,
+   `rather than` 3.8 times and `TRICOLON` 1.4 times. `CORRECTIVE_CONTRAST`,
+   `BORROWED_RIGOUR` and `more/less ... than` were flat. `EM_DASH` could
+   not be measured. Results in section 11. `harvest.py` gained
+   `--by-subtype` and `--summary-only`.
+
+Planned:
+
 7. **Collect the public design and spec baseline** (5.3, section 6):
    pre-2022 PEPs, IETF and Rust RFCs, RISC-V manuals and open hardware
    design docs. Check per-file masked percentages before trusting counts.
 8. **Per-pattern LRs** for the design and spec registers: the public
    baseline and the author's specs against the `pacino` LLM specs, with
    the arXiv change as a prior.
-9. Scan-statistic density (5.4), then subtree mining (5.5).
+9. **arXiv paper bodies, a pilot** (TF-005). About 200 papers per
+   window from the TF-004 set, from LaTeX source. Needs a LaTeX masker
+   for full papers. Reports rates per section next to the same papers'
+   abstracts, which tests whether the abstract ratios hold for whole
+   papers. It also gives `EM_DASH` a measurement through TeX dashes, and
+   intervals for the constructions that were too rare in abstracts.
+   A full run is a separate decision.
+10. **`DISGUISE_METAPHOR` fix** (from TF-004). `pose` and `pass` fire
+    without `as`: every arXiv finding read was `posing challenges` or a
+    literal `passing`. Test rows first.
+11. **Pattern splits from TF-004.** `rather than` apart from
+    `instead of`; a lemma list for the `PARTICIPIAL_TAIL` verbs that
+    rose; confidence per phrase for `LLM_DICTION` and
+    `CONSULTANT_REGISTER`. Measure each with `harvest.py --by-subtype`
+    and the arXiv tables.
+12. **Licensing, continued from step 5.** Fresh labels for the
+    `TRICOLON` clause and noun split, then the licensing tests for
+    `CORRECTIVE_CONTRAST`, `ALTERNATIVE_FRAMING` and `PARTICIPIAL_TAIL`.
+13. Scan-statistic density (5.4), then subtree mining (5.5). This was
+    step 9 before TF-004.
+
+Order: 9 and 7 do not depend on each other and can run side by side.
+10 is small and can go at any time. 11 waits for 9, whose section rates
+may change the evidence for the splits. 8 needs 7 and uses 9 as its
+prior. 12 needs new labels from blog editing, so it goes when they
+exist. 13 comes last.
 
 ## 8. TF-001 results (2026-11-17)
 
@@ -650,3 +680,232 @@ conditions: (1) harvest is unchanged; (2) the code-masked share rose;
 **Deferred.** Whole-line comment and rule lines are the largest
 remaining kind of missed code. Next come assembly lines and bit-encoding
 rows. All need test rows written without quoting the specs.
+
+### Phase 2: TRICOLON referent score, a null result
+
+**Baseline.** Harvest after the phase 1 commit is identical to the
+phase 1 harvest, and `labels.jsonl` is unchanged.
+
+**Offline test.** All 239 `tricolon` rows in `labels.jsonl` were matched
+back to their series and scored. A member is a referent when it holds
+inline code or an identifier shape, a proper noun, a number, or a noun
+phrase that recurs word for word in the document. The score is the share
+of referent members. Full method and tables are in
+`notes/tricolon-referent-null-2026-11-18.md`.
+
+| score | AUC, accepted over rewritten |
+|---|---|
+| current label | 0.53 |
+| referent score, as specified | 0.49 |
+| referent score, core phrase only, clause members not referents | 0.61 (95% interval 0.47 to 0.72) |
+| the series has no clause members | 0.63 |
+
+As specified, the score carries no signal. Mean scores are 0.55 for
+accepted and 0.56 for rewritten. Clause members with identifiers in them
+score as referents, and the rewritten blog sentences are full of
+identifiers. The stricter reading's gain comes from noun lists against
+clause lists. Within noun lists it does not separate (means 0.64 and
+0.62).
+
+**Decision.** Null result. No detector code changed, so no waiver moves. Steps 9 to 12 of TF-003 did not run, so
+`harvest.py` has no `--by-subtype`.
+
+**Lead.** Clause series hold 15 of 19 rewritten and 44 of 84 accepted
+(prec* 0.25). Noun series hold 4 and 40 (prec* 0.09). This was found
+after looking at the data. It needs fresh labels before it becomes a
+detector change.
+
+## 11. TF-004 results (2026-11-18)
+
+### arXiv cs.AR abstracts before and after LLMs
+
+**Data.** The arXiv API, primary category `cs.AR` only, by
+first-version date. Pre window: 2018-01-01 to 2021-12-31, 955 papers.
+Post window: 2025-01-01 to 2026-11-17 (the latest available), 2,627
+papers. Neither window exceeds 3,000, so nothing was sampled. 797 and
+1,307 cross-listed papers were counted and excluded. Abstracts and
+metadata are cached under `private/arxiv/`; the committed table is
+`eval/arxiv-rates-2026-11-18.md`, which holds aggregates only.
+
+**Papers per year.** The windows differ in size because `cs.AR` grew.
+Per year, post has about 5.7 times as many primary papers as pre
+(about 1,370 a year against 240). Rates are per 1,000 words and mean
+length barely changed, so the imbalance does not bias the rates. It
+makes the pre side the main source of interval width. A shift in topic
+mix (ML and LLM hardware) came with the growth; see the caveats below.
+
+**Completeness check.** The set `cs:cs:AR` was harvested through
+OAI-PMH (`oaipmh.arxiv.org/oai`, `from=2018-01-01`, 7 pages) as an
+independent count. OAI's `<created>` field is not the v1 date (some
+2018 papers show 2022), so the comparison dates papers by the YYMM
+prefix of the arXiv id. Columns 3 to 5 use that dating. Column 2 is the
+API's v1 date, which the windows use.
+
+| year | API primary, v1 date | OAI primary, id year | API primary, id year | OAI only | API cross-listed, excluded |
+|---|---|---|---|---|---|
+| 2018 | 122 | 122 | 122 | 0 | 128 |
+| 2019 | 136 | 136 | 136 | 0 | 109 |
+| 2020 | 310 | 308 | 308 | 0 | 221 |
+| 2021 | 387 | 388 | 388 | 0 | 339 |
+| 2025 | 1,116 | 1,105 | 1,103 | 2 | 598 |
+| 2026 (to Nov 17) | 1,511 | 1,524 | 1,524 | 0 | 709 |
+
+The API missed no paper in either window. The 2 OAI-only papers have
+v1 dates of 2024-12-20 and 2024-12-31 and January 2025 ids, so they are
+outside the post window. Every API paper is primary `cs.AR` in OAI as
+well. The two datings differ near month ends, where a late submission
+gets the next month's id. `eval/arxiv_rates.py check` reruns the
+check from the harvested pages in `private/arxiv/oai/` (`--refresh`
+harvests again). It exits 1 if the fetch missed a paper.
+
+**Method.** `eval/arxiv_rates.py fetch` and `analyse`. LaTeX math and
+reference commands are blanked in place, and `\emph{}`-style commands
+keep their argument. ticfinder runs with its defaults (`en_core_web_md`,
+code masker, phrase lists) at commit 69e1743 with no uncommitted
+changes. Each abstract is written as a `.txt` file, since abstracts are
+not markdown. Rates are pooled findings per 1,000 words. Intervals come
+from a bootstrap over papers: 2,000 draws, seed 4004.
+
+**Sanity measures.**
+
+| measure | pre | post |
+|---|---|---|
+| words analysed | 179,136 | 500,093 |
+| mean abstract length, words | 187.6 (183.9 to 191.2) | 190.4 (188.5 to 192.2) |
+| LaTeX-masked share of non-space characters | 0.21% | 0.46% |
+| Unicode em and en dashes | 0 | 0 |
+
+Length barely moved, so it does not explain the changes in rate.
+The arXiv API serves abstracts in ASCII. `EM_DASH` finds nothing in
+either window, so the hypothesis cannot be tested for it here. A proxy
+(TeX `---` and spaced ` -- `) went from 0.24 to 0.32 per 1,000 words,
+ratio 1.32 (0.85 to 2.25): flat, with few instances.
+
+**Results per construction** (ratio of post rate over pre rate, 95%
+interval; rows with fewer than 20 findings left out):
+
+| construction | pre rate | post rate | ratio | verdict |
+|---|---|---|---|---|
+| `PARTICIPIAL_TAIL` | 1.81 | 5.67 | 3.14 (2.79 to 3.57) | rose |
+| `DISGUISE_METAPHOR` | 0.02 | 0.05 | 2.87 (1.10 to inf) | rose, false positives |
+| `TRICOLON` | 4.24 | 6.11 | 1.44 (1.32 to 1.56) | rose |
+| `CONSULTANT_REGISTER` | 1.65 | 2.35 | 1.43 (1.23 to 1.67) | rose |
+| `LLM_DICTION` | 2.99 | 3.81 | 1.27 (1.14 to 1.44) | rose |
+| `ABSTRACT_ADVERB` | 0.69 | 0.88 | 1.27 (1.02 to 1.59) | rose |
+| `ALTERNATIVE_FRAMING` | 0.76 | 0.94 | 1.23 (1.02 to 1.51) | rose |
+| `HOLLOW_BOOSTER` | 0.06 | 0.08 | 1.43 (0.79 to 3.56) | flat |
+| `EMPHATIC_REFLEXIVE` | 0.07 | 0.09 | 1.30 (0.74 to 2.63) | flat |
+| `CORRECTIVE_CONTRAST` | 0.21 | 0.22 | 1.04 (0.71 to 1.57) | flat |
+| `BORROWED_RIGOUR` | 0.31 | 0.31 | 1.02 (0.74 to 1.45) | flat |
+| `VAGUE_QUANTIFIER` | 0.87 | 0.73 | 0.85 (0.70 to 1.03) | flat |
+| `FRAME_MARKER` | 0.09 | 0.02 | 0.27 (0.12 to 0.56) | fell, mixed |
+
+**Within constructions** the split is often sharper than between them:
+
+- `ALTERNATIVE_FRAMING`: `rather than` rose 3.84 (2.29 to 8.06).
+  `instead of` (1.07), `less ... than` (1.20) and `more ... than` (0.79)
+  were flat. The harvest labels agree: by subtype, `rather than` has prec*
+  0.54 on the blogs and `instead of` 0.12.
+- `TRICOLON`: `list-like` rose 1.56 and `enumeration` 1.49; `figure` was
+  flat at 1.00. The blog prec* order is the same (0.22, 0.12, 0.10).
+- `PARTICIPIAL_TAIL`: the rise is in particular verbs. `Enabling` rose
+  6.6 times, `achieving` 4.5, `demonstrating` 8.1, `highlighting` and
+  `leaving` from zero to 45 and 48. `Using`, `resulting` and `allowing`
+  were flat.
+- Phrase lists: `leverages` rose 3.5, `landscape` 4.7, `essential` 1.9,
+  `comprehensive` 1.6 and `increasingly` 2.0. `Dynamic`, `paradigm`,
+  `robust`, `crucial` and `optimize` were flat. `A wide range of` (0.37)
+  and `a variety of` (0.16) fell.
+
+With about 20 pattern rows tested at 95%, one or two verdicts near an
+interval edge are expected by chance.
+
+**Sanity reading.** 20 random findings per window (all of them when
+fewer) for the three constructions with the largest change in either
+direction, among rows with at least 20 findings. Counts only.
+
+| construction | pre: real / read | post: real / read |
+|---|---|---|
+| `PARTICIPIAL_TAIL` | 17 / 20 | 20 / 20 |
+| `DISGUISE_METAPHOR` | 0 / 3 | 0 / 20 |
+| `FRAME_MARKER` | 8 / 16 | 6 / 12 |
+
+- `PARTICIPIAL_TAIL` is accurate here. The 3 misses were parse errors:
+  a gerund subject, a participle inside a from/to phrase, and one inside
+  a parenthetical example.
+- `DISGUISE_METAPHOR` has no real instance. Every `pose` finding is
+  `posing (significant) challenges`, and every `pass` finding is literal
+  (`passing tests`, `message passing`). `pose` and `pass` are in the
+  always-metaphorical set, so the detector fires without `as`. Its
+  rise measures `posing challenges`, a phrase that did rise, under the
+  wrong id. A fix needs a test row first (requiring `as`, as in
+  `poses as` and `passes for`); this task could not change `tools/`.
+- `FRAME_MARKER` changed composition. `It is important to` and
+  `it is worth mentioning` (7 pre, 0 post) are advance organizers.
+  `In today's ...` is mostly a plain time phrase (counted as not real,
+  except one `in today's era`). `At its core,` (6 post) is an organizer;
+  `At its core is a ...` (4 post) describes a component and was counted
+  as not real. With 28 findings the fall is not reliable.
+
+**Verdict.** The hypothesis holds in part. It is not a null result: six
+constructions rose beyond their intervals, and the measured risers
+match the blog labels where both exist. Two of its predictions failed.
+`TRICOLON` was expected flat and rose 1.44, carried by `list-like` and
+`enumeration`. `EM_DASH` could not be tested on ASCII abstracts.
+
+**What it implies for confidence in the academic register.**
+
+- Raise: `PARTICIPIAL_TAIL` (3.1 times, accurate here), and
+  `rather than` as its own pattern or subtype. A lemma list for the participial
+  verbs that rose is a candidate pattern split.
+- Keep low and treat as a rate signal: `TRICOLON` `list-like` and
+  `enumeration` (about 1.5 times), via density (5.4). `figure` is
+  ordinary academic English.
+- Lower in this register: `CORRECTIVE_CONTRAST` `cc_coordinated`,
+  `BORROWED_RIGOUR`, `af_less_than`, `instead of`, `VAGUE_QUANTIFIER`
+  and the flat `LLM_DICTION` words (`dynamic`, `paradigm`, `robust`,
+  `crucial`). Their rates did not move, so here they mark the register.
+  They do not mark LLM influence.
+- Split by phrase: `LLM_DICTION` and `CONSULTANT_REGISTER` hold both
+  risers and flat words. Per-phrase confidence fits the data better
+  than one confidence per list.
+- Fix before trusting: `DISGUISE_METAPHOR` (`pose`, `pass` without
+  `as`).
+
+The post window mixes human and LLM-assisted papers, so each ratio
+understates the LLM rate. Topic also shifted (LLM accelerators
+and LLM-for-EDA papers are new in 2025 to 2026), which genre matching
+does not remove. These ratios fit the empirical-Bayes prior in 5.3.
+They are not LRs.
+
+### harvest.py by subtype
+
+`eval/harvest.py --by-subtype` groups the summary by construction,
+pattern and subtype. `--summary-only PATH` regroups an existing
+`labels.jsonl` without loading spaCy or reading `$PACINO` (about 0.1 s).
+
+**Parsing rule.** Take the last `[...]` group at the end of
+`label_text`. If it starts with a member-count field (`3-part NOUN, `
+or `3 clauses, `), drop that field. Otherwise the whole bracket is the
+subtype. A label with no bracket groups as `-`. The rule does not split
+on every comma, because `[X, not Y]` and `[cleft, across sentences]`
+are single names with commas in them. Splitting would merge
+`cc_negated_apposition` `X, not Y` into a `not Y` row.
+
+**Byte identity.** Without the option, a full harvest before and after
+the change gave the same summary and `labels.jsonl`, byte for byte, and
+both match the committed `labels.jsonl`. `--summary-only` on the
+committed file prints the same summary. A full harvest with
+`--by-subtype` writes the same `labels.jsonl`, and its summary equals
+the regrouped one.
+
+**Check against TF-003's hand counts** (`TRICOLON tricolon`):
+
+| subtype | accepted | rewritten | deleted | prec* | TF-003 by hand |
+|---|---|---|---|---|---|
+| `list-like` | 52 | 15 | 89 | 0.22 | 52 / 15 / 89 |
+| `enumeration` | 23 | 3 | 39 | 0.12 | 23 / 3 / 39 |
+| `figure` | 9 | 1 | 8 | 0.10 | 9 / 1 / 8 |
+
+No difference. `tools/tests.py` is unchanged; this table stands in for
+a test row.
