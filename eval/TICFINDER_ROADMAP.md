@@ -391,7 +391,7 @@ Tidied after TF-004. Step numbers are kept stable because task files
 cite them, so they do not give the order of work. The order is listed
 after the steps.
 
-Done: steps 1 to 6, 9 and 10. Planned: steps 7, 8 and 11 to 14. The
+Done: steps 1 to 6 and 9 to 11. Planned: steps 7, 8 and 12 to 14. The
 list stays in step order, so the numbers render as written.
 
 1. Drop `harvest.py` into `ticfinder/eval/`, run it, and confirm the
@@ -1579,3 +1579,89 @@ On the arXiv findings the change is visible. The share of findings at
 most phrases with enough findings, and the lists hold both risers and
 flat words. Per-phrase levels separate them where one level per list
 could not.
+
+## 15. TF-008 results (2026-11-19)
+
+Step 14: the full arXiv body run, with JSON summaries for step 8 first.
+
+### Phase 1: preliminaries
+
+**Preconditions.** `tools/ticfinder.py`, `tools/ticfinder-phrases.json`
+and `eval/` had no uncommitted changes. ticfinder is at 651302d (sha256
+81ade1e30516; phrase file a21c541dbaf6). `$PACINO/waivers` was not
+migrated: harvest there gave 122 accepted, 54 rewritten, 302 deleted and
+22 open, and its `labels.jsonl` differed from the committed one in the
+19 `ALTERNATIVE_FRAMING` rows that TF-007 rekeyed (12 `af_rather_than`
+and 7 `af_instead_of`, `open` against `accepted`). This task may not
+write to `$PACINO`, so, as in TF-007, the waivers were copied outside the
+repo and the copy was migrated (`--migrate-waivers` moved 19). Harvest
+against the copy gives 141, 54, 302 and 3, and its `labels.jsonl` and
+`--by-subtype` summary are byte-identical to the committed ones. The
+check now reads "matches once migrated".
+
+**Snapshot.** `private/arxiv/bodies/` was copied to
+`private/arxiv/bodies-tf005/` before anything wrote to it. All six
+files match by size and sha256. The full run reads and writes
+`private/arxiv/bodies/` only.
+
+**Pinned rebuild.** `analyse --report-only --table-sha SHA` in both
+arXiv scripts reads a table written by an earlier ticfinder. The report
+names the commit whose `tools/ticfinder.py` has that sha256 prefix,
+found in git history (c1c7d5943a28 is 69e1743). `arxiv_bodies.py` also
+takes `--table-dir DIR`, which reads the sample, records and tables from
+a snapshot. Both rebuilds equal the committed reports byte for byte
+apart from the `Generated` date line:
+
+```bash
+python3 eval/arxiv_rates.py analyse --report-only --table-sha c1c7d5943a28 \
+    --report OUT.md --json eval/arxiv-rates-2026-11-18.json
+python3 eval/arxiv_bodies.py analyse --report-only --table-sha c1c7d5943a28 \
+    --table-dir private/arxiv/bodies-tf005 --report OUT.md \
+    --json eval/arxiv-bodies-2026-11-18.json
+python3 eval/harvest.py --summary-only eval/labels.jsonl --by-subtype \
+    --json eval/harvest-summary.json
+```
+
+`--table-sha` and `--table-dir` need `--report-only`, so a pinned run
+cannot write a table. The text output of `arxiv_rates.py` and
+`harvest.py` is unchanged with and without `--json`.
+
+**JSON schema.** Schema version 1. Every file is one object:
+
+| field | meaning |
+|---|---|
+| `schema` | 1 |
+| `kind` | `arxiv-rates`, `arxiv-bodies` or `harvest-summary` |
+| `tf_commit`, `tf_sha256` | ticfinder the table was written with (for harvest, the working tree; `labels_sha256` names the labels file) |
+| `generated` | date written |
+| `bootstrap` | arXiv only: `draws`, `seed`, interval method |
+| `min_n` | arXiv only: findings below which the verdict is `too few` |
+| `sanity`, `sample` | arXiv only: the setup and masking tables as numbers |
+| `rows` | arXiv only: one object per table row the report prints |
+| `totals`, `patterns`, `subtypes` | harvest only: label totals, and rows at pattern and at subtype level whatever `--by-subtype` says |
+
+An arXiv rate row has `table` (the report heading it sits under),
+`level` (`construction`, `pattern`, `subtype` or `phrase`), `key` (the
+report key with `|` separators) and the key split into `construction`,
+`pattern`, `subtype` or `phrase`. It also has `text_type`, `pre` and
+`post`, each with `n`, `papers`, `rate`, `rate_lo`, `rate_hi` (bodies
+add `mean`, `mean_lo`, `mean_hi`), then `ratio`, `ratio_lo`,
+`ratio_hi`, `n` and `verdict`. A comparison row has `text_type` and
+`text_type_b`, `n_a` and `n_b`, `ratio_a`, `ratio_b` and
+`ratio_of_ratios` (each `value`, `lo`, `hi`) and `inside`. A TF-004
+check row has `tf004`, `sample_ratio` and the two `inside` flags. A
+harvest row has `construction`, `pattern`, optionally `subtype`, the
+four label counts and `prec`. Counts are integers and rates are floats
+at full precision. An undefined value (`prec*` with no rewritten or
+accepted label, a nan rate) is `null`, and an infinite one is the
+string `"inf"`. Ratios are post rate over pre rate across two periods.
+They are not likelihood ratios.
+
+**Check.** Each JSON's rows, rendered in the report's cell format,
+equal the report's table rows as a multiset: 122 rows for TF-004, 383
+for TF-005, and 18 pattern and 49 subtype rows for harvest. The words
+and sanity tables match as well.
+
+**Cleanups.** The section 7 "Done:" line now lists step 11. The README
+describes phrase-entry objects and `--migrate-waivers` for renamed
+patterns.

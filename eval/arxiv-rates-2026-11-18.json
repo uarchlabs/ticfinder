@@ -1,0 +1,3399 @@
+{
+ "schema": 1,
+ "kind": "arxiv-rates",
+ "tf_commit": "69e1743",
+ "tf_sha256": "c1c7d5943a28",
+ "generated": "2026-11-19",
+ "report": "arxiv-rates-2026-11-18.md",
+ "bootstrap": {
+  "draws": 2000,
+  "seed": 4004,
+  "interval": "percentile 95%, nearest rank for ratios"
+ },
+ "min_n": 20,
+ "sanity": {
+  "pre": {
+   "papers_population": 955,
+   "papers_analysed": 955,
+   "sampled": false,
+   "cross_listed_excluded": 797,
+   "first_version_span": [
+    "2018-01-01",
+    "2021-12-30"
+   ],
+   "words": 179136,
+   "mean_words": 187.57696335078535,
+   "mean_words_lo": 183.85748691099477,
+   "mean_words_hi": 191.22968586387432,
+   "latex_masked_pct": 0.20846963116246317,
+   "any_latex_masked_pct": 12.146596858638743,
+   "tf_masked_pct_mean": 0.00031413612565445024,
+   "unicode_dashes": 0,
+   "em_dash_proxy": {
+    "n": 43,
+    "rate": 0.24004108610217934,
+    "rate_lo": 0.14672579953444836,
+    "rate_hi": 0.33958489301298744
+   }
+  },
+  "post": {
+   "papers_population": 2627,
+   "papers_analysed": 2627,
+   "sampled": false,
+   "cross_listed_excluded": 1307,
+   "first_version_span": [
+    "2025-01-01",
+    "2026-11-17"
+   ],
+   "words": 500093,
+   "mean_words": 190.36657784545108,
+   "mean_words_lo": 188.5369527978683,
+   "mean_words_hi": 192.22688427864483,
+   "latex_masked_pct": 0.4638986428500566,
+   "any_latex_masked_pct": 23.18233726684431,
+   "tf_masked_pct_mean": 0.0029691663494480396,
+   "unicode_dashes": 0,
+   "em_dash_proxy": {
+    "n": 158,
+    "rate": 0.31594123493030296,
+    "rate_lo": 0.24148746150564862,
+    "rate_hi": 0.39616474463113815
+   }
+  },
+  "em_dash_proxy_ratio": {
+   "ratio": 1.3161964897784826,
+   "ratio_lo": 0.8451900936003475,
+   "ratio_hi": 2.2491196632858332
+  }
+ },
+ "note": "ratios are post rate over pre rate, two periods; they are not likelihood ratios",
+ "rows": [
+  {
+   "table": "Rates per construction",
+   "level": "construction",
+   "key": "NEG_ESCALATION",
+   "construction": "NEG_ESCALATION",
+   "text_type": "abstract",
+   "pre": {
+    "n": 0,
+    "papers": 0,
+    "rate": 0.0,
+    "rate_lo": 0.0,
+    "rate_hi": 0.0
+   },
+   "post": {
+    "n": 2,
+    "papers": 2,
+    "rate": 0.0039992561383582655,
+    "rate_lo": 0.0,
+    "rate_hi": 0.010020755523397682
+   },
+   "ratio": "inf",
+   "ratio_lo": "inf",
+   "ratio_hi": "inf",
+   "n": 2,
+   "verdict": "too few"
+  },
+  {
+   "table": "Rates per construction",
+   "level": "construction",
+   "key": "GAPPED_ANTITHESIS",
+   "construction": "GAPPED_ANTITHESIS",
+   "text_type": "abstract",
+   "pre": {
+    "n": 0,
+    "papers": 0,
+    "rate": 0.0,
+    "rate_lo": 0.0,
+    "rate_hi": 0.0
+   },
+   "post": {
+    "n": 1,
+    "papers": 1,
+    "rate": 0.0019996280691791327,
+    "rate_lo": 0.0,
+    "rate_hi": 0.006047444940102891
+   },
+   "ratio": "inf",
+   "ratio_lo": "inf",
+   "ratio_hi": "inf",
+   "n": 1,
+   "verdict": "too few"
+  },
+  {
+   "table": "Rates per construction",
+   "level": "construction",
+   "key": "CLOSER",
+   "construction": "CLOSER",
+   "text_type": "abstract",
+   "pre": {
+    "n": 1,
+    "papers": 1,
+    "rate": 0.005582350839585566,
+    "rate_lo": 0.0,
+    "rate_hi": 0.016982730440071387
+   },
+   "post": {
+    "n": 11,
+    "papers": 11,
+    "rate": 0.02199590876097046,
+    "rate_lo": 0.00999373293055054,
+    "rate_hi": 0.03599764623994371
+   },
+   "ratio": 3.9402591118052044,
+   "ratio_lo": 0.9072371957922438,
+   "ratio_hi": "inf",
+   "n": 12,
+   "verdict": "too few"
+  },
+  {
+   "table": "Rates per construction",
+   "level": "construction",
+   "key": "PARTICIPIAL_TAIL",
+   "construction": "PARTICIPIAL_TAIL",
+   "text_type": "abstract",
+   "pre": {
+    "n": 324,
+    "papers": 250,
+    "rate": 1.8086816720257235,
+    "rate_lo": 1.595249035733917,
+    "rate_hi": 2.0114569585736204
+   },
+   "post": {
+    "n": 2836,
+    "papers": 1658,
+    "rate": 5.67094520419202,
+    "rate_lo": 5.4639032615645675,
+    "rate_hi": 5.88082515212459
+   },
+   "ratio": 3.1354025928954994,
+   "ratio_lo": 2.7900565774958963,
+   "ratio_hi": 3.56932219780744,
+   "n": 3160,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per construction",
+   "level": "construction",
+   "key": "DISGUISE_METAPHOR",
+   "construction": "DISGUISE_METAPHOR",
+   "text_type": "abstract",
+   "pre": {
+    "n": 3,
+    "papers": 3,
+    "rate": 0.0167470525187567,
+    "rate_lo": 0.0,
+    "rate_hi": 0.03883523718243189
+   },
+   "post": {
+    "n": 24,
+    "papers": 24,
+    "rate": 0.047991073660299186,
+    "rate_lo": 0.02982878597474903,
+    "rate_hi": 0.06720247464471066
+   },
+   "ratio": 2.865642990403785,
+   "ratio_lo": 1.0996910223601712,
+   "ratio_hi": "inf",
+   "n": 27,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per construction",
+   "level": "construction",
+   "key": "TRICOLON",
+   "construction": "TRICOLON",
+   "text_type": "abstract",
+   "pre": {
+    "n": 760,
+    "papers": 500,
+    "rate": 4.24258663808503,
+    "rate_lo": 3.9531868091713207,
+    "rate_hi": 4.550239630672952
+   },
+   "post": {
+    "n": 3055,
+    "papers": 1676,
+    "rate": 6.10886375134225,
+    "rate_lo": 5.8650227273484425,
+    "rate_hi": 6.343028366802564
+   },
+   "ratio": 1.4398913381058491,
+   "ratio_lo": 1.3242307825478528,
+   "ratio_hi": 1.5599825450394975,
+   "n": 3815,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per construction",
+   "level": "construction",
+   "key": "HOLLOW_BOOSTER",
+   "construction": "HOLLOW_BOOSTER",
+   "text_type": "abstract",
+   "pre": {
+    "n": 10,
+    "papers": 10,
+    "rate": 0.05582350839585566,
+    "rate_lo": 0.022424440935587577,
+    "rate_hi": 0.09037393491422661
+   },
+   "post": {
+    "n": 40,
+    "papers": 40,
+    "rate": 0.07998512276716531,
+    "rate_lo": 0.056236229108131974,
+    "rate_hi": 0.10521102188290324
+   },
+   "ratio": 1.4328214952018925,
+   "ratio_lo": 0.7922551744825519,
+   "ratio_hi": 3.5550296658831395,
+   "n": 50,
+   "verdict": "flat"
+  },
+  {
+   "table": "Rates per construction",
+   "level": "construction",
+   "key": "CONSULTANT_REGISTER",
+   "construction": "CONSULTANT_REGISTER",
+   "text_type": "abstract",
+   "pre": {
+    "n": 295,
+    "papers": 216,
+    "rate": 1.646793497677742,
+    "rate_lo": 1.425881657680282,
+    "rate_hi": 1.880778048571557
+   },
+   "post": {
+    "n": 1177,
+    "papers": 869,
+    "rate": 2.3535622374238394,
+    "rate_lo": 2.2135917113109573,
+    "rate_hi": 2.4977585692154642
+   },
+   "ratio": 1.4291787286886675,
+   "ratio_lo": 1.2336538143526052,
+   "ratio_hi": 1.6734846542410804,
+   "n": 1472,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per construction",
+   "level": "construction",
+   "key": "EMPHATIC_REFLEXIVE",
+   "construction": "EMPHATIC_REFLEXIVE",
+   "text_type": "abstract",
+   "pre": {
+    "n": 13,
+    "papers": 13,
+    "rate": 0.07257056091461235,
+    "rate_lo": 0.03871645549635839,
+    "rate_hi": 0.11409467929534256
+   },
+   "post": {
+    "n": 47,
+    "papers": 46,
+    "rate": 0.09398251925141925,
+    "rate_lo": 0.06771460331947106,
+    "rate_hi": 0.12173049484864046
+   },
+   "ratio": 1.2950501975863262,
+   "ratio_lo": 0.7376084425262646,
+   "ratio_hi": 2.630705967484782,
+   "n": 60,
+   "verdict": "flat"
+  },
+  {
+   "table": "Rates per construction",
+   "level": "construction",
+   "key": "LLM_DICTION",
+   "construction": "LLM_DICTION",
+   "text_type": "abstract",
+   "pre": {
+    "n": 535,
+    "papers": 346,
+    "rate": 2.9865576991782783,
+    "rate_lo": 2.6862577981940987,
+    "rate_hi": 3.299695777406132
+   },
+   "post": {
+    "n": 1903,
+    "papers": 1200,
+    "rate": 3.8052922156478894,
+    "rate_lo": 3.613967578848357,
+    "rate_hi": 4.00208316967094
+   },
+   "ratio": 1.2741398623220566,
+   "ratio_lo": 1.1365277031122387,
+   "ratio_hi": 1.4369243273071526,
+   "n": 2438,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per construction",
+   "level": "construction",
+   "key": "ABSTRACT_ADVERB",
+   "construction": "ABSTRACT_ADVERB",
+   "text_type": "abstract",
+   "pre": {
+    "n": 124,
+    "papers": 111,
+    "rate": 0.6922115041086102,
+    "rate_lo": 0.5692522658048311,
+    "rate_hi": 0.8377609607053986
+   },
+   "post": {
+    "n": 439,
+    "papers": 380,
+    "rate": 0.8778367223696393,
+    "rate_lo": 0.7927214104033329,
+    "rate_hi": 0.9686781141917172
+   },
+   "ratio": 1.2681625733742556,
+   "ratio_lo": 1.0241569742671444,
+   "ratio_hi": 1.5916029694473395,
+   "n": 563,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per construction",
+   "level": "construction",
+   "key": "ALTERNATIVE_FRAMING",
+   "construction": "ALTERNATIVE_FRAMING",
+   "text_type": "abstract",
+   "pre": {
+    "n": 137,
+    "papers": 123,
+    "rate": 0.7647820650232225,
+    "rate_lo": 0.6295334301846603,
+    "rate_hi": 0.9038099819575908
+   },
+   "post": {
+    "n": 471,
+    "papers": 405,
+    "rate": 0.9418248205833715,
+    "rate_lo": 0.8532464842521207,
+    "rate_hi": 1.028192008398232
+   },
+   "ratio": 1.2314943872994368,
+   "ratio_lo": 1.015820078992301,
+   "ratio_hi": 1.5053817978735664,
+   "n": 608,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per construction",
+   "level": "construction",
+   "key": "CORRECTIVE_CONTRAST",
+   "construction": "CORRECTIVE_CONTRAST",
+   "text_type": "abstract",
+   "pre": {
+    "n": 38,
+    "papers": 36,
+    "rate": 0.2121293319042515,
+    "rate_lo": 0.14258654028010692,
+    "rate_hi": 0.2822109988162936
+   },
+   "post": {
+    "n": 110,
+    "papers": 102,
+    "rate": 0.21995908760970462,
+    "rate_lo": 0.17784870489985855,
+    "rate_hi": 0.2641974746049858
+   },
+   "ratio": 1.036910292580317,
+   "ratio_lo": 0.7142584799757586,
+   "ratio_hi": 1.5709666790465036,
+   "n": 148,
+   "verdict": "flat"
+  },
+  {
+   "table": "Rates per construction",
+   "level": "construction",
+   "key": "BORROWED_RIGOUR",
+   "construction": "BORROWED_RIGOUR",
+   "text_type": "abstract",
+   "pre": {
+    "n": 55,
+    "papers": 49,
+    "rate": 0.30702929617720615,
+    "rate_lo": 0.223314390569456,
+    "rate_hi": 0.4009864846256881
+   },
+   "post": {
+    "n": 156,
+    "papers": 139,
+    "rate": 0.3119419787919447,
+    "rate_lo": 0.2610726326780622,
+    "rate_hi": 0.3650603614268893
+   },
+   "ratio": 1.0160006965977055,
+   "ratio_lo": 0.7376364266144997,
+   "ratio_hi": 1.4512210705029087,
+   "n": 211,
+   "verdict": "flat"
+  },
+  {
+   "table": "Rates per construction",
+   "level": "construction",
+   "key": "VAGUE_QUANTIFIER",
+   "construction": "VAGUE_QUANTIFIER",
+   "text_type": "abstract",
+   "pre": {
+    "n": 155,
+    "papers": 140,
+    "rate": 0.8652643801357628,
+    "rate_lo": 0.7299563417649517,
+    "rate_hi": 1.007102420456427
+   },
+   "post": {
+    "n": 366,
+    "papers": 346,
+    "rate": 0.7318638733195625,
+    "rate_lo": 0.6595991325706001,
+    "rate_hi": 0.8076583103011299
+   },
+   "ratio": 0.8458268826514397,
+   "ratio_lo": 0.7026999692656885,
+   "ratio_hi": 1.0331700395228582,
+   "n": 521,
+   "verdict": "flat"
+  },
+  {
+   "table": "Rates per construction",
+   "level": "construction",
+   "key": "HEDGE_STACK",
+   "construction": "HEDGE_STACK",
+   "text_type": "abstract",
+   "pre": {
+    "n": 2,
+    "papers": 2,
+    "rate": 0.011164701679171132,
+    "rate_lo": 0.0,
+    "rate_hi": 0.028094303329543848
+   },
+   "post": {
+    "n": 4,
+    "papers": 3,
+    "rate": 0.007998512276716531,
+    "rate_lo": 0.0,
+    "rate_hi": 0.018098348588043565
+   },
+   "ratio": 0.7164107476009463,
+   "ratio_lo": 0.0,
+   "ratio_hi": "inf",
+   "n": 6,
+   "verdict": "too few"
+  },
+  {
+   "table": "Rates per construction",
+   "level": "construction",
+   "key": "EMPTY_FRAME",
+   "construction": "EMPTY_FRAME",
+   "text_type": "abstract",
+   "pre": {
+    "n": 2,
+    "papers": 2,
+    "rate": 0.011164701679171132,
+    "rate_lo": 0.0,
+    "rate_hi": 0.028129751466675783
+   },
+   "post": {
+    "n": 2,
+    "papers": 2,
+    "rate": 0.0039992561383582655,
+    "rate_lo": 0.0,
+    "rate_hi": 0.010026628272189626
+   },
+   "ratio": 0.3582053738004731,
+   "ratio_lo": 0.0,
+   "ratio_hi": "inf",
+   "n": 4,
+   "verdict": "too few"
+  },
+  {
+   "table": "Rates per construction",
+   "level": "construction",
+   "key": "FRAME_MARKER",
+   "construction": "FRAME_MARKER",
+   "text_type": "abstract",
+   "pre": {
+    "n": 16,
+    "papers": 16,
+    "rate": 0.08931761343336905,
+    "rate_lo": 0.049770372075536744,
+    "rate_hi": 0.13453325791598644
+   },
+   "post": {
+    "n": 12,
+    "papers": 12,
+    "rate": 0.023995536830149593,
+    "rate_lo": 0.011971170460429142,
+    "rate_hi": 0.03809947200756735
+   },
+   "ratio": 0.26865403035035484,
+   "ratio_lo": 0.11639587717712056,
+   "ratio_hi": 0.55634577907624,
+   "n": 28,
+   "verdict": "fell"
+  },
+  {
+   "table": "Rates per pattern",
+   "level": "pattern",
+   "key": "CORRECTIVE_CONTRAST|cc_parallel_sibling",
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_parallel_sibling",
+   "text_type": "abstract",
+   "pre": {
+    "n": 0,
+    "papers": 0,
+    "rate": 0.0,
+    "rate_lo": 0.0,
+    "rate_hi": 0.0
+   },
+   "post": {
+    "n": 6,
+    "papers": 6,
+    "rate": 0.011997768415074796,
+    "rate_lo": 0.003978691324983437,
+    "rate_hi": 0.022073963757842995
+   },
+   "ratio": "inf",
+   "ratio_lo": "inf",
+   "ratio_hi": "inf",
+   "n": 6,
+   "verdict": "too few"
+  },
+  {
+   "table": "Rates per pattern",
+   "level": "pattern",
+   "key": "NEG_ESCALATION|neg_escalation",
+   "construction": "NEG_ESCALATION",
+   "pattern": "neg_escalation",
+   "text_type": "abstract",
+   "pre": {
+    "n": 0,
+    "papers": 0,
+    "rate": 0.0,
+    "rate_lo": 0.0,
+    "rate_hi": 0.0
+   },
+   "post": {
+    "n": 2,
+    "papers": 2,
+    "rate": 0.0039992561383582655,
+    "rate_lo": 0.0,
+    "rate_hi": 0.010020755523397682
+   },
+   "ratio": "inf",
+   "ratio_lo": "inf",
+   "ratio_hi": "inf",
+   "n": 2,
+   "verdict": "too few"
+  },
+  {
+   "table": "Rates per pattern",
+   "level": "pattern",
+   "key": "GAPPED_ANTITHESIS|gapped_antithesis",
+   "construction": "GAPPED_ANTITHESIS",
+   "pattern": "gapped_antithesis",
+   "text_type": "abstract",
+   "pre": {
+    "n": 0,
+    "papers": 0,
+    "rate": 0.0,
+    "rate_lo": 0.0,
+    "rate_hi": 0.0
+   },
+   "post": {
+    "n": 1,
+    "papers": 1,
+    "rate": 0.0019996280691791327,
+    "rate_lo": 0.0,
+    "rate_hi": 0.006047444940102891
+   },
+   "ratio": "inf",
+   "ratio_lo": "inf",
+   "ratio_hi": "inf",
+   "n": 1,
+   "verdict": "too few"
+  },
+  {
+   "table": "Rates per pattern",
+   "level": "pattern",
+   "key": "CLOSER|-",
+   "construction": "CLOSER",
+   "pattern": "-",
+   "text_type": "abstract",
+   "pre": {
+    "n": 1,
+    "papers": 1,
+    "rate": 0.005582350839585566,
+    "rate_lo": 0.0,
+    "rate_hi": 0.016982730440071387
+   },
+   "post": {
+    "n": 11,
+    "papers": 11,
+    "rate": 0.02199590876097046,
+    "rate_lo": 0.00999373293055054,
+    "rate_hi": 0.03599764623994371
+   },
+   "ratio": 3.9402591118052044,
+   "ratio_lo": 0.9072371957922438,
+   "ratio_hi": "inf",
+   "n": 12,
+   "verdict": "too few"
+  },
+  {
+   "table": "Rates per pattern",
+   "level": "pattern",
+   "key": "PARTICIPIAL_TAIL|participial_tail",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "text_type": "abstract",
+   "pre": {
+    "n": 324,
+    "papers": 250,
+    "rate": 1.8086816720257235,
+    "rate_lo": 1.595249035733917,
+    "rate_hi": 2.0114569585736204
+   },
+   "post": {
+    "n": 2836,
+    "papers": 1658,
+    "rate": 5.67094520419202,
+    "rate_lo": 5.4639032615645675,
+    "rate_hi": 5.88082515212459
+   },
+   "ratio": 3.1354025928954994,
+   "ratio_lo": 2.7900565774958963,
+   "ratio_hi": 3.56932219780744,
+   "n": 3160,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per pattern",
+   "level": "pattern",
+   "key": "DISGUISE_METAPHOR|disguise_metaphor",
+   "construction": "DISGUISE_METAPHOR",
+   "pattern": "disguise_metaphor",
+   "text_type": "abstract",
+   "pre": {
+    "n": 3,
+    "papers": 3,
+    "rate": 0.0167470525187567,
+    "rate_lo": 0.0,
+    "rate_hi": 0.03883523718243189
+   },
+   "post": {
+    "n": 24,
+    "papers": 24,
+    "rate": 0.047991073660299186,
+    "rate_lo": 0.02982878597474903,
+    "rate_hi": 0.06720247464471066
+   },
+   "ratio": 2.865642990403785,
+   "ratio_lo": 1.0996910223601712,
+   "ratio_hi": "inf",
+   "n": 27,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per pattern",
+   "level": "pattern",
+   "key": "CORRECTIVE_CONTRAST|cc_negated_apposition",
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_negated_apposition",
+   "text_type": "abstract",
+   "pre": {
+    "n": 2,
+    "papers": 2,
+    "rate": 0.011164701679171132,
+    "rate_lo": 0.0,
+    "rate_hi": 0.02800050674407957
+   },
+   "post": {
+    "n": 13,
+    "papers": 11,
+    "rate": 0.025995164899328724,
+    "rate_lo": 0.01188327981402071,
+    "rate_hi": 0.043927326684380895
+   },
+   "ratio": 2.3283349297030753,
+   "ratio_lo": 0.7122876050795922,
+   "ratio_hi": "inf",
+   "n": 15,
+   "verdict": "too few"
+  },
+  {
+   "table": "Rates per pattern",
+   "level": "pattern",
+   "key": "ALTERNATIVE_FRAMING|af_rather_instead",
+   "construction": "ALTERNATIVE_FRAMING",
+   "pattern": "af_rather_instead",
+   "text_type": "abstract",
+   "pre": {
+    "n": 36,
+    "papers": 35,
+    "rate": 0.20096463022508038,
+    "rate_lo": 0.13556371456115843,
+    "rate_hi": 0.26800270658522685
+   },
+   "post": {
+    "n": 216,
+    "papers": 193,
+    "rate": 0.4319196629426927,
+    "rate_lo": 0.36868253799853534,
+    "rate_hi": 0.49450689752032434
+   },
+   "ratio": 2.1492322428028388,
+   "ratio_lo": 1.5566473587278902,
+   "ratio_hi": 3.286183964288278,
+   "n": 252,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per pattern",
+   "level": "pattern",
+   "key": "TRICOLON|tricolon",
+   "construction": "TRICOLON",
+   "pattern": "tricolon",
+   "text_type": "abstract",
+   "pre": {
+    "n": 760,
+    "papers": 500,
+    "rate": 4.24258663808503,
+    "rate_lo": 3.9531868091713207,
+    "rate_hi": 4.550239630672952
+   },
+   "post": {
+    "n": 3055,
+    "papers": 1676,
+    "rate": 6.10886375134225,
+    "rate_lo": 5.8650227273484425,
+    "rate_hi": 6.343028366802564
+   },
+   "ratio": 1.4398913381058491,
+   "ratio_lo": 1.3242307825478528,
+   "ratio_hi": 1.5599825450394975,
+   "n": 3815,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per pattern",
+   "level": "pattern",
+   "key": "HOLLOW_BOOSTER|-",
+   "construction": "HOLLOW_BOOSTER",
+   "pattern": "-",
+   "text_type": "abstract",
+   "pre": {
+    "n": 10,
+    "papers": 10,
+    "rate": 0.05582350839585566,
+    "rate_lo": 0.022424440935587577,
+    "rate_hi": 0.09037393491422661
+   },
+   "post": {
+    "n": 40,
+    "papers": 40,
+    "rate": 0.07998512276716531,
+    "rate_lo": 0.056236229108131974,
+    "rate_hi": 0.10521102188290324
+   },
+   "ratio": 1.4328214952018925,
+   "ratio_lo": 0.7922551744825519,
+   "ratio_hi": 3.5550296658831395,
+   "n": 50,
+   "verdict": "flat"
+  },
+  {
+   "table": "Rates per pattern",
+   "level": "pattern",
+   "key": "CONSULTANT_REGISTER|-",
+   "construction": "CONSULTANT_REGISTER",
+   "pattern": "-",
+   "text_type": "abstract",
+   "pre": {
+    "n": 295,
+    "papers": 216,
+    "rate": 1.646793497677742,
+    "rate_lo": 1.425881657680282,
+    "rate_hi": 1.880778048571557
+   },
+   "post": {
+    "n": 1177,
+    "papers": 869,
+    "rate": 2.3535622374238394,
+    "rate_lo": 2.2135917113109573,
+    "rate_hi": 2.4977585692154642
+   },
+   "ratio": 1.4291787286886675,
+   "ratio_lo": 1.2336538143526052,
+   "ratio_hi": 1.6734846542410804,
+   "n": 1472,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per pattern",
+   "level": "pattern",
+   "key": "EMPHATIC_REFLEXIVE|emphatic_reflexive",
+   "construction": "EMPHATIC_REFLEXIVE",
+   "pattern": "emphatic_reflexive",
+   "text_type": "abstract",
+   "pre": {
+    "n": 13,
+    "papers": 13,
+    "rate": 0.07257056091461235,
+    "rate_lo": 0.03871645549635839,
+    "rate_hi": 0.11409467929534256
+   },
+   "post": {
+    "n": 47,
+    "papers": 46,
+    "rate": 0.09398251925141925,
+    "rate_lo": 0.06771460331947106,
+    "rate_hi": 0.12173049484864046
+   },
+   "ratio": 1.2950501975863262,
+   "ratio_lo": 0.7376084425262646,
+   "ratio_hi": 2.630705967484782,
+   "n": 60,
+   "verdict": "flat"
+  },
+  {
+   "table": "Rates per pattern",
+   "level": "pattern",
+   "key": "LLM_DICTION|-",
+   "construction": "LLM_DICTION",
+   "pattern": "-",
+   "text_type": "abstract",
+   "pre": {
+    "n": 535,
+    "papers": 346,
+    "rate": 2.9865576991782783,
+    "rate_lo": 2.6862577981940987,
+    "rate_hi": 3.299695777406132
+   },
+   "post": {
+    "n": 1903,
+    "papers": 1200,
+    "rate": 3.8052922156478894,
+    "rate_lo": 3.613967578848357,
+    "rate_hi": 4.00208316967094
+   },
+   "ratio": 1.2741398623220566,
+   "ratio_lo": 1.1365277031122387,
+   "ratio_hi": 1.4369243273071526,
+   "n": 2438,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per pattern",
+   "level": "pattern",
+   "key": "ABSTRACT_ADVERB|abstract_adverb",
+   "construction": "ABSTRACT_ADVERB",
+   "pattern": "abstract_adverb",
+   "text_type": "abstract",
+   "pre": {
+    "n": 124,
+    "papers": 111,
+    "rate": 0.6922115041086102,
+    "rate_lo": 0.5692522658048311,
+    "rate_hi": 0.8377609607053986
+   },
+   "post": {
+    "n": 439,
+    "papers": 380,
+    "rate": 0.8778367223696393,
+    "rate_lo": 0.7927214104033329,
+    "rate_hi": 0.9686781141917172
+   },
+   "ratio": 1.2681625733742556,
+   "ratio_lo": 1.0241569742671444,
+   "ratio_hi": 1.5916029694473395,
+   "n": 563,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per pattern",
+   "level": "pattern",
+   "key": "BORROWED_RIGOUR|-",
+   "construction": "BORROWED_RIGOUR",
+   "pattern": "-",
+   "text_type": "abstract",
+   "pre": {
+    "n": 55,
+    "papers": 49,
+    "rate": 0.30702929617720615,
+    "rate_lo": 0.223314390569456,
+    "rate_hi": 0.4009864846256881
+   },
+   "post": {
+    "n": 156,
+    "papers": 139,
+    "rate": 0.3119419787919447,
+    "rate_lo": 0.2610726326780622,
+    "rate_hi": 0.3650603614268893
+   },
+   "ratio": 1.0160006965977055,
+   "ratio_lo": 0.7376364266144997,
+   "ratio_hi": 1.4512210705029087,
+   "n": 211,
+   "verdict": "flat"
+  },
+  {
+   "table": "Rates per pattern",
+   "level": "pattern",
+   "key": "CORRECTIVE_CONTRAST|cc_coordinated",
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_coordinated",
+   "text_type": "abstract",
+   "pre": {
+    "n": 32,
+    "papers": 31,
+    "rate": 0.1786352268667381,
+    "rate_lo": 0.11391590373836706,
+    "rate_hi": 0.24140450543893882
+   },
+   "post": {
+    "n": 89,
+    "papers": 89,
+    "rate": 0.1779668981569428,
+    "rate_lo": 0.14231585581239253,
+    "rate_hi": 0.21549642530314245
+   },
+   "ratio": 0.9962586958825659,
+   "ratio_lo": 0.6891752554372863,
+   "ratio_hi": 1.574523392207092,
+   "n": 121,
+   "verdict": "flat"
+  },
+  {
+   "table": "Rates per pattern",
+   "level": "pattern",
+   "key": "ALTERNATIVE_FRAMING|af_less_than",
+   "construction": "ALTERNATIVE_FRAMING",
+   "pattern": "af_less_than",
+   "text_type": "abstract",
+   "pre": {
+    "n": 101,
+    "papers": 92,
+    "rate": 0.5638174347981423,
+    "rate_lo": 0.45131904305261494,
+    "rate_hi": 0.6798920789975543
+   },
+   "post": {
+    "n": 255,
+    "papers": 230,
+    "rate": 0.5099051576406788,
+    "rate_lo": 0.44471835401341575,
+    "rate_hi": 0.5785805101821743
+   },
+   "ratio": 0.9043799041497091,
+   "ratio_lo": 0.7174766677991361,
+   "ratio_hi": 1.174223698273703,
+   "n": 356,
+   "verdict": "flat"
+  },
+  {
+   "table": "Rates per pattern",
+   "level": "pattern",
+   "key": "VAGUE_QUANTIFIER|-",
+   "construction": "VAGUE_QUANTIFIER",
+   "pattern": "-",
+   "text_type": "abstract",
+   "pre": {
+    "n": 155,
+    "papers": 140,
+    "rate": 0.8652643801357628,
+    "rate_lo": 0.7299563417649517,
+    "rate_hi": 1.007102420456427
+   },
+   "post": {
+    "n": 366,
+    "papers": 346,
+    "rate": 0.7318638733195625,
+    "rate_lo": 0.6595991325706001,
+    "rate_hi": 0.8076583103011299
+   },
+   "ratio": 0.8458268826514397,
+   "ratio_lo": 0.7026999692656885,
+   "ratio_hi": 1.0331700395228582,
+   "n": 521,
+   "verdict": "flat"
+  },
+  {
+   "table": "Rates per pattern",
+   "level": "pattern",
+   "key": "HEDGE_STACK|-",
+   "construction": "HEDGE_STACK",
+   "pattern": "-",
+   "text_type": "abstract",
+   "pre": {
+    "n": 2,
+    "papers": 2,
+    "rate": 0.011164701679171132,
+    "rate_lo": 0.0,
+    "rate_hi": 0.028094303329543848
+   },
+   "post": {
+    "n": 4,
+    "papers": 3,
+    "rate": 0.007998512276716531,
+    "rate_lo": 0.0,
+    "rate_hi": 0.018098348588043565
+   },
+   "ratio": 0.7164107476009463,
+   "ratio_lo": 0.0,
+   "ratio_hi": "inf",
+   "n": 6,
+   "verdict": "too few"
+  },
+  {
+   "table": "Rates per pattern",
+   "level": "pattern",
+   "key": "EMPTY_FRAME|-",
+   "construction": "EMPTY_FRAME",
+   "pattern": "-",
+   "text_type": "abstract",
+   "pre": {
+    "n": 2,
+    "papers": 2,
+    "rate": 0.011164701679171132,
+    "rate_lo": 0.0,
+    "rate_hi": 0.028129751466675783
+   },
+   "post": {
+    "n": 2,
+    "papers": 2,
+    "rate": 0.0039992561383582655,
+    "rate_lo": 0.0,
+    "rate_hi": 0.010026628272189626
+   },
+   "ratio": 0.3582053738004731,
+   "ratio_lo": 0.0,
+   "ratio_hi": "inf",
+   "n": 4,
+   "verdict": "too few"
+  },
+  {
+   "table": "Rates per pattern",
+   "level": "pattern",
+   "key": "FRAME_MARKER|-",
+   "construction": "FRAME_MARKER",
+   "pattern": "-",
+   "text_type": "abstract",
+   "pre": {
+    "n": 16,
+    "papers": 16,
+    "rate": 0.08931761343336905,
+    "rate_lo": 0.049770372075536744,
+    "rate_hi": 0.13453325791598644
+   },
+   "post": {
+    "n": 12,
+    "papers": 12,
+    "rate": 0.023995536830149593,
+    "rate_lo": 0.011971170460429142,
+    "rate_hi": 0.03809947200756735
+   },
+   "ratio": 0.26865403035035484,
+   "ratio_lo": 0.11639587717712056,
+   "ratio_hi": 0.55634577907624,
+   "n": 28,
+   "verdict": "fell"
+  },
+  {
+   "table": "Rates per pattern",
+   "level": "pattern",
+   "key": "CORRECTIVE_CONTRAST|cc_cleft",
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_cleft",
+   "text_type": "abstract",
+   "pre": {
+    "n": 4,
+    "papers": 4,
+    "rate": 0.022329403358342263,
+    "rate_lo": 0.005503864699564668,
+    "rate_hi": 0.04997547039868609
+   },
+   "post": {
+    "n": 2,
+    "papers": 2,
+    "rate": 0.0039992561383582655,
+    "rate_lo": 0.0,
+    "rate_hi": 0.01001722262184883
+   },
+   "ratio": 0.17910268690023656,
+   "ratio_lo": 0.0,
+   "ratio_hi": 1.4245752101591844,
+   "n": 6,
+   "verdict": "too few"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|leave",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "leave",
+   "text_type": "abstract",
+   "pre": {
+    "n": 0,
+    "papers": 0,
+    "rate": 0.0,
+    "rate_lo": 0.0,
+    "rate_hi": 0.0
+   },
+   "post": {
+    "n": 48,
+    "papers": 48,
+    "rate": 0.09598214732059837,
+    "rate_lo": 0.07022013080494703,
+    "rate_hi": 0.12399119043028396
+   },
+   "ratio": "inf",
+   "ratio_lo": "inf",
+   "ratio_hi": "inf",
+   "n": 48,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|highlight",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "highlight",
+   "text_type": "abstract",
+   "pre": {
+    "n": 0,
+    "papers": 0,
+    "rate": 0.0,
+    "rate_lo": 0.0,
+    "rate_hi": 0.0
+   },
+   "post": {
+    "n": 45,
+    "papers": 44,
+    "rate": 0.08998326311306097,
+    "rate_lo": 0.06400903807777443,
+    "rate_hi": 0.11810327040815892
+   },
+   "ratio": "inf",
+   "ratio_lo": "inf",
+   "ratio_hi": "inf",
+   "n": 45,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|create",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "create",
+   "text_type": "abstract",
+   "pre": {
+    "n": 0,
+    "papers": 0,
+    "rate": 0.0,
+    "rate_lo": 0.0,
+    "rate_hi": 0.0
+   },
+   "post": {
+    "n": 25,
+    "papers": 25,
+    "rate": 0.049990701729478317,
+    "rate_lo": 0.03199263369616942,
+    "rate_hi": 0.0718303919347691
+   },
+   "ratio": "inf",
+   "ratio_lo": "inf",
+   "ratio_hi": "inf",
+   "n": 25,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|outperform",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "outperform",
+   "text_type": "abstract",
+   "pre": {
+    "n": 1,
+    "papers": 1,
+    "rate": 0.005582350839585566,
+    "rate_lo": 0.0,
+    "rate_hi": 0.021892701156040563
+   },
+   "post": {
+    "n": 30,
+    "papers": 29,
+    "rate": 0.05998884207537398,
+    "rate_lo": 0.039901073351538356,
+    "rate_hi": 0.08364388615550503
+   },
+   "ratio": 10.746161214014194,
+   "ratio_lo": 2.8792799163270573,
+   "ratio_hi": "inf",
+   "n": 31,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|eliminate",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "eliminate",
+   "text_type": "abstract",
+   "pre": {
+    "n": 2,
+    "papers": 2,
+    "rate": 0.011164701679171132,
+    "rate_lo": 0.0,
+    "rate_hi": 0.028030590350812113
+   },
+   "post": {
+    "n": 46,
+    "papers": 45,
+    "rate": 0.09198289118224011,
+    "rate_lo": 0.06616340914190645,
+    "rate_hi": 0.12018614633609616
+   },
+   "ratio": 8.238723597410882,
+   "ratio_lo": 2.9719662556781308,
+   "ratio_hi": "inf",
+   "n": 48,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|yield",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "yield",
+   "text_type": "abstract",
+   "pre": {
+    "n": 1,
+    "papers": 1,
+    "rate": 0.005582350839585566,
+    "rate_lo": 0.0,
+    "rate_hi": 0.016879111515233733
+   },
+   "post": {
+    "n": 23,
+    "papers": 22,
+    "rate": 0.045991445591120055,
+    "rate_lo": 0.02626638189921939,
+    "rate_hi": 0.06616402222940387
+   },
+   "ratio": 8.238723597410882,
+   "ratio_lo": 2.15669225342346,
+   "ratio_hi": "inf",
+   "n": 24,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|demonstrate",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "demonstrate",
+   "text_type": "abstract",
+   "pre": {
+    "n": 5,
+    "papers": 5,
+    "rate": 0.02791175419792783,
+    "rate_lo": 0.005595638985261942,
+    "rate_hi": 0.05581685743277791
+   },
+   "post": {
+    "n": 113,
+    "papers": 112,
+    "rate": 0.22595797181724198,
+    "rate_lo": 0.18727231606106712,
+    "rate_hi": 0.267655273561441
+   },
+   "ratio": 8.095441447890693,
+   "ratio_lo": 3.954727129299835,
+   "ratio_hi": 37.67503222246349,
+   "n": 118,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|offer",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "offer",
+   "text_type": "abstract",
+   "pre": {
+    "n": 3,
+    "papers": 3,
+    "rate": 0.0167470525187567,
+    "rate_lo": 0.0,
+    "rate_hi": 0.03912338471228787
+   },
+   "post": {
+    "n": 58,
+    "papers": 58,
+    "rate": 0.1159784280123897,
+    "rate_lo": 0.08767682051078782,
+    "rate_hi": 0.14717900535943776
+   },
+   "ratio": 6.925303893475813,
+   "ratio_lo": 3.0084980787991,
+   "ratio_hi": "inf",
+   "n": 61,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|enable",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "enable",
+   "text_type": "abstract",
+   "pre": {
+    "n": 13,
+    "papers": 13,
+    "rate": 0.07257056091461235,
+    "rate_lo": 0.03355282087471614,
+    "rate_hi": 0.11277662069472409
+   },
+   "post": {
+    "n": 238,
+    "papers": 232,
+    "rate": 0.4759114804646336,
+    "rate_lo": 0.41888126721826413,
+    "rate_hi": 0.5354997856747749
+   },
+   "ratio": 6.55791376650097,
+   "ratio_lo": 4.149691212667833,
+   "ratio_hi": 13.88819728306286,
+   "n": 251,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|deliver",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "deliver",
+   "text_type": "abstract",
+   "pre": {
+    "n": 2,
+    "papers": 2,
+    "rate": 0.011164701679171132,
+    "rate_lo": 0.0,
+    "rate_hi": 0.02804942100226234
+   },
+   "post": {
+    "n": 34,
+    "papers": 34,
+    "rate": 0.06798735435209051,
+    "rate_lo": 0.046028744973236835,
+    "rate_hi": 0.092749677278856
+   },
+   "ratio": 6.089491354608043,
+   "ratio_lo": 2.129243752674582,
+   "ratio_hi": "inf",
+   "n": 36,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|leverage",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "leverage",
+   "text_type": "abstract",
+   "pre": {
+    "n": 2,
+    "papers": 2,
+    "rate": 0.011164701679171132,
+    "rate_lo": 0.0,
+    "rate_hi": 0.028160415355134638
+   },
+   "post": {
+    "n": 30,
+    "papers": 30,
+    "rate": 0.05998884207537398,
+    "rate_lo": 0.039930156182736216,
+    "rate_hi": 0.08171725502023379
+   },
+   "ratio": 5.373080607007097,
+   "ratio_lo": 1.8198632160595365,
+   "ratio_hi": "inf",
+   "n": 32,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|ensure",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "ensure",
+   "text_type": "abstract",
+   "pre": {
+    "n": 3,
+    "papers": 3,
+    "rate": 0.0167470525187567,
+    "rate_lo": 0.0,
+    "rate_hi": 0.039036865723899423
+   },
+   "post": {
+    "n": 40,
+    "papers": 38,
+    "rate": 0.07998512276716531,
+    "rate_lo": 0.05554320711980026,
+    "rate_hi": 0.10799009842754866
+   },
+   "ratio": 4.776071650672975,
+   "ratio_lo": 1.8972577077821375,
+   "ratio_hi": "inf",
+   "n": 43,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|require",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "require",
+   "text_type": "abstract",
+   "pre": {
+    "n": 3,
+    "papers": 3,
+    "rate": 0.0167470525187567,
+    "rate_lo": 0.0,
+    "rate_hi": 0.038872897188831024
+   },
+   "post": {
+    "n": 40,
+    "papers": 40,
+    "rate": 0.07998512276716531,
+    "rate_lo": 0.05790079856562704,
+    "rate_hi": 0.10592536214992351
+   },
+   "ratio": 4.776071650672975,
+   "ratio_lo": 1.9687402294530199,
+   "ratio_hi": "inf",
+   "n": 43,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|cause",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "cause",
+   "text_type": "abstract",
+   "pre": {
+    "n": 2,
+    "papers": 2,
+    "rate": 0.011164701679171132,
+    "rate_lo": 0.0,
+    "rate_hi": 0.02810735628524815
+   },
+   "post": {
+    "n": 26,
+    "papers": 26,
+    "rate": 0.05199032979865745,
+    "rate_lo": 0.03205782111274678,
+    "rate_hi": 0.0726985733360573
+   },
+   "ratio": 4.656669859406151,
+   "ratio_lo": 1.555991260956366,
+   "ratio_hi": "inf",
+   "n": 28,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|achieve",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "achieve",
+   "text_type": "abstract",
+   "pre": {
+    "n": 14,
+    "papers": 14,
+    "rate": 0.07815291175419793,
+    "rate_lo": 0.039210304280370666,
+    "rate_hi": 0.1228026871408932
+   },
+   "post": {
+    "n": 174,
+    "papers": 160,
+    "rate": 0.34793528403716906,
+    "rate_lo": 0.2931145707934307,
+    "rate_hi": 0.4052363654237476
+   },
+   "ratio": 4.451981074377308,
+   "ratio_lo": 2.8020671080576816,
+   "ratio_hi": 8.961611664533361,
+   "n": 188,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|limit",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "limit",
+   "text_type": "abstract",
+   "pre": {
+    "n": 5,
+    "papers": 5,
+    "rate": 0.02791175419792783,
+    "rate_lo": 0.005590206367009832,
+    "rate_hi": 0.051275006385309845
+   },
+   "post": {
+    "n": 57,
+    "papers": 57,
+    "rate": 0.11397879994321056,
+    "rate_lo": 0.08655734797831603,
+    "rate_hi": 0.14242322328126514
+   },
+   "ratio": 4.083541261325394,
+   "ratio_lo": 2.060480130161319,
+   "ratio_hi": 19.745895871482606,
+   "n": 62,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "ALTERNATIVE_FRAMING|af_rather_instead|rather than",
+   "construction": "ALTERNATIVE_FRAMING",
+   "pattern": "af_rather_instead",
+   "subtype": "rather than",
+   "text_type": "abstract",
+   "pre": {
+    "n": 14,
+    "papers": 13,
+    "rate": 0.07815291175419793,
+    "rate_lo": 0.038435498997957555,
+    "rate_hi": 0.12473052410720818
+   },
+   "post": {
+    "n": 150,
+    "papers": 134,
+    "rate": 0.2999442103768699,
+    "rate_lo": 0.24782101193127737,
+    "rate_hi": 0.35223859005884756
+   },
+   "ratio": 3.8379147192907834,
+   "ratio_lo": 2.293563214199706,
+   "ratio_hi": 8.05906558806848,
+   "n": 164,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "ABSTRACT_ADVERB|abstract_adverb|spatially",
+   "construction": "ABSTRACT_ADVERB",
+   "pattern": "abstract_adverb",
+   "subtype": "spatially",
+   "text_type": "abstract",
+   "pre": {
+    "n": 2,
+    "papers": 2,
+    "rate": 0.011164701679171132,
+    "rate_lo": 0.0,
+    "rate_hi": 0.02823817376540785
+   },
+   "post": {
+    "n": 20,
+    "papers": 19,
+    "rate": 0.039992561383582655,
+    "rate_lo": 0.023786940703801995,
+    "rate_hi": 0.060052561301081116
+   },
+   "ratio": 3.5820537380047317,
+   "ratio_lo": 1.1445466418428878,
+   "ratio_hi": "inf",
+   "n": 22,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|focus",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "focus",
+   "text_type": "abstract",
+   "pre": {
+    "n": 2,
+    "papers": 2,
+    "rate": 0.011164701679171132,
+    "rate_lo": 0.0,
+    "rate_hi": 0.028013668898972666
+   },
+   "post": {
+    "n": 19,
+    "papers": 19,
+    "rate": 0.037992933314403524,
+    "rate_lo": 0.021923926171652758,
+    "rate_hi": 0.055891305406792005
+   },
+   "ratio": 3.402951051104495,
+   "ratio_lo": 1.1110786646508362,
+   "ratio_hi": "inf",
+   "n": 21,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|support",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "support",
+   "text_type": "abstract",
+   "pre": {
+    "n": 2,
+    "papers": 2,
+    "rate": 0.011164701679171132,
+    "rate_lo": 0.0,
+    "rate_hi": 0.028138303758572274
+   },
+   "post": {
+    "n": 19,
+    "papers": 18,
+    "rate": 0.037992933314403524,
+    "rate_lo": 0.021861568234575558,
+    "rate_hi": 0.057725290678427355
+   },
+   "ratio": 3.402951051104495,
+   "ratio_lo": 1.0788115163515204,
+   "ratio_hi": "inf",
+   "n": 21,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|combine",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "combine",
+   "text_type": "abstract",
+   "pre": {
+    "n": 2,
+    "papers": 2,
+    "rate": 0.011164701679171132,
+    "rate_lo": 0.0,
+    "rate_hi": 0.028170740065004612
+   },
+   "post": {
+    "n": 18,
+    "papers": 18,
+    "rate": 0.035993305245224386,
+    "rate_lo": 0.020042288254767355,
+    "rate_hi": 0.053745442619922645
+   },
+   "ratio": 3.223848364204258,
+   "ratio_lo": 1.0648533817088162,
+   "ratio_hi": "inf",
+   "n": 20,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "ABSTRACT_ADVERB|abstract_adverb|specifically",
+   "construction": "ABSTRACT_ADVERB",
+   "pattern": "abstract_adverb",
+   "subtype": "specifically",
+   "text_type": "abstract",
+   "pre": {
+    "n": 6,
+    "papers": 6,
+    "rate": 0.0334941050375134,
+    "rate_lo": 0.01103849011169317,
+    "rate_hi": 0.06195002283168476
+   },
+   "post": {
+    "n": 51,
+    "papers": 51,
+    "rate": 0.10198103152813577,
+    "rate_lo": 0.07546038719689382,
+    "rate_hi": 0.13184692183893656
+   },
+   "ratio": 3.0447456773040216,
+   "ratio_lo": 1.5085146852360303,
+   "ratio_hi": 10.80916870415648,
+   "n": 57,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|reduce",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "reduce",
+   "text_type": "abstract",
+   "pre": {
+    "n": 12,
+    "papers": 12,
+    "rate": 0.0669882100750268,
+    "rate_lo": 0.033152167698474164,
+    "rate_hi": 0.10596499511819457
+   },
+   "post": {
+    "n": 101,
+    "papers": 92,
+    "rate": 0.2019624349870924,
+    "rate_lo": 0.15969211400190816,
+    "rate_hi": 0.2468419203833232
+   },
+   "ratio": 3.0148952294873155,
+   "ratio_lo": 1.8004688489797893,
+   "ratio_hi": 6.547708222224457,
+   "n": 113,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|lead",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "lead",
+   "text_type": "abstract",
+   "pre": {
+    "n": 11,
+    "papers": 11,
+    "rate": 0.061405859235441236,
+    "rate_lo": 0.027837660162373726,
+    "rate_hi": 0.0997766155634978
+   },
+   "post": {
+    "n": 91,
+    "papers": 90,
+    "rate": 0.18196615429530108,
+    "rate_lo": 0.146323887927357,
+    "rate_hi": 0.2196161906454312
+   },
+   "ratio": 2.9633353650766407,
+   "ratio_lo": 1.724227024019728,
+   "ratio_hi": 6.813191831860424,
+   "n": 102,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|show",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "show",
+   "text_type": "abstract",
+   "pre": {
+    "n": 6,
+    "papers": 6,
+    "rate": 0.0334941050375134,
+    "rate_lo": 0.011084720325976846,
+    "rate_hi": 0.06231377563561739
+   },
+   "post": {
+    "n": 48,
+    "papers": 46,
+    "rate": 0.09598214732059837,
+    "rate_lo": 0.07000737571377497,
+    "rate_hi": 0.12376823623377868
+   },
+   "ratio": 2.865642990403785,
+   "ratio_lo": 1.3991011659529957,
+   "ratio_hi": 9.215908291863634,
+   "n": 54,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "ABSTRACT_ADVERB|abstract_adverb|functionally",
+   "construction": "ABSTRACT_ADVERB",
+   "pattern": "abstract_adverb",
+   "subtype": "functionally",
+   "text_type": "abstract",
+   "pre": {
+    "n": 4,
+    "papers": 3,
+    "rate": 0.022329403358342263,
+    "rate_lo": 0.0,
+    "rate_hi": 0.05488483660613653
+   },
+   "post": {
+    "n": 32,
+    "papers": 29,
+    "rate": 0.06398809821373225,
+    "rate_lo": 0.041837123325962705,
+    "rate_hi": 0.08894399531071628
+   },
+   "ratio": 2.865642990403785,
+   "ratio_lo": 1.09774563795002,
+   "ratio_hi": "inf",
+   "n": 36,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|make",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "make",
+   "text_type": "abstract",
+   "pre": {
+    "n": 27,
+    "papers": 26,
+    "rate": 0.1507234726688103,
+    "rate_lo": 0.09441855803703349,
+    "rate_hi": 0.2097884678357091
+   },
+   "post": {
+    "n": 181,
+    "papers": 178,
+    "rate": 0.36193268052142297,
+    "rate_lo": 0.3126722563907853,
+    "rate_hi": 0.412949086288214
+   },
+   "ratio": 2.4013026910328006,
+   "ratio_lo": 1.6501175804879393,
+   "ratio_hi": 3.8501519902677783,
+   "n": 208,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "DISGUISE_METAPHOR|disguise_metaphor|pose",
+   "construction": "DISGUISE_METAPHOR",
+   "pattern": "disguise_metaphor",
+   "subtype": "pose",
+   "text_type": "abstract",
+   "pre": {
+    "n": 3,
+    "papers": 3,
+    "rate": 0.0167470525187567,
+    "rate_lo": 0.0,
+    "rate_hi": 0.03883523718243189
+   },
+   "post": {
+    "n": 19,
+    "papers": 19,
+    "rate": 0.037992933314403524,
+    "rate_lo": 0.021984667939484438,
+    "rate_hi": 0.0547162611273492
+   },
+   "ratio": 2.268634034069663,
+   "ratio_lo": 0.8544345092070611,
+   "ratio_hi": "inf",
+   "n": 22,
+   "verdict": "flat"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|improve",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "improve",
+   "text_type": "abstract",
+   "pre": {
+    "n": 6,
+    "papers": 6,
+    "rate": 0.0334941050375134,
+    "rate_lo": 0.011078415936750848,
+    "rate_hi": 0.0618657983608124
+   },
+   "post": {
+    "n": 37,
+    "papers": 37,
+    "rate": 0.07398623855962791,
+    "rate_lo": 0.05202472498503697,
+    "rate_hi": 0.09875439005609715
+   },
+   "ratio": 2.208933138436251,
+   "ratio_lo": 1.0517047674272895,
+   "ratio_hi": 7.090848624083306,
+   "n": 43,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|provide",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "provide",
+   "text_type": "abstract",
+   "pre": {
+    "n": 12,
+    "papers": 12,
+    "rate": 0.0669882100750268,
+    "rate_lo": 0.033348845181163614,
+    "rate_hi": 0.1054003099911267
+   },
+   "post": {
+    "n": 61,
+    "papers": 61,
+    "rate": 0.1219773122199271,
+    "rate_lo": 0.09349096383625498,
+    "rate_hi": 0.1521381118051834
+   },
+   "ratio": 1.8208773168190717,
+   "ratio_lo": 1.0784449684277837,
+   "ratio_hi": 3.791845969655239,
+   "n": 73,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "ABSTRACT_ADVERB|abstract_adverb|substantially",
+   "construction": "ABSTRACT_ADVERB",
+   "pattern": "abstract_adverb",
+   "subtype": "substantially",
+   "text_type": "abstract",
+   "pre": {
+    "n": 5,
+    "papers": 5,
+    "rate": 0.02791175419792783,
+    "rate_lo": 0.005593449625079805,
+    "rate_hi": 0.05573240540770843
+   },
+   "post": {
+    "n": 25,
+    "papers": 25,
+    "rate": 0.049990701729478317,
+    "rate_lo": 0.0303892381524751,
+    "rate_hi": 0.07008847359742285
+   },
+   "ratio": 1.7910268690023656,
+   "ratio_lo": 0.7619327297826963,
+   "ratio_hi": 8.281716676475137,
+   "n": 30,
+   "verdict": "flat"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "TRICOLON|tricolon|list-like",
+   "construction": "TRICOLON",
+   "pattern": "tricolon",
+   "subtype": "list-like",
+   "text_type": "abstract",
+   "pre": {
+    "n": 426,
+    "papers": 345,
+    "rate": 2.378081457663451,
+    "rate_lo": 2.157357931230369,
+    "rate_hi": 2.592111859839247
+   },
+   "post": {
+    "n": 1854,
+    "papers": 1268,
+    "rate": 3.7073104402581123,
+    "rate_lo": 3.530967806873094,
+    "rate_hi": 3.8773114254590233
+   },
+   "ratio": 1.5589501479485381,
+   "ratio_lo": 1.4111656912383126,
+   "ratio_hi": 1.7360277151605363,
+   "n": 2280,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "TRICOLON|tricolon|enumeration",
+   "construction": "TRICOLON",
+   "pattern": "tricolon",
+   "subtype": "enumeration",
+   "text_type": "abstract",
+   "pre": {
+    "n": 196,
+    "papers": 168,
+    "rate": 1.094140764558771,
+    "rate_lo": 0.938139160158475,
+    "rate_hi": 1.2673885679467192
+   },
+   "post": {
+    "n": 817,
+    "papers": 637,
+    "rate": 1.6336961325193513,
+    "rate_lo": 1.5166298555205429,
+    "rate_hi": 1.7530691726635432
+   },
+   "ratio": 1.4931315836478902,
+   "ratio_lo": 1.2697258337393091,
+   "ratio_hi": 1.7749196144916577,
+   "n": 1013,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|allow",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "allow",
+   "text_type": "abstract",
+   "pre": {
+    "n": 14,
+    "papers": 14,
+    "rate": 0.07815291175419793,
+    "rate_lo": 0.03882914597556445,
+    "rate_hi": 0.1201561672453001
+   },
+   "post": {
+    "n": 58,
+    "papers": 58,
+    "rate": 0.1159784280123897,
+    "rate_lo": 0.08902049849969966,
+    "rate_hi": 0.14570909924354322
+   },
+   "ratio": 1.4839936914591028,
+   "ratio_lo": 0.8730211073737796,
+   "ratio_hi": 3.121436612661385,
+   "n": 72,
+   "verdict": "flat"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "HOLLOW_BOOSTER|-|-",
+   "construction": "HOLLOW_BOOSTER",
+   "pattern": "-",
+   "subtype": "-",
+   "text_type": "abstract",
+   "pre": {
+    "n": 10,
+    "papers": 10,
+    "rate": 0.05582350839585566,
+    "rate_lo": 0.022424440935587577,
+    "rate_hi": 0.09037393491422661
+   },
+   "post": {
+    "n": 40,
+    "papers": 40,
+    "rate": 0.07998512276716531,
+    "rate_lo": 0.056236229108131974,
+    "rate_hi": 0.10521102188290324
+   },
+   "ratio": 1.4328214952018925,
+   "ratio_lo": 0.7922551744825519,
+   "ratio_hi": 3.5550296658831395,
+   "n": 50,
+   "verdict": "flat"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "CONSULTANT_REGISTER|-|-",
+   "construction": "CONSULTANT_REGISTER",
+   "pattern": "-",
+   "subtype": "-",
+   "text_type": "abstract",
+   "pre": {
+    "n": 295,
+    "papers": 216,
+    "rate": 1.646793497677742,
+    "rate_lo": 1.425881657680282,
+    "rate_hi": 1.880778048571557
+   },
+   "post": {
+    "n": 1177,
+    "papers": 869,
+    "rate": 2.3535622374238394,
+    "rate_lo": 2.2135917113109573,
+    "rate_hi": 2.4977585692154642
+   },
+   "ratio": 1.4291787286886675,
+   "ratio_lo": 1.2336538143526052,
+   "ratio_hi": 1.6734846542410804,
+   "n": 1472,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "ABSTRACT_ADVERB|abstract_adverb|fundamentally",
+   "construction": "ABSTRACT_ADVERB",
+   "pattern": "abstract_adverb",
+   "subtype": "fundamentally",
+   "text_type": "abstract",
+   "pre": {
+    "n": 9,
+    "papers": 9,
+    "rate": 0.050241157556270094,
+    "rate_lo": 0.02197595983741614,
+    "rate_hi": 0.08373117270329906
+   },
+   "post": {
+    "n": 35,
+    "papers": 34,
+    "rate": 0.06998698242126963,
+    "rate_lo": 0.04804367411827613,
+    "rate_hi": 0.0942129259387453
+   },
+   "ratio": 1.3930208981129508,
+   "ratio_lo": 0.7179263200916791,
+   "ratio_hi": 3.686087113030957,
+   "n": 44,
+   "verdict": "flat"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "EMPHATIC_REFLEXIVE|emphatic_reflexive|itself",
+   "construction": "EMPHATIC_REFLEXIVE",
+   "pattern": "emphatic_reflexive",
+   "subtype": "itself",
+   "text_type": "abstract",
+   "pre": {
+    "n": 11,
+    "papers": 11,
+    "rate": 0.061405859235441236,
+    "rate_lo": 0.02789508539005746,
+    "rate_hi": 0.10041209492853968
+   },
+   "post": {
+    "n": 40,
+    "papers": 39,
+    "rate": 0.07998512276716531,
+    "rate_lo": 0.05591988363082016,
+    "rate_hi": 0.1056296210191947
+   },
+   "ratio": 1.302564995638084,
+   "ratio_lo": 0.7077265452692426,
+   "ratio_hi": 2.969385303985075,
+   "n": 51,
+   "verdict": "flat"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "LLM_DICTION|-|-",
+   "construction": "LLM_DICTION",
+   "pattern": "-",
+   "subtype": "-",
+   "text_type": "abstract",
+   "pre": {
+    "n": 535,
+    "papers": 346,
+    "rate": 2.9865576991782783,
+    "rate_lo": 2.6862577981940987,
+    "rate_hi": 3.299695777406132
+   },
+   "post": {
+    "n": 1903,
+    "papers": 1200,
+    "rate": 3.8052922156478894,
+    "rate_lo": 3.613967578848357,
+    "rate_hi": 4.00208316967094
+   },
+   "ratio": 1.2741398623220566,
+   "ratio_lo": 1.1365277031122387,
+   "ratio_hi": 1.4369243273071526,
+   "n": 2438,
+   "verdict": "rose"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "ALTERNATIVE_FRAMING|af_less_than|less...than",
+   "construction": "ALTERNATIVE_FRAMING",
+   "pattern": "af_less_than",
+   "subtype": "less...than",
+   "text_type": "abstract",
+   "pre": {
+    "n": 28,
+    "papers": 26,
+    "rate": 0.15630582350839586,
+    "rate_lo": 0.09920580666275161,
+    "rate_hi": 0.21611673985908597
+   },
+   "post": {
+    "n": 94,
+    "papers": 91,
+    "rate": 0.1879650385028385,
+    "rate_lo": 0.1518853289410807,
+    "rate_hi": 0.2278355784746756
+   },
+   "ratio": 1.2025466120444455,
+   "ratio_lo": 0.800483043041283,
+   "ratio_hi": 1.9582378320826288,
+   "n": 122,
+   "verdict": "flat"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|use",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "use",
+   "text_type": "abstract",
+   "pre": {
+    "n": 18,
+    "papers": 18,
+    "rate": 0.10048231511254019,
+    "rate_lo": 0.06052442488873909,
+    "rate_hi": 0.14871820399776672
+   },
+   "post": {
+    "n": 55,
+    "papers": 55,
+    "rate": 0.10997954380485231,
+    "rate_lo": 0.0816816481734935,
+    "rate_hi": 0.13950047697316129
+   },
+   "ratio": 1.0945164199458903,
+   "ratio_lo": 0.6662271543378272,
+   "ratio_hi": 1.9977464107468728,
+   "n": 73,
+   "verdict": "flat"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "ALTERNATIVE_FRAMING|af_rather_instead|instead of",
+   "construction": "ALTERNATIVE_FRAMING",
+   "pattern": "af_rather_instead",
+   "subtype": "instead of",
+   "text_type": "abstract",
+   "pre": {
+    "n": 22,
+    "papers": 22,
+    "rate": 0.12281171847088247,
+    "rate_lo": 0.07196174248887252,
+    "rate_hi": 0.17394963882734263
+   },
+   "post": {
+    "n": 66,
+    "papers": 63,
+    "rate": 0.13197545256582277,
+    "rate_lo": 0.10100076791633138,
+    "rate_hi": 0.16809897682872035
+   },
+   "ratio": 1.0746161214014194,
+   "ratio_lo": 0.683749290899337,
+   "ratio_hi": 1.899194177905343,
+   "n": 88,
+   "verdict": "flat"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "BORROWED_RIGOUR|-|-",
+   "construction": "BORROWED_RIGOUR",
+   "pattern": "-",
+   "subtype": "-",
+   "text_type": "abstract",
+   "pre": {
+    "n": 55,
+    "papers": 49,
+    "rate": 0.30702929617720615,
+    "rate_lo": 0.223314390569456,
+    "rate_hi": 0.4009864846256881
+   },
+   "post": {
+    "n": 156,
+    "papers": 139,
+    "rate": 0.3119419787919447,
+    "rate_lo": 0.2610726326780622,
+    "rate_hi": 0.3650603614268893
+   },
+   "ratio": 1.0160006965977055,
+   "ratio_lo": 0.7376364266144997,
+   "ratio_hi": 1.4512210705029087,
+   "n": 211,
+   "verdict": "flat"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "ABSTRACT_ADVERB|abstract_adverb|computationally",
+   "construction": "ABSTRACT_ADVERB",
+   "pattern": "abstract_adverb",
+   "subtype": "computationally",
+   "text_type": "abstract",
+   "pre": {
+    "n": 16,
+    "papers": 15,
+    "rate": 0.08931761343336905,
+    "rate_lo": 0.044851056721539675,
+    "rate_hi": 0.1403728053764145
+   },
+   "post": {
+    "n": 45,
+    "papers": 44,
+    "rate": 0.08998326311306097,
+    "rate_lo": 0.06437716765701675,
+    "rate_hi": 0.11727637001337947
+   },
+   "ratio": 1.0074526138138307,
+   "ratio_lo": 0.5800367777638881,
+   "ratio_hi": 2.0175733992180365,
+   "n": 61,
+   "verdict": "flat"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "TRICOLON|tricolon|figure",
+   "construction": "TRICOLON",
+   "pattern": "tricolon",
+   "subtype": "figure",
+   "text_type": "abstract",
+   "pre": {
+    "n": 138,
+    "papers": 123,
+    "rate": 0.7703644158628081,
+    "rate_lo": 0.6465596290111337,
+    "rate_hi": 0.9080120588616656
+   },
+   "post": {
+    "n": 384,
+    "papers": 353,
+    "rate": 0.767857178564787,
+    "rate_lo": 0.6904330098250862,
+    "rate_hi": 0.8458593736351868
+   },
+   "ratio": 0.9967453879665339,
+   "ratio_lo": 0.8205609300678476,
+   "ratio_hi": 1.224176198999364,
+   "n": 522,
+   "verdict": "flat"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "CORRECTIVE_CONTRAST|cc_coordinated|not X but Y",
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_coordinated",
+   "subtype": "not X but Y",
+   "text_type": "abstract",
+   "pre": {
+    "n": 32,
+    "papers": 31,
+    "rate": 0.1786352268667381,
+    "rate_lo": 0.11391590373836706,
+    "rate_hi": 0.24140450543893882
+   },
+   "post": {
+    "n": 89,
+    "papers": 89,
+    "rate": 0.1779668981569428,
+    "rate_lo": 0.14231585581239253,
+    "rate_hi": 0.21549642530314245
+   },
+   "ratio": 0.9962586958825659,
+   "ratio_lo": 0.6891752554372863,
+   "ratio_hi": 1.574523392207092,
+   "n": 121,
+   "verdict": "flat"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|result",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "result",
+   "text_type": "abstract",
+   "pre": {
+    "n": 23,
+    "papers": 21,
+    "rate": 0.12839406931046804,
+    "rate_lo": 0.07426550793738836,
+    "rate_hi": 0.188560113679284
+   },
+   "post": {
+    "n": 59,
+    "papers": 59,
+    "rate": 0.11797805608156883,
+    "rate_lo": 0.09040148006250537,
+    "rate_hi": 0.1487084434029887
+   },
+   "ratio": 0.9188746545316483,
+   "ratio_lo": 0.5683630814913934,
+   "ratio_hi": 1.6302286049471884,
+   "n": 82,
+   "verdict": "flat"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "VAGUE_QUANTIFIER|-|-",
+   "construction": "VAGUE_QUANTIFIER",
+   "pattern": "-",
+   "subtype": "-",
+   "text_type": "abstract",
+   "pre": {
+    "n": 155,
+    "papers": 140,
+    "rate": 0.8652643801357628,
+    "rate_lo": 0.7299563417649517,
+    "rate_hi": 1.007102420456427
+   },
+   "post": {
+    "n": 366,
+    "papers": 346,
+    "rate": 0.7318638733195625,
+    "rate_lo": 0.6595991325706001,
+    "rate_hi": 0.8076583103011299
+   },
+   "ratio": 0.8458268826514397,
+   "ratio_lo": 0.7026999692656885,
+   "ratio_hi": 1.0331700395228582,
+   "n": 521,
+   "verdict": "flat"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "ALTERNATIVE_FRAMING|af_less_than|more...than",
+   "construction": "ALTERNATIVE_FRAMING",
+   "pattern": "af_less_than",
+   "subtype": "more...than",
+   "text_type": "abstract",
+   "pre": {
+    "n": 73,
+    "papers": 69,
+    "rate": 0.40751161128974633,
+    "rate_lo": 0.31562242596027457,
+    "rate_hi": 0.5066094769131131
+   },
+   "post": {
+    "n": 161,
+    "papers": 148,
+    "rate": 0.3219401191378404,
+    "rate_lo": 0.26953800727183375,
+    "rate_hi": 0.37517247992697983
+   },
+   "ratio": 0.7900145915325504,
+   "ratio_lo": 0.5989851205971267,
+   "ratio_hi": 1.0774826127424537,
+   "n": 234,
+   "verdict": "flat"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "ABSTRACT_ADVERB|abstract_adverb|traditionally",
+   "construction": "ABSTRACT_ADVERB",
+   "pattern": "abstract_adverb",
+   "subtype": "traditionally",
+   "text_type": "abstract",
+   "pre": {
+    "n": 7,
+    "papers": 7,
+    "rate": 0.039076455877098966,
+    "rate_lo": 0.011180146178815232,
+    "rate_hi": 0.06800250053284082
+   },
+   "post": {
+    "n": 14,
+    "papers": 14,
+    "rate": 0.027994792968507855,
+    "rate_lo": 0.014060686734097797,
+    "rate_hi": 0.04389003848869095
+   },
+   "ratio": 0.7164107476009461,
+   "ratio_lo": 0.30317104498984415,
+   "ratio_hi": 2.3426471763718477,
+   "n": 21,
+   "verdict": "flat"
+  },
+  {
+   "table": "Rates per subtype, at least 20 findings",
+   "level": "subtype",
+   "key": "FRAME_MARKER|-|-",
+   "construction": "FRAME_MARKER",
+   "pattern": "-",
+   "subtype": "-",
+   "text_type": "abstract",
+   "pre": {
+    "n": 16,
+    "papers": 16,
+    "rate": 0.08931761343336905,
+    "rate_lo": 0.049770372075536744,
+    "rate_hi": 0.13453325791598644
+   },
+   "post": {
+    "n": 12,
+    "papers": 12,
+    "rate": 0.023995536830149593,
+    "rate_lo": 0.011971170460429142,
+    "rate_hi": 0.03809947200756735
+   },
+   "ratio": 0.26865403035035484,
+   "ratio_lo": 0.11639587717712056,
+   "ratio_hi": 0.55634577907624,
+   "n": 28,
+   "verdict": "fell"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "LLM_DICTION|landscape",
+   "construction": "LLM_DICTION",
+   "phrase": "landscape",
+   "text_type": "abstract",
+   "pre": {
+    "n": 2,
+    "papers": 2,
+    "rate": 0.011164701679171132,
+    "rate_lo": 0.0,
+    "rate_hi": 0.028074430931285022
+   },
+   "post": {
+    "n": 26,
+    "papers": 22,
+    "rate": 0.05199032979865745,
+    "rate_lo": 0.03010849752527277,
+    "rate_hi": 0.07595084779994193
+   },
+   "ratio": 4.656669859406151,
+   "ratio_lo": 1.6191457148742894,
+   "ratio_hi": "inf",
+   "n": 28,
+   "verdict": "rose"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "CONSULTANT_REGISTER|leverages",
+   "construction": "CONSULTANT_REGISTER",
+   "phrase": "leverages",
+   "text_type": "abstract",
+   "pre": {
+    "n": 17,
+    "papers": 16,
+    "rate": 0.09489996427295463,
+    "rate_lo": 0.05030107993035316,
+    "rate_hi": 0.14504576167749506
+   },
+   "post": {
+    "n": 168,
+    "papers": 166,
+    "rate": 0.3359375156220943,
+    "rate_lo": 0.28688445044998306,
+    "rate_hi": 0.3857824776136989
+   },
+   "ratio": 3.5399119293223222,
+   "ratio_lo": 2.2458579656458535,
+   "ratio_hi": 6.844875799345524,
+   "n": 185,
+   "verdict": "rose"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "LLM_DICTION|seamless",
+   "construction": "LLM_DICTION",
+   "phrase": "seamless",
+   "text_type": "abstract",
+   "pre": {
+    "n": 3,
+    "papers": 3,
+    "rate": 0.0167470525187567,
+    "rate_lo": 0.0,
+    "rate_hi": 0.038820107647837276
+   },
+   "post": {
+    "n": 21,
+    "papers": 20,
+    "rate": 0.041992189452761786,
+    "rate_lo": 0.023980559221092615,
+    "rate_hi": 0.06157742814649738
+   },
+   "ratio": 2.507437616603312,
+   "ratio_lo": 0.9535492430133772,
+   "ratio_hi": "inf",
+   "n": 24,
+   "verdict": "flat"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "BORROWED_RIGOUR|search space",
+   "construction": "BORROWED_RIGOUR",
+   "phrase": "search space",
+   "text_type": "abstract",
+   "pre": {
+    "n": 4,
+    "papers": 4,
+    "rate": 0.022329403358342263,
+    "rate_lo": 0.00553357499252847,
+    "rate_hi": 0.04520979633127716
+   },
+   "post": {
+    "n": 23,
+    "papers": 20,
+    "rate": 0.045991445591120055,
+    "rate_lo": 0.02601992219436793,
+    "rate_hi": 0.06820424448700461
+   },
+   "ratio": 2.0596808993527205,
+   "ratio_lo": 0.8084916070687399,
+   "ratio_hi": 10.75937824585135,
+   "n": 27,
+   "verdict": "flat"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "LLM_DICTION|innovative",
+   "construction": "LLM_DICTION",
+   "phrase": "innovative",
+   "text_type": "abstract",
+   "pre": {
+    "n": 5,
+    "papers": 5,
+    "rate": 0.02791175419792783,
+    "rate_lo": 0.005610447556589339,
+    "rate_hi": 0.05577842911831625
+   },
+   "post": {
+    "n": 28,
+    "papers": 28,
+    "rate": 0.05598958593701571,
+    "rate_lo": 0.03611236729994379,
+    "rate_hi": 0.0767809757620585
+   },
+   "ratio": 2.005950093282649,
+   "ratio_lo": 0.8783242031441115,
+   "ratio_hi": 8.973081208033483,
+   "n": 33,
+   "verdict": "flat"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "VAGUE_QUANTIFIER|increasingly",
+   "construction": "VAGUE_QUANTIFIER",
+   "phrase": "increasingly",
+   "text_type": "abstract",
+   "pre": {
+    "n": 46,
+    "papers": 46,
+    "rate": 0.2567881386209361,
+    "rate_lo": 0.1885928919312302,
+    "rate_hi": 0.32959052727415705
+   },
+   "post": {
+    "n": 255,
+    "papers": 249,
+    "rate": 0.5099051576406788,
+    "rate_lo": 0.4497785578101167,
+    "rate_hi": 0.5701744861261663
+   },
+   "ratio": 1.9857037025895787,
+   "ratio_lo": 1.4939752558675303,
+   "ratio_hi": 2.728942625413037,
+   "n": 301,
+   "verdict": "rose"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "LLM_DICTION|essential",
+   "construction": "LLM_DICTION",
+   "phrase": "essential",
+   "text_type": "abstract",
+   "pre": {
+    "n": 28,
+    "papers": 28,
+    "rate": 0.15630582350839586,
+    "rate_lo": 0.10090955956437991,
+    "rate_hi": 0.2130781779507598
+   },
+   "post": {
+    "n": 148,
+    "papers": 145,
+    "rate": 0.29594495423851164,
+    "rate_lo": 0.2495537604880882,
+    "rate_hi": 0.34485428401639934
+   },
+   "ratio": 1.8933712615167864,
+   "ratio_lo": 1.3259810698087569,
+   "ratio_hi": 3.004675094309822,
+   "n": 176,
+   "verdict": "rose"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "CONSULTANT_REGISTER|leveraging",
+   "construction": "CONSULTANT_REGISTER",
+   "phrase": "leveraging",
+   "text_type": "abstract",
+   "pre": {
+    "n": 35,
+    "papers": 33,
+    "rate": 0.19538227938549482,
+    "rate_lo": 0.13169088699660045,
+    "rate_hi": 0.2687838182608109
+   },
+   "post": {
+    "n": 184,
+    "papers": 176,
+    "rate": 0.36793156472896044,
+    "rate_lo": 0.317675679705879,
+    "rate_hi": 0.42421919399490515
+   },
+   "ratio": 1.8831368222653444,
+   "ratio_lo": 1.3181356664028847,
+   "ratio_hi": 2.875605698070784,
+   "n": 219,
+   "verdict": "rose"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "CONSULTANT_REGISTER|optimizing",
+   "construction": "CONSULTANT_REGISTER",
+   "phrase": "optimizing",
+   "text_type": "abstract",
+   "pre": {
+    "n": 23,
+    "papers": 23,
+    "rate": 0.12839406931046804,
+    "rate_lo": 0.07837848355809811,
+    "rate_hi": 0.1814915536469686
+   },
+   "post": {
+    "n": 116,
+    "papers": 106,
+    "rate": 0.2319568560247794,
+    "rate_lo": 0.18975362529515025,
+    "rate_hi": 0.27746968886849105
+   },
+   "ratio": 1.8066010156893424,
+   "ratio_lo": 1.1878326227743206,
+   "ratio_hi": 2.976017026483953,
+   "n": 139,
+   "verdict": "rose"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "LLM_DICTION|comprehensive",
+   "construction": "LLM_DICTION",
+   "phrase": "comprehensive",
+   "text_type": "abstract",
+   "pre": {
+    "n": 37,
+    "papers": 35,
+    "rate": 0.20654698106466596,
+    "rate_lo": 0.13988203465181775,
+    "rate_hi": 0.2774867669447543
+   },
+   "post": {
+    "n": 169,
+    "papers": 162,
+    "rate": 0.3379371436912734,
+    "rate_lo": 0.28768959212504264,
+    "rate_hi": 0.3898921661939946
+   },
+   "ratio": 1.6361272478994582,
+   "ratio_lo": 1.1592817709628116,
+   "ratio_hi": 2.4959704968418905,
+   "n": 206,
+   "verdict": "rose"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "LLM_DICTION|versatile",
+   "construction": "LLM_DICTION",
+   "phrase": "versatile",
+   "text_type": "abstract",
+   "pre": {
+    "n": 6,
+    "papers": 6,
+    "rate": 0.0334941050375134,
+    "rate_lo": 0.011020344879436771,
+    "rate_hi": 0.06183112008909051
+   },
+   "post": {
+    "n": 26,
+    "papers": 25,
+    "rate": 0.05199032979865745,
+    "rate_lo": 0.0319680863451779,
+    "rate_hi": 0.07372619943876246
+   },
+   "ratio": 1.5522232864687167,
+   "ratio_lo": 0.690377172132464,
+   "ratio_hi": 5.618595162462703,
+   "n": 32,
+   "verdict": "flat"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "LLM_DICTION|dynamics",
+   "construction": "LLM_DICTION",
+   "phrase": "dynamics",
+   "text_type": "abstract",
+   "pre": {
+    "n": 10,
+    "papers": 6,
+    "rate": 0.05582350839585566,
+    "rate_lo": 0.011162933555844152,
+    "rate_hi": 0.1291341420919544
+   },
+   "post": {
+    "n": 42,
+    "papers": 37,
+    "rate": 0.08398437890552357,
+    "rate_lo": 0.05761912808157976,
+    "rate_hi": 0.1122692835185258
+   },
+   "ratio": 1.5044625699619871,
+   "ratio_lo": 0.5782347935079801,
+   "ratio_hi": 8.034391003112763,
+   "n": 52,
+   "verdict": "flat"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "LLM_DICTION|robust",
+   "construction": "LLM_DICTION",
+   "phrase": "robust",
+   "text_type": "abstract",
+   "pre": {
+    "n": 24,
+    "papers": 23,
+    "rate": 0.1339764201500536,
+    "rate_lo": 0.0835151902266079,
+    "rate_hi": 0.1935950589217953
+   },
+   "post": {
+    "n": 97,
+    "papers": 95,
+    "rate": 0.19396392271037585,
+    "rate_lo": 0.15596956143657403,
+    "rate_hi": 0.23258643803694856
+   },
+   "ratio": 1.4477467191102453,
+   "ratio_lo": 0.9580852884053892,
+   "ratio_hi": 2.423974142551983,
+   "n": 121,
+   "verdict": "flat"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "HOLLOW_BOOSTER|notably,",
+   "construction": "HOLLOW_BOOSTER",
+   "phrase": "notably,",
+   "text_type": "abstract",
+   "pre": {
+    "n": 4,
+    "papers": 4,
+    "rate": 0.022329403358342263,
+    "rate_lo": 0.00549820773536278,
+    "rate_hi": 0.04507542543389807
+   },
+   "post": {
+    "n": 16,
+    "papers": 16,
+    "rate": 0.031994049106866124,
+    "rate_lo": 0.017939189235631557,
+    "rate_hi": 0.0479849569223458
+   },
+   "ratio": 1.4328214952018925,
+   "ratio_lo": 0.5407747561019189,
+   "ratio_hi": 7.4999851269268065,
+   "n": 20,
+   "verdict": "flat"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "CONSULTANT_REGISTER|optimizes",
+   "construction": "CONSULTANT_REGISTER",
+   "phrase": "optimizes",
+   "text_type": "abstract",
+   "pre": {
+    "n": 20,
+    "papers": 18,
+    "rate": 0.11164701679171132,
+    "rate_lo": 0.061574941552850704,
+    "rate_hi": 0.16927076695255597
+   },
+   "post": {
+    "n": 76,
+    "papers": 72,
+    "rate": 0.1519717332576141,
+    "rate_lo": 0.11749202496366713,
+    "rate_hi": 0.18566674187882035
+   },
+   "ratio": 1.3611804204417979,
+   "ratio_lo": 0.8476577483217125,
+   "ratio_hi": 2.5111011297511885,
+   "n": 96,
+   "verdict": "flat"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "CONSULTANT_REGISTER|optimize",
+   "construction": "CONSULTANT_REGISTER",
+   "phrase": "optimize",
+   "text_type": "abstract",
+   "pre": {
+    "n": 45,
+    "papers": 43,
+    "rate": 0.25120578778135044,
+    "rate_lo": 0.1791222428656726,
+    "rate_hi": 0.33013677391144786
+   },
+   "post": {
+    "n": 156,
+    "papers": 145,
+    "rate": 0.3119419787919447,
+    "rate_lo": 0.2611075865236584,
+    "rate_hi": 0.3650510611294674
+   },
+   "ratio": 1.2417786291749735,
+   "ratio_lo": 0.8910247933884297,
+   "ratio_hi": 1.8153322657473911,
+   "n": 201,
+   "verdict": "flat"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "LLM_DICTION|significant",
+   "construction": "LLM_DICTION",
+   "phrase": "significant",
+   "text_type": "abstract",
+   "pre": {
+    "n": 141,
+    "papers": 120,
+    "rate": 0.7871114683815649,
+    "rate_lo": 0.6533512681631238,
+    "rate_hi": 0.924228445846254
+   },
+   "post": {
+    "n": 481,
+    "papers": 443,
+    "rate": 0.9618211012751628,
+    "rate_lo": 0.8749838410091126,
+    "rate_hi": 1.0472482305029507
+   },
+   "ratio": 1.2219630127519685,
+   "ratio_lo": 1.0078608944791423,
+   "ratio_hi": 1.4943154014457978,
+   "n": 622,
+   "verdict": "rose"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "CONSULTANT_REGISTER|optimized",
+   "construction": "CONSULTANT_REGISTER",
+   "phrase": "optimized",
+   "text_type": "abstract",
+   "pre": {
+    "n": 90,
+    "papers": 71,
+    "rate": 0.5024115755627009,
+    "rate_lo": 0.38546734129413085,
+    "rate_hi": 0.6280792758494412
+   },
+   "post": {
+    "n": 298,
+    "papers": 263,
+    "rate": 0.5958891646153814,
+    "rate_lo": 0.5239242532338861,
+    "rate_hi": 0.6666240966003188
+   },
+   "ratio": 1.1860577932504555,
+   "ratio_lo": 0.9171885944145329,
+   "ratio_hi": 1.5904513881954456,
+   "n": 388,
+   "verdict": "flat"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "LLM_DICTION|crucial",
+   "construction": "LLM_DICTION",
+   "phrase": "crucial",
+   "text_type": "abstract",
+   "pre": {
+    "n": 31,
+    "papers": 31,
+    "rate": 0.17305287602715255,
+    "rate_lo": 0.11404612935775708,
+    "rate_hi": 0.23733087061881283
+   },
+   "post": {
+    "n": 102,
+    "papers": 101,
+    "rate": 0.20396206305627154,
+    "rate_lo": 0.16722811536770754,
+    "rate_hi": 0.24467795577703338
+   },
+   "ratio": 1.1786112299241374,
+   "ratio_lo": 0.8161978168501036,
+   "ratio_hi": 1.8644297893650787,
+   "n": 133,
+   "verdict": "flat"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "LLM_DICTION|paradigms",
+   "construction": "LLM_DICTION",
+   "phrase": "paradigms",
+   "text_type": "abstract",
+   "pre": {
+    "n": 10,
+    "papers": 10,
+    "rate": 0.05582350839585566,
+    "rate_lo": 0.022442095596202676,
+    "rate_hi": 0.09455816379520063
+   },
+   "post": {
+    "n": 32,
+    "papers": 29,
+    "rate": 0.06398809821373225,
+    "rate_lo": 0.0418592538562121,
+    "rate_hi": 0.08845470139337958
+   },
+   "ratio": 1.146257196161514,
+   "ratio_lo": 0.5721130224351968,
+   "ratio_hi": 2.894297328640966,
+   "n": 42,
+   "verdict": "flat"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "BORROWED_RIGOUR|order of magnitude",
+   "construction": "BORROWED_RIGOUR",
+   "phrase": "order of magnitude",
+   "text_type": "abstract",
+   "pre": {
+    "n": 9,
+    "papers": 9,
+    "rate": 0.050241157556270094,
+    "rate_lo": 0.02161679262542956,
+    "rate_hi": 0.08347246570296586
+   },
+   "post": {
+    "n": 27,
+    "papers": 26,
+    "rate": 0.053989957867836585,
+    "rate_lo": 0.033975461229829376,
+    "rate_hi": 0.0754527723237743
+   },
+   "ratio": 1.0746161214014194,
+   "ratio_lo": 0.5334738088815969,
+   "ratio_hi": 2.91885801197252,
+   "n": 36,
+   "verdict": "flat"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "LLM_DICTION|dynamic",
+   "construction": "LLM_DICTION",
+   "phrase": "dynamic",
+   "text_type": "abstract",
+   "pre": {
+    "n": 136,
+    "papers": 97,
+    "rate": 0.7591997141836371,
+    "rate_lo": 0.6037476959352347,
+    "rate_hi": 0.9342261441889597
+   },
+   "post": {
+    "n": 384,
+    "papers": 276,
+    "rate": 0.767857178564787,
+    "rate_lo": 0.6707764418786001,
+    "rate_hi": 0.867370274911151
+   },
+   "ratio": 1.0114034083778063,
+   "ratio_lo": 0.7946299666655454,
+   "ratio_hi": 1.3046961977559064,
+   "n": 520,
+   "verdict": "flat"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "CONSULTANT_REGISTER|holistic",
+   "construction": "CONSULTANT_REGISTER",
+   "phrase": "holistic",
+   "text_type": "abstract",
+   "pre": {
+    "n": 9,
+    "papers": 9,
+    "rate": 0.050241157556270094,
+    "rate_lo": 0.02231270655857191,
+    "rate_hi": 0.08507253534547186
+   },
+   "post": {
+    "n": 24,
+    "papers": 23,
+    "rate": 0.047991073660299186,
+    "rate_lo": 0.02995591720567073,
+    "rate_hi": 0.06808544606122865
+   },
+   "ratio": 0.955214330134595,
+   "ratio_lo": 0.4537479347040055,
+   "ratio_hi": 2.297738628083689,
+   "n": 33,
+   "verdict": "flat"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "LLM_DICTION|harness",
+   "construction": "LLM_DICTION",
+   "phrase": "harness",
+   "text_type": "abstract",
+   "pre": {
+    "n": 7,
+    "papers": 5,
+    "rate": 0.039076455877098966,
+    "rate_lo": 0.005615614578124324,
+    "rate_hi": 0.0785467288765097
+   },
+   "post": {
+    "n": 17,
+    "papers": 15,
+    "rate": 0.033993677176045255,
+    "rate_lo": 0.017940390783897166,
+    "rate_hi": 0.05410492206952805
+   },
+   "ratio": 0.8699273363725775,
+   "ratio_lo": 0.3375219688827989,
+   "ratio_hi": 5.048536058164668,
+   "n": 24,
+   "verdict": "flat"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "CONSULTANT_REGISTER|leverage",
+   "construction": "CONSULTANT_REGISTER",
+   "phrase": "leverage",
+   "text_type": "abstract",
+   "pre": {
+    "n": 26,
+    "papers": 26,
+    "rate": 0.1451411218292247,
+    "rate_lo": 0.0949072761498417,
+    "rate_hi": 0.20275282100043138
+   },
+   "post": {
+    "n": 60,
+    "papers": 58,
+    "rate": 0.11997768415074796,
+    "rate_lo": 0.08852242538726916,
+    "rate_hi": 0.1512919467465832
+   },
+   "ratio": 0.8266277856933996,
+   "ratio_lo": 0.5319212965529817,
+   "ratio_hi": 1.3436869936857865,
+   "n": 86,
+   "verdict": "flat"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "VAGUE_QUANTIFIER|numerous",
+   "construction": "VAGUE_QUANTIFIER",
+   "phrase": "numerous",
+   "text_type": "abstract",
+   "pre": {
+    "n": 17,
+    "papers": 17,
+    "rate": 0.09489996427295463,
+    "rate_lo": 0.050771560423678454,
+    "rate_hi": 0.14065849103712635
+   },
+   "post": {
+    "n": 39,
+    "papers": 37,
+    "rate": 0.07798549469798617,
+    "rate_lo": 0.05366337432596568,
+    "rate_hi": 0.10429381837986533
+   },
+   "ratio": 0.8217652693069676,
+   "ratio_lo": 0.4669888414825687,
+   "ratio_hi": 1.5811492239703875,
+   "n": 56,
+   "verdict": "flat"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "LLM_DICTION|paradigm",
+   "construction": "LLM_DICTION",
+   "phrase": "paradigm",
+   "text_type": "abstract",
+   "pre": {
+    "n": 58,
+    "papers": 41,
+    "rate": 0.32377634869596283,
+    "rate_lo": 0.2141549278204205,
+    "rate_hi": 0.4481009037417381
+   },
+   "post": {
+    "n": 133,
+    "papers": 121,
+    "rate": 0.2659505332008246,
+    "rate_lo": 0.21852734105657085,
+    "rate_hi": 0.31703820289966916
+   },
+   "ratio": 0.821401977852809,
+   "ratio_lo": 0.5703358378755549,
+   "ratio_hi": 1.2918648358280953,
+   "n": 191,
+   "verdict": "flat"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "LLM_DICTION|vital",
+   "construction": "LLM_DICTION",
+   "phrase": "vital",
+   "text_type": "abstract",
+   "pre": {
+    "n": 8,
+    "papers": 8,
+    "rate": 0.044658806716684527,
+    "rate_lo": 0.01667097106544439,
+    "rate_hi": 0.07801631266529183
+   },
+   "post": {
+    "n": 17,
+    "papers": 17,
+    "rate": 0.033993677176045255,
+    "rate_lo": 0.01988197454871828,
+    "rate_hi": 0.05170535505987907
+   },
+   "ratio": 0.7611864193260054,
+   "ratio_lo": 0.35363225305260637,
+   "ratio_hi": 2.1564504505221915,
+   "n": 25,
+   "verdict": "flat"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "BORROWED_RIGOUR|state of the art",
+   "construction": "BORROWED_RIGOUR",
+   "phrase": "state of the art",
+   "text_type": "abstract",
+   "pre": {
+    "n": 13,
+    "papers": 11,
+    "rate": 0.07257056091461235,
+    "rate_lo": 0.03345934028003348,
+    "rate_hi": 0.11802177292646113
+   },
+   "post": {
+    "n": 18,
+    "papers": 18,
+    "rate": 0.035993305245224386,
+    "rate_lo": 0.019994627460819148,
+    "rate_hi": 0.05236238180862457
+   },
+   "ratio": 0.49597667141603974,
+   "ratio_lo": 0.23057334180383948,
+   "ratio_hi": 1.2030021674035387,
+   "n": 31,
+   "verdict": "flat"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "VAGUE_QUANTIFIER|a wide range of",
+   "construction": "VAGUE_QUANTIFIER",
+   "phrase": "a wide range of",
+   "text_type": "abstract",
+   "pre": {
+    "n": 48,
+    "papers": 41,
+    "rate": 0.2679528403001072,
+    "rate_lo": 0.18832871394537357,
+    "rate_hi": 0.3584864735951465
+   },
+   "post": {
+    "n": 49,
+    "papers": 49,
+    "rate": 0.0979817753897775,
+    "rate_lo": 0.07142826641233757,
+    "rate_hi": 0.12659702035899106
+   },
+   "ratio": 0.3656679857546496,
+   "ratio_lo": 0.23910265067471353,
+   "ratio_hi": 0.5577159056302958,
+   "n": 97,
+   "verdict": "fell"
+  },
+  {
+   "table": "Phrase-list matches, at least 20 findings",
+   "level": "phrase",
+   "key": "VAGUE_QUANTIFIER|a variety of",
+   "construction": "VAGUE_QUANTIFIER",
+   "phrase": "a variety of",
+   "text_type": "abstract",
+   "pre": {
+    "n": 41,
+    "papers": 37,
+    "rate": 0.22887638442300823,
+    "rate_lo": 0.1580300286889523,
+    "rate_hi": 0.3057422354052368
+   },
+   "post": {
+    "n": 18,
+    "papers": 17,
+    "rate": 0.035993305245224386,
+    "rate_lo": 0.01991891481466943,
+    "rate_hi": 0.053940358463708496
+   },
+   "ratio": 0.15726089581484184,
+   "ratio_lo": 0.08407391050545375,
+   "ratio_hi": 0.26787154352021464,
+   "n": 59,
+   "verdict": "fell"
+  }
+ ]
+}

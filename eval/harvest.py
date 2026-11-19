@@ -14,14 +14,19 @@ Usage:
   eval/harvest.py REPO --docs blogs/A.md blogs/B.md --waiver-dir waivers \
       --out eval/labels.jsonl [--by-subtype]
   eval/harvest.py --summary-only eval/labels.jsonl [--by-subtype]
+  eval/harvest.py ... --json PATH
 
 --summary-only regroups an existing labels file without running ticfinder
 or reading REPO. --by-subtype splits each pattern row by subtype (see
-subtype()).
+subtype()). --json PATH also writes the summary rows as JSON, at both
+pattern and subtype level whatever --by-subtype says (schema:
+eval/TICFINDER_ROADMAP.md s.15). The text output does not change.
 """
 
 import argparse
+import datetime
 import difflib
+import hashlib
 import importlib.util
 import json
 import re
@@ -69,8 +74,8 @@ def subtype(label_text):
     return _COUNT_FIELD.sub("", m.group(1).strip()) or "-"
 
 
-def summarise(rows, by_subtype=False):
-    """Print the per construction / pattern (/ subtype) summary."""
+def aggregate(rows, by_subtype=False):
+    """{(construction, pattern[, subtype]): Counter of labels}."""
     agg = defaultdict(Counter)
     for r in rows:
         key = (r["construction"], r["pattern"] or "-")
@@ -79,6 +84,58 @@ def summarise(rows, by_subtype=False):
         lab = r["label"] if r["label"] != "removed" else \
             "removed_" + r["removal"]
         agg[key][lab] += 1
+    return agg
+
+
+JSON_SCHEMA = 1
+
+
+def write_json(path, rows, labels_path):
+    """Summary rows as numbers, at pattern and at subtype level."""
+    tf_path = HERE.parent / "tools" / "ticfinder.py"
+    commit = subprocess.run(
+        ["git", "-C", str(HERE.parent), "log", "-1", "--format=%h", "--",
+         "tools/ticfinder.py"], capture_output=True, text=True).stdout.strip()
+    dirty = subprocess.run(
+        ["git", "-C", str(HERE.parent), "status", "--porcelain", "--",
+         "tools/ticfinder.py"], capture_output=True, text=True).stdout.strip()
+
+    def level(by_subtype):
+        out = []
+        for key, n in sorted(aggregate(rows, by_subtype).items()):
+            tp, fp = n["removed_rewritten"], n["accepted"]
+            d = {"construction": key[0], "pattern": key[1]}
+            if by_subtype:
+                d["subtype"] = key[2]
+            d.update({"rewritten": tp, "deleted": n["removed_deleted"],
+                      "accepted": fp, "open": n["open"],
+                      "prec": tp / (tp + fp) if tp + fp else None})
+            out.append(d)
+        return out
+    tot = Counter()
+    for n in aggregate(rows).values():
+        tot.update(n)
+    out = {"schema": JSON_SCHEMA, "kind": "harvest-summary",
+           "tf_commit": commit + (" with uncommitted changes" if dirty
+                                  else ""),
+           "tf_sha256": hashlib.sha256(tf_path.read_bytes()).hexdigest()[:12],
+           "generated": datetime.date.today().isoformat(),
+           "labels": Path(labels_path).name,
+           "labels_sha256": hashlib.sha256(
+               Path(labels_path).read_bytes()).hexdigest()[:12],
+           "prec_definition": "rewritten / (rewritten + accepted); deleted "
+                              "excluded; null when both are 0",
+           "totals": {"rewritten": tot["removed_rewritten"],
+                      "deleted": tot["removed_deleted"],
+                      "accepted": tot["accepted"], "open": tot["open"]},
+           "patterns": level(False), "subtypes": level(True)}
+    Path(path).write_text(json.dumps(out, indent=1) + "\n", encoding="utf-8")
+    print(f"wrote {path}", file=sys.stderr)
+
+
+def summarise(rows, by_subtype=False):
+    """Print the per construction / pattern (/ subtype) summary."""
+    agg = aggregate(rows, by_subtype)
     sub_hdr = f" {'subtype':<24}" if by_subtype else ""
     print(f"\n{'construction':<22} {'pattern':<24}{sub_hdr} {'rewr':>5} "
           f"{'del':>5} {'acc':>5} {'open':>5} {'prec*':>6}")
@@ -146,6 +203,8 @@ def main():
     ap.add_argument("--summary-only", metavar="LABELS",
                     help="print the summary for an existing labels.jsonl; "
                          "runs no ticfinder and writes nothing")
+    ap.add_argument("--json", metavar="PATH",
+                    help="also write the summary rows as JSON")
     args = ap.parse_args()
 
     if args.summary_only:
@@ -153,6 +212,8 @@ def main():
                 Path(args.summary_only).read_text(encoding="utf-8")
                 .splitlines() if line.strip()]
         summarise(rows, args.by_subtype)
+        if args.json:
+            write_json(args.json, rows, args.summary_only)
         return
     if not args.repo or not args.docs:
         ap.error("REPO and --docs are required unless --summary-only "
@@ -206,6 +267,8 @@ def main():
         "".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
 
     summarise(rows, args.by_subtype)
+    if args.json:
+        write_json(args.json, rows, args.out)
 
 
 if __name__ == "__main__":

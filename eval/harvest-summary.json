@@ -1,0 +1,672 @@
+{
+ "schema": 1,
+ "kind": "harvest-summary",
+ "tf_commit": "651302d",
+ "tf_sha256": "81ade1e30516",
+ "generated": "2026-11-19",
+ "labels": "labels.jsonl",
+ "labels_sha256": "555a32cc1c09",
+ "prec_definition": "rewritten / (rewritten + accepted); deleted excluded; null when both are 0",
+ "totals": {
+  "rewritten": 54,
+  "deleted": 302,
+  "accepted": 141,
+  "open": 3
+ },
+ "patterns": [
+  {
+   "construction": "ABSTRACT_ADVERB",
+   "pattern": "abstract_adverb",
+   "rewritten": 0,
+   "deleted": 8,
+   "accepted": 1,
+   "open": 0,
+   "prec": 0.0
+  },
+  {
+   "construction": "ALTERNATIVE_FRAMING",
+   "pattern": "af_instead_of",
+   "rewritten": 1,
+   "deleted": 3,
+   "accepted": 7,
+   "open": 0,
+   "prec": 0.125
+  },
+  {
+   "construction": "ALTERNATIVE_FRAMING",
+   "pattern": "af_less_than",
+   "rewritten": 2,
+   "deleted": 7,
+   "accepted": 5,
+   "open": 0,
+   "prec": 0.2857142857142857
+  },
+  {
+   "construction": "ALTERNATIVE_FRAMING",
+   "pattern": "af_rather_than",
+   "rewritten": 14,
+   "deleted": 77,
+   "accepted": 12,
+   "open": 0,
+   "prec": 0.5384615384615384
+  },
+  {
+   "construction": "BORROWED_RIGOUR",
+   "pattern": "-",
+   "rewritten": 0,
+   "deleted": 10,
+   "accepted": 3,
+   "open": 0,
+   "prec": 0.0
+  },
+  {
+   "construction": "CONSULTANT_REGISTER",
+   "pattern": "-",
+   "rewritten": 0,
+   "deleted": 1,
+   "accepted": 0,
+   "open": 0,
+   "prec": null
+  },
+  {
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_cleft",
+   "rewritten": 0,
+   "deleted": 4,
+   "accepted": 1,
+   "open": 0,
+   "prec": 0.0
+  },
+  {
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_coordinated",
+   "rewritten": 0,
+   "deleted": 3,
+   "accepted": 5,
+   "open": 0,
+   "prec": 0.0
+  },
+  {
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_negated_apposition",
+   "rewritten": 0,
+   "deleted": 10,
+   "accepted": 8,
+   "open": 0,
+   "prec": 0.0
+  },
+  {
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_parallel_sibling",
+   "rewritten": 1,
+   "deleted": 3,
+   "accepted": 2,
+   "open": 0,
+   "prec": 0.3333333333333333
+  },
+  {
+   "construction": "EMPHATIC_REFLEXIVE",
+   "pattern": "emphatic_reflexive",
+   "rewritten": 2,
+   "deleted": 8,
+   "accepted": 2,
+   "open": 0,
+   "prec": 0.5
+  },
+  {
+   "construction": "EM_DASH",
+   "pattern": "-",
+   "rewritten": 8,
+   "deleted": 9,
+   "accepted": 0,
+   "open": 0,
+   "prec": 1.0
+  },
+  {
+   "construction": "GAPPED_ANTITHESIS",
+   "pattern": "gapped_antithesis",
+   "rewritten": 1,
+   "deleted": 1,
+   "accepted": 0,
+   "open": 3,
+   "prec": 1.0
+  },
+  {
+   "construction": "LLM_DICTION",
+   "pattern": "-",
+   "rewritten": 0,
+   "deleted": 6,
+   "accepted": 2,
+   "open": 0,
+   "prec": 0.0
+  },
+  {
+   "construction": "NEG_ESCALATION",
+   "pattern": "neg_escalation",
+   "rewritten": 0,
+   "deleted": 1,
+   "accepted": 0,
+   "open": 0,
+   "prec": null
+  },
+  {
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "rewritten": 6,
+   "deleted": 14,
+   "accepted": 9,
+   "open": 0,
+   "prec": 0.4
+  },
+  {
+   "construction": "TRICOLON",
+   "pattern": "tricolon",
+   "rewritten": 19,
+   "deleted": 136,
+   "accepted": 84,
+   "open": 0,
+   "prec": 0.18446601941747573
+  },
+  {
+   "construction": "TRICOLON",
+   "pattern": "tricolon_parataxis",
+   "rewritten": 0,
+   "deleted": 1,
+   "accepted": 0,
+   "open": 0,
+   "prec": null
+  }
+ ],
+ "subtypes": [
+  {
+   "construction": "ABSTRACT_ADVERB",
+   "pattern": "abstract_adverb",
+   "subtype": "arithmetically",
+   "rewritten": 0,
+   "deleted": 1,
+   "accepted": 0,
+   "open": 0,
+   "prec": null
+  },
+  {
+   "construction": "ABSTRACT_ADVERB",
+   "pattern": "abstract_adverb",
+   "subtype": "geometrically",
+   "rewritten": 0,
+   "deleted": 1,
+   "accepted": 0,
+   "open": 0,
+   "prec": null
+  },
+  {
+   "construction": "ABSTRACT_ADVERB",
+   "pattern": "abstract_adverb",
+   "subtype": "mutually",
+   "rewritten": 0,
+   "deleted": 3,
+   "accepted": 1,
+   "open": 0,
+   "prec": 0.0
+  },
+  {
+   "construction": "ABSTRACT_ADVERB",
+   "pattern": "abstract_adverb",
+   "subtype": "semantically",
+   "rewritten": 0,
+   "deleted": 1,
+   "accepted": 0,
+   "open": 0,
+   "prec": null
+  },
+  {
+   "construction": "ABSTRACT_ADVERB",
+   "pattern": "abstract_adverb",
+   "subtype": "structurally",
+   "rewritten": 0,
+   "deleted": 1,
+   "accepted": 0,
+   "open": 0,
+   "prec": null
+  },
+  {
+   "construction": "ABSTRACT_ADVERB",
+   "pattern": "abstract_adverb",
+   "subtype": "syntactically",
+   "rewritten": 0,
+   "deleted": 1,
+   "accepted": 0,
+   "open": 0,
+   "prec": null
+  },
+  {
+   "construction": "ALTERNATIVE_FRAMING",
+   "pattern": "af_instead_of",
+   "subtype": "instead of",
+   "rewritten": 1,
+   "deleted": 3,
+   "accepted": 7,
+   "open": 0,
+   "prec": 0.125
+  },
+  {
+   "construction": "ALTERNATIVE_FRAMING",
+   "pattern": "af_less_than",
+   "subtype": "less...than",
+   "rewritten": 1,
+   "deleted": 1,
+   "accepted": 0,
+   "open": 0,
+   "prec": 1.0
+  },
+  {
+   "construction": "ALTERNATIVE_FRAMING",
+   "pattern": "af_less_than",
+   "subtype": "more...than",
+   "rewritten": 1,
+   "deleted": 6,
+   "accepted": 5,
+   "open": 0,
+   "prec": 0.16666666666666666
+  },
+  {
+   "construction": "ALTERNATIVE_FRAMING",
+   "pattern": "af_rather_than",
+   "subtype": "rather than",
+   "rewritten": 14,
+   "deleted": 77,
+   "accepted": 12,
+   "open": 0,
+   "prec": 0.5384615384615384
+  },
+  {
+   "construction": "BORROWED_RIGOUR",
+   "pattern": "-",
+   "subtype": "-",
+   "rewritten": 0,
+   "deleted": 10,
+   "accepted": 3,
+   "open": 0,
+   "prec": 0.0
+  },
+  {
+   "construction": "CONSULTANT_REGISTER",
+   "pattern": "-",
+   "subtype": "-",
+   "rewritten": 0,
+   "deleted": 1,
+   "accepted": 0,
+   "open": 0,
+   "prec": null
+  },
+  {
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_cleft",
+   "subtype": "cleft",
+   "rewritten": 0,
+   "deleted": 2,
+   "accepted": 1,
+   "open": 0,
+   "prec": 0.0
+  },
+  {
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_cleft",
+   "subtype": "cleft, across sentences",
+   "rewritten": 0,
+   "deleted": 2,
+   "accepted": 0,
+   "open": 0,
+   "prec": null
+  },
+  {
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_coordinated",
+   "subtype": "not X but Y",
+   "rewritten": 0,
+   "deleted": 3,
+   "accepted": 5,
+   "open": 0,
+   "prec": 0.0
+  },
+  {
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_negated_apposition",
+   "subtype": "X, not Y",
+   "rewritten": 0,
+   "deleted": 10,
+   "accepted": 8,
+   "open": 0,
+   "prec": 0.0
+  },
+  {
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_parallel_sibling",
+   "subtype": "X, not Y",
+   "rewritten": 1,
+   "deleted": 3,
+   "accepted": 2,
+   "open": 0,
+   "prec": 0.3333333333333333
+  },
+  {
+   "construction": "EMPHATIC_REFLEXIVE",
+   "pattern": "emphatic_reflexive",
+   "subtype": "itself",
+   "rewritten": 2,
+   "deleted": 7,
+   "accepted": 2,
+   "open": 0,
+   "prec": 0.5
+  },
+  {
+   "construction": "EMPHATIC_REFLEXIVE",
+   "pattern": "emphatic_reflexive",
+   "subtype": "themselves",
+   "rewritten": 0,
+   "deleted": 1,
+   "accepted": 0,
+   "open": 0,
+   "prec": null
+  },
+  {
+   "construction": "EM_DASH",
+   "pattern": "-",
+   "subtype": "paired aside",
+   "rewritten": 6,
+   "deleted": 6,
+   "accepted": 0,
+   "open": 0,
+   "prec": 1.0
+  },
+  {
+   "construction": "EM_DASH",
+   "pattern": "-",
+   "subtype": "pivot (\u2014 it's Y)",
+   "rewritten": 1,
+   "deleted": 0,
+   "accepted": 0,
+   "open": 0,
+   "prec": 1.0
+  },
+  {
+   "construction": "EM_DASH",
+   "pattern": "-",
+   "subtype": "single break",
+   "rewritten": 1,
+   "deleted": 3,
+   "accepted": 0,
+   "open": 0,
+   "prec": 1.0
+  },
+  {
+   "construction": "GAPPED_ANTITHESIS",
+   "pattern": "gapped_antithesis",
+   "subtype": "before/after",
+   "rewritten": 1,
+   "deleted": 1,
+   "accepted": 0,
+   "open": 3,
+   "prec": 1.0
+  },
+  {
+   "construction": "LLM_DICTION",
+   "pattern": "-",
+   "subtype": "-",
+   "rewritten": 0,
+   "deleted": 6,
+   "accepted": 2,
+   "open": 0,
+   "prec": 0.0
+  },
+  {
+   "construction": "NEG_ESCALATION",
+   "pattern": "neg_escalation",
+   "subtype": "never",
+   "rewritten": 0,
+   "deleted": 1,
+   "accepted": 0,
+   "open": 0,
+   "prec": null
+  },
+  {
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "apply",
+   "rewritten": 1,
+   "deleted": 0,
+   "accepted": 0,
+   "open": 0,
+   "prec": 1.0
+  },
+  {
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "arrive",
+   "rewritten": 0,
+   "deleted": 1,
+   "accepted": 0,
+   "open": 0,
+   "prec": null
+  },
+  {
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "carry",
+   "rewritten": 1,
+   "deleted": 0,
+   "accepted": 1,
+   "open": 0,
+   "prec": 0.5
+  },
+  {
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "change",
+   "rewritten": 0,
+   "deleted": 0,
+   "accepted": 1,
+   "open": 0,
+   "prec": 0.0
+  },
+  {
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "close",
+   "rewritten": 0,
+   "deleted": 0,
+   "accepted": 1,
+   "open": 0,
+   "prec": 0.0
+  },
+  {
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "confirm",
+   "rewritten": 1,
+   "deleted": 1,
+   "accepted": 0,
+   "open": 0,
+   "prec": 1.0
+  },
+  {
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "count",
+   "rewritten": 0,
+   "deleted": 1,
+   "accepted": 0,
+   "open": 0,
+   "prec": null
+  },
+  {
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "cover",
+   "rewritten": 1,
+   "deleted": 0,
+   "accepted": 2,
+   "open": 0,
+   "prec": 0.3333333333333333
+  },
+  {
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "discard",
+   "rewritten": 0,
+   "deleted": 0,
+   "accepted": 1,
+   "open": 0,
+   "prec": 0.0
+  },
+  {
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "end",
+   "rewritten": 0,
+   "deleted": 1,
+   "accepted": 0,
+   "open": 0,
+   "prec": null
+  },
+  {
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "give",
+   "rewritten": 0,
+   "deleted": 4,
+   "accepted": 0,
+   "open": 0,
+   "prec": null
+  },
+  {
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "hold",
+   "rewritten": 1,
+   "deleted": 0,
+   "accepted": 0,
+   "open": 0,
+   "prec": 1.0
+  },
+  {
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "model",
+   "rewritten": 0,
+   "deleted": 1,
+   "accepted": 0,
+   "open": 0,
+   "prec": null
+  },
+  {
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "remove",
+   "rewritten": 1,
+   "deleted": 0,
+   "accepted": 1,
+   "open": 0,
+   "prec": 0.5
+  },
+  {
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "result",
+   "rewritten": 0,
+   "deleted": 0,
+   "accepted": 1,
+   "open": 0,
+   "prec": 0.0
+  },
+  {
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "reverse",
+   "rewritten": 0,
+   "deleted": 1,
+   "accepted": 1,
+   "open": 0,
+   "prec": 0.0
+  },
+  {
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "separate",
+   "rewritten": 0,
+   "deleted": 1,
+   "accepted": 0,
+   "open": 0,
+   "prec": null
+  },
+  {
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "sit",
+   "rewritten": 0,
+   "deleted": 1,
+   "accepted": 0,
+   "open": 0,
+   "prec": null
+  },
+  {
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "take",
+   "rewritten": 0,
+   "deleted": 1,
+   "accepted": 0,
+   "open": 0,
+   "prec": null
+  },
+  {
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "walk",
+   "rewritten": 0,
+   "deleted": 1,
+   "accepted": 0,
+   "open": 0,
+   "prec": null
+  },
+  {
+   "construction": "TRICOLON",
+   "pattern": "tricolon",
+   "subtype": "enumeration",
+   "rewritten": 3,
+   "deleted": 39,
+   "accepted": 23,
+   "open": 0,
+   "prec": 0.11538461538461539
+  },
+  {
+   "construction": "TRICOLON",
+   "pattern": "tricolon",
+   "subtype": "figure",
+   "rewritten": 1,
+   "deleted": 8,
+   "accepted": 9,
+   "open": 0,
+   "prec": 0.1
+  },
+  {
+   "construction": "TRICOLON",
+   "pattern": "tricolon",
+   "subtype": "list-like",
+   "rewritten": 15,
+   "deleted": 89,
+   "accepted": 52,
+   "open": 0,
+   "prec": 0.22388059701492538
+  },
+  {
+   "construction": "TRICOLON",
+   "pattern": "tricolon_parataxis",
+   "subtype": "asyndetic",
+   "rewritten": 0,
+   "deleted": 1,
+   "accepted": 0,
+   "open": 0,
+   "prec": null
+  }
+ ]
+}

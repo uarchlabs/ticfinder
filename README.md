@@ -339,6 +339,30 @@ Stale entries are never removed automatically. A waiver goes stale because the
 sentence changed, and that is either a rewrite worth recording or an accidental
 revert worth noticing; the tool cannot tell which.
 
+### Migrating waivers
+
+Two changes alter the id of a finding whose text did not change, so its
+waiver shows as stale:
+
+- ids written before TF-001 hashed only the first 240 characters of the
+  sentence
+- a pattern was renamed or split. The id hashes the pattern name. TF-007
+  split `af_rather_instead` into `af_rather_than` and `af_instead_of`, so
+  each of its findings has a new id
+
+`RENAMED_PATTERNS` in `ticfinder.py` maps each new pattern name to the old
+one. A normal run counts the waivers held under an old-style id and reports
+the count. It writes nothing. `--migrate-waivers` rekeys them in the
+waiver file and prints each one it moved. An entry whose `pattern` field held
+the old name gets the new name.
+
+```
+./tools/ticfinder.py --waiver-dir waivers --migrate-waivers posts/*.md
+```
+
+Check the printed sentences after a migration from the 240-character ids,
+since an edit past that point was not detected before.
+
 The waiver file records the source path it was written for and warns on
 mismatch. This covers the case where two directories hold the same filename.
 
@@ -417,6 +441,26 @@ Two shorthands are accepted: a bare list of strings (everything becomes
 `match_lemma: true` matches inflected forms, so `leverage` also catches
 `leveraged` and `leveraging`. It costs a full parse of each phrase at startup,
 so use it for single words and leave it off for fixed multi-word phrases.
+
+An entry in `phrases` is a string or an object. The object sets a confidence
+for one phrase, or for single word forms of it:
+
+```json
+"phrases": [
+  "paradigm",
+  {"phrase": "landscape", "confidence": "med"},
+  {"phrase": "leverage", "forms": {"leverages": "med", "leveraging": "med"}}
+]
+```
+
+`confidence` applies to every match of the phrase. `forms` maps a matched
+text, lowercased, to a level, which is how one lemma entry gives `leverages`
+a different level from `leverage`. A form not in `forms` takes the phrase's
+`confidence`, and a phrase without one takes the construction's. Levels are
+`high`, `med` and `low`. An unknown key, an empty phrase, a bad level or a
+`forms` value that is not a mapping stops the load with an error. The
+confidence does not enter the finding's id, so changing a level keeps every
+waiver.
 
 Phrases are best grouped by why they are a problem rather than alphabetically.
 Each group becomes its own construction id, with its own row in the summary and

@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
-"""ticfinder construction rates in arXiv cs.AR paper bodies (TF-005 pilot).
+"""ticfinder construction rates in arXiv cs.AR paper bodies (TF-005 pilot,
+TF-008 full run).
 
   fetch        walk a seeded shuffle of each window's TF-004 primary ids,
                download the v1 LaTeX source from export.arxiv.org/e-print,
-               and keep the first 200 papers per window with usable
-               source. Archives are cached under private/arxiv/source/,
+               and keep the first --want papers per window with usable
+               source (default 200, the pilot). --want all walks every pre
+               id and then walks post until it keeps as many as pre kept.
+               Archives are cached under private/arxiv/source/,
                the expanded main file under private/arxiv/expanded/, and
-               the sample and per-paper records under private/arxiv/bodies/.
+               the sample and per-paper records under private/arxiv/bodies/
+               (sample.json and papers.jsonl, or sample-NAME.json and
+               papers-NAME.jsonl with --sample-name NAME).
                A rerun fetches only what is missing.
   selftest     expected-output rows for the LaTeX masker and the section
                classifier, written from synthetic LaTeX only.
@@ -15,6 +20,10 @@
                spot-check. Prints text; writes nothing.
   analyse      phase 2: ticfinder over the masked bodies and the same
                papers' abstracts, per-section rates, and the report.
+               --report-only --table-sha SHA [--table-dir DIR] rebuilds a
+               report from a table written by an earlier ticfinder (pinned
+               rebuild). --json PATH also writes every report row as JSON
+               (schema: eval/TICFINDER_ROADMAP.md s.15).
 
 Windows, primary category and dating are TF-004's (eval/arxiv_rates.py).
 The sample is drawn from the TF-004 month manifests; no new metadata is
@@ -49,8 +58,25 @@ CACHE = AR.CACHE
 SRC = CACHE / "source"
 EXP = CACHE / "expanded"
 BODY = CACHE / "bodies"
-SAMPLE_FILE = BODY / "sample.json"
-RECORDS = BODY / "papers.jsonl"
+
+
+def use_paths(table_dir=None, sample_name=None):
+    """Point the sample, record and table files at a directory and sample.
+
+    The default is private/arxiv/bodies/ with sample.json and papers.jsonl
+    (the pilot). --sample-name NAME selects sample-NAME.json and
+    papers-NAME.jsonl; --table-dir reads another directory (a snapshot).
+    """
+    global SAMPLE_FILE, RECORDS, TABLE_B, FIND_B
+    d = AR.Path(table_dir) if table_dir else BODY
+    suf = f"-{sample_name}" if sample_name else ""
+    SAMPLE_FILE = d / f"sample{suf}.json"
+    RECORDS = d / f"papers{suf}.jsonl"
+    TABLE_B = d / "per_paper.jsonl"
+    FIND_B = d / "findings.jsonl"
+
+
+use_paths()
 
 EPRINT = "https://export.arxiv.org/e-print/"
 WANT = 200              # usable papers per window
@@ -960,16 +986,20 @@ def process(pid, data):
 def cmd_fetch(args):
     for d in (SRC, EXP, BODY):
         d.mkdir(parents=True, exist_ok=True)
-    sample = {"seed": BODY_SEED, "want": WANT, "windows": {}}
+    want = "all" if args.want == "all" else int(args.want)
+    sample = {"seed": BODY_SEED, "want": want, "windows": {}}
     records = []
     fetched = []
     t0 = time.monotonic()
     try:
         for window in AR.WINDOWS:
             ids = window_ids(window)
+            # --want all: every pre id, then post until it matches pre
+            target = (want if want != "all" else len(ids) if window == "pre"
+                      else len(sample["windows"]["pre"]["kept"]))
             kept, skips, walked = [], Counter(), 0
             for pid in ids:
-                if len(kept) >= WANT:
+                if len(kept) >= target:
                     break
                 walked += 1
                 data, new = cached_source(pid, fetched)
@@ -1119,8 +1149,6 @@ def cmd_mask_report(args):
 
 # ------------------------------------------------------------- analyse
 
-TABLE_B = BODY / "per_paper.jsonl"
-FIND_B = BODY / "findings.jsonl"
 TMP_B = AR.TMP
 BOOT_SEED_B = 5005
 SECTION_TYPES = ["introduction", "body", "related", "conclusion"]
@@ -1140,14 +1168,21 @@ def section_of(spans, pos):
     return None
 
 
-def counts_of(findings):
-    by = {"construction": Counter(), "pattern": Counter(),
-          "subtype": Counter()}
+LEVELS = ("construction", "pattern", "subtype", "phrase")
+
+
+def counts_of(findings, phrase_ids):
+    """Counts by level. A phrase key is construction|matched text,
+    lowercased, as in arxiv_rates.py (TF-008; pilot tables have none)."""
+    by = {lvl: Counter() for lvl in LEVELS}
     for f in findings:
         pat = f.pattern or "-"
         by["construction"][f.construction] += 1
         by["pattern"][f"{f.construction}|{pat}"] += 1
         by["subtype"][f"{f.construction}|{pat}|{AR.subtype(f.label)}"] += 1
+        if f.construction in phrase_ids:
+            by["phrase"][f"{f.construction}|"
+                         f"{' '.join(f.text.lower().split())}"] += 1
     return by
 
 
@@ -1171,6 +1206,7 @@ def run_body_analysis():
     extra = []
     for f in tf.discover_phrase_files(None):
         extra.extend(tf.load_phrase_file(f))
+    phrase_ids = {e["id"] for e in extra} | set(tf.PHRASE_PATTERNS)
     TMP_B.mkdir(parents=True, exist_ok=True)
     rows, allf = [], []
     old_f = defaultdict(list)
@@ -1188,7 +1224,8 @@ def run_body_analysis():
         abs_masked, abs_nblank = AR.mask_latex(abstract)
         key = (ver["sha256"], sha(masked), sha(abs_masked))
         r = done.get(pid)
-        if r and (r["tf_sha256"], r["mask_sha"], r["abs_sha"]) == key:
+        if r and (r["tf_sha256"], r["mask_sha"], r["abs_sha"]) == key \
+                and "phrase" in r["counts"]["body"]:
             rows.append(r)
             allf.extend(old_f[pid])
             continue
@@ -1232,7 +1269,7 @@ def run_body_analysis():
                          "text": f.text, "context": f.context})
         wt = {t: words.get(t, 0) for t in SECTION_TYPES}
         wt["abstract"] = astats["words"]
-        cnt = {t: counts_of(per_type[t]) for t in ["abstract"]
+        cnt = {t: counts_of(per_type[t], phrase_ids) for t in ["abstract"]
                + SECTION_TYPES}
         r = {"id": pid, "window": window, "tf_sha256": ver["sha256"],
              "mask_sha": key[1], "abs_sha": key[2], "words": wt,
@@ -1257,8 +1294,8 @@ def run_body_analysis():
           file=sys.stderr)
 
 
-def load_body_table():
-    ver = AR.tf_version()
+def load_body_table(pin=None):
+    ver = AR.tf_version(pin)
     sample, papers = kept_papers()
     want = {(w, p) for w, p, _ in papers}
     rows = defaultdict(list)
@@ -1274,10 +1311,10 @@ def load_body_table():
         for r in rows[w]:
             r["words"]["all"] = sum(r["words"][t] for t in SECTION_TYPES)
             r["counts"]["all"] = {}
-            for lvl in ("construction", "pattern", "subtype"):
+            for lvl in LEVELS:
                 c = Counter()
                 for t in SECTION_TYPES:
-                    c.update(r["counts"][t][lvl])
+                    c.update(r["counts"][t].get(lvl, {}))
                 r["counts"]["all"][lvl] = c
     return sample, rows, ver
 
@@ -1302,7 +1339,7 @@ class Boot:
         self.cache = {}
 
     def counts(self, w, t, lvl, key):
-        return self.np.array([r["counts"][t][lvl].get(key, 0)
+        return self.np.array([r["counts"][t].get(lvl, {}).get(key, 0)
                               for r in self.rows[w]], dtype=float)
 
     def stat(self, t, lvl, key):
@@ -1450,22 +1487,59 @@ def single_pattern(B, key):
 
 def write_body_report(args):
     import numpy as np
-    sample, rows, ver = load_body_table()
+    sample, rows, ver = load_body_table(args.table_sha)
     _, recs = load_records()
     draws = args.draws
-    B = Boot(rows, draws, BOOT_SEED_B)
+    seed = args.seed
+    full = args.layout == "full"
+    B = Boot(rows, draws, seed)
     keys = {lvl: sorted({k for w in rows for r in rows[w] for t in TYPES
-                         for k in r["counts"][t][lvl]})
-            for lvl in ("construction", "pattern", "subtype")}
+                         for k in r["counts"][t].get(lvl, {})})
+            for lvl in LEVELS}
     today = __import__("datetime").date.today().isoformat()
-    out_path = AR.Path(args.report or AR.HERE / f"arxiv-bodies-{today}.md")
+    stem = "arxiv-bodies-full" if full else "arxiv-bodies"
+    out_path = AR.Path(args.report or AR.HERE / f"{stem}-{today}.md")
+    pilot_report = AR.HERE / "arxiv-bodies-2026-11-18.md"
+    if out_path.resolve() == pilot_report.resolve() and not args.table_sha:
+        sys.exit(f"refusing to overwrite the committed pilot report "
+                 f"{pilot_report.name}")
     L = []
     p = L.append
+    J = []      # JSON rows, one per row the report prints
 
-    p("# ticfinder construction rates in arXiv cs.AR paper bodies, a pilot")
-    p("")
-    p(f"Generated {today} by `eval/arxiv_bodies.py` (TF-005). Aggregates "
-      "only: no paper text, titles or ids.")
+    def jci(x, ci):
+        return {"value": AR.jnum(x), "lo": AR.jnum(ci[0]),
+                "hi": AR.jnum(ci[1])}
+
+    def jstat(t, lvl, k, s, table):
+        side = {w: {"n": s["o"][w]["n"], "papers": s["o"][w]["papers"],
+                    "rate": AR.jnum(s["o"][w]["rate"]),
+                    "rate_lo": AR.jnum(s["o"][w]["ci"][0]),
+                    "rate_hi": AR.jnum(s["o"][w]["ci"][1]),
+                    "mean": AR.jnum(s["o"][w]["mean"]),
+                    "mean_lo": AR.jnum(s["o"][w]["mean_ci"][0]),
+                    "mean_hi": AR.jnum(s["o"][w]["mean_ci"][1])}
+                for w in ("pre", "post")}
+        J.append({"table": table, "level": lvl, "key": k,
+                  **AR.split_key(lvl, k), "text_type": t, **side,
+                  "ratio": AR.jnum(s["ratio"]),
+                  "ratio_lo": AR.jnum(s["ratio_ci"][0]),
+                  "ratio_hi": AR.jnum(s["ratio_ci"][1]), "n": s["n"],
+                  "verdict": verdict(s["n"], *s["ratio_ci"])})
+
+    if full:
+        p("# ticfinder construction rates in arXiv cs.AR paper bodies, "
+          "full run")
+        p("")
+        p(f"Generated {today} by `eval/arxiv_bodies.py` (TF-008). Aggregates "
+          "only: no paper text, titles or ids. Ratios are rates over two "
+          "periods (post over pre), not likelihood ratios.")
+    else:
+        p("# ticfinder construction rates in arXiv cs.AR paper bodies, a "
+          "pilot")
+        p("")
+        p(f"Generated {today} by `eval/arxiv_bodies.py` (TF-005). Aggregates "
+          "only: no paper text, titles or ids.")
     p("")
     p("## Setup")
     p("")
@@ -1474,9 +1548,16 @@ def write_body_report(args):
     p("| papers | TF-004 primary `cs.AR` sets (month manifests); windows by "
       "v1 date: pre 2018-01-01 to 2021-12-31, post 2025-01-01 to the "
       "latest TF-004 date |")
-    p(f"| sample | each window's ids shuffled with seed "
-      f"`{BODY_SEED}-bodies-<window>`; walked in order, the first {WANT} "
-      "with usable LaTeX source kept |")
+    if sample["want"] == "all":
+        p(f"| sample | each window's ids shuffled with seed "
+          f"`{BODY_SEED}-bodies-<window>` and walked in order: every pre id, "
+          "then post until it kept as many papers with usable LaTeX source "
+          "as pre kept. The pilot's papers are the first "
+          f"{WANT} kept in each window |")
+    else:
+        p(f"| sample | each window's ids shuffled with seed "
+          f"`{BODY_SEED}-bodies-<window>`; walked in order, the first "
+          f"{sample['want']} with usable LaTeX source kept |")
     p("| source | `export.arxiv.org/e-print/<id>v1` (the v1 source, so a "
       "body cannot hold a later revision), 3.5 s between requests |")
     p("| abstracts | the same papers' API abstracts (latest version, as in "
@@ -1492,7 +1573,7 @@ def write_body_report(args):
       "becomes U+2014 and two spaces. `selftest` holds its rows |")
     p(f"| sections | {SECTION_RULE} Findings are assigned to a section by "
       "offset |")
-    p(f"| bootstrap | {draws} draws over papers, seed {BOOT_SEED_B}; one "
+    p(f"| bootstrap | {draws} draws over papers, seed {seed}; one "
       "index matrix per window shared by every text type, so comparisons "
       "between text types are paired; percentile 95% intervals (nearest "
       "rank for ratios) |")
@@ -1600,6 +1681,7 @@ def write_body_report(args):
           f"{ci_txt(b['rate'], b['ci'])} | "
           f"{ci_txt(s['ratio'], s['ratio_ci'])} | "
           f"{verdict(s['n'], *s['ratio_ci'])} |")
+        jstat(t, "construction", "EM_DASH", s, "EM_DASH per text type")
     p("")
 
     # comparisons
@@ -1630,6 +1712,15 @@ def write_body_report(args):
                   f"{ci_txt(d['b']['ratio'], d['b']['ratio_ci'])} | "
                   f"{ci_txt(d['rr'], d['rr_ci'])} | "
                   f"{'yes' if d['inside'] else 'no'} |")
+                J.append({"table": title, "level": lvl, "key": d["key"],
+                          **AR.split_key(lvl, d["key"]), "text_type": ta,
+                          "text_type_b": tb,
+                          "n_a": {"pre": c[0], "post": c[1]},
+                          "n_b": {"pre": c[2], "post": c[3]},
+                          "ratio_a": jci(d["a"]["ratio"], d["a"]["ratio_ci"]),
+                          "ratio_b": jci(d["b"]["ratio"], d["b"]["ratio_ci"]),
+                          "ratio_of_ratios": jci(d["rr"], d["rr_ci"]),
+                          "inside": bool(d["inside"])})
         n_in = sum(d["inside"] for lvl in ("construction", "pattern")
                    for d in comps[(ta, tb, lvl)])
         n_all = sum(len(comps[(ta, tb, lvl)]) for lvl in ("construction",
@@ -1683,20 +1774,38 @@ def write_body_report(args):
               f"{AR.fmt(hi4)}) | {s['o']['pre']['n']} / "
               f"{s['o']['post']['n']} | {ci_txt(s['ratio'], s['ratio_ci'])}"
               f" | {'yes' if ins else 'no'} | {'yes' if rev else 'no'} |")
+            J.append({"table": "Check against TF-004", "level": lvl,
+                      "key": k, **AR.split_key(lvl, k),
+                      "text_type": "abstract",
+                      "tf004": {"n": n, "value": AR.jnum(r4),
+                                "lo": AR.jnum(lo4), "hi": AR.jnum(hi4)},
+                      "n_pre": s["o"]["pre"]["n"],
+                      "n_post": s["o"]["post"]["n"],
+                      "sample_ratio": jci(s["ratio"], s["ratio_ci"]),
+                      "sample_inside_tf004": bool(ins),
+                      "tf004_inside_sample": bool(rev)})
     p("")
-    p(f"{nchk - len(outside)} of {nchk} sample abstract ratios lie inside "
-      f"the TF-004 interval; the TF-004 ratio lies inside the sample "
-      f"interval for {nchk - len(rev_out)} of {nchk}. The sample's abstract "
-      "counts equal the TF-004 per-paper counts for the same papers (same "
-      "abstracts, same ticfinder), so the differences come from drawing "
-      "200 papers, and from keeping only papers with usable LaTeX. A "
-      "200-paper interval is two to three times as wide as the TF-004 one, "
-      "so about half of the sample points are expected inside the narrower "
-      "TF-004 interval by sampling alone.")
+    if full:
+        p(f"{nchk - len(outside)} of {nchk} sample abstract ratios lie inside "
+          f"the TF-004 interval; the TF-004 ratio lies inside the sample "
+          f"interval for {nchk - len(rev_out)} of {nchk}. TF-004 ran an "
+          "earlier ticfinder (69e1743), so rows whose code changed in TF-006 "
+          "and TF-007 can differ for that reason as well as from sampling "
+          "and from keeping only papers with usable LaTeX.")
+    else:
+        p(f"{nchk - len(outside)} of {nchk} sample abstract ratios lie inside "
+          f"the TF-004 interval; the TF-004 ratio lies inside the sample "
+          f"interval for {nchk - len(rev_out)} of {nchk}. The sample's "
+          "abstract counts equal the TF-004 per-paper counts for the same "
+          "papers (same abstracts, same ticfinder), so the differences come "
+          "from drawing 200 papers, and from keeping only papers with usable "
+          "LaTeX. A 200-paper interval is two to three times as wide as the "
+          "TF-004 one, so about half of the sample points are expected inside "
+          "the narrower TF-004 interval by sampling alone.")
     p("")
 
     # rate tables per text type
-    def rate_table(t, lvl, minn):
+    def rate_table(t, lvl, minn, table=None):
         rs = []
         for k in keys[lvl]:
             s = B.stat(t, lvl, k)
@@ -1718,6 +1827,7 @@ def write_body_report(args):
               f"{ci_txt(b['mean'], b['mean_ci'])} | "
               f"{ci_txt(s['ratio'], s['ratio_ci'])} | "
               f"{verdict(s['n'], *s['ratio_ci'])} |")
+            jstat(t, lvl, k, s, table or f"Rates per text type: {t}, {lvl}")
         p("")
     p("## Rates per text type")
     p("")
@@ -1740,8 +1850,72 @@ def write_body_report(args):
     p(f"With {npat} body pattern rows at 95%, a few `rose` or `fell` "
       "verdicts near an interval edge are expected by chance.")
     p("")
+    if full:
+        p("### all, subtypes with at least 20 findings")
+        p("")
+        rate_table("all", "subtype", MIN_N)
+        p("## Phrase-list matches")
+        p("")
+        p("Every phrase-list construction, keyed by matched text, lowercased "
+          f"(one lemma entry gives a row per word form). Rows with at least "
+          f"{MIN_N} findings in both windows together.")
+        p("")
+        for t in ("all", "body"):
+            p(f"### {t}")
+            p("")
+            rate_table(t, "phrase", MIN_N, f"Phrase-list matches: {t}")
+        p("## `ALTERNATIVE_FRAMING` by pattern")
+        p("")
+        p("The TF-007 split: `af_rather_than` and `af_instead_of` apart, per "
+          f"text type, rows with at least {MIN_N} findings.")
+        p("")
+        p("| text type | pattern | pre n | post n | ratio (95% CI) | verdict |")
+        p("|---|---|---|---|---|---|")
+        for t in TYPES:
+            for k in keys["pattern"]:
+                if not k.startswith("ALTERNATIVE_FRAMING|"):
+                    continue
+                s = B.stat(t, "pattern", k)
+                if s["n"] < MIN_N:
+                    continue
+                p(f"| {t} | `{k.split('|')[1]}` | {s['o']['pre']['n']} | "
+                  f"{s['o']['post']['n']} | "
+                  f"{ci_txt(s['ratio'], s['ratio_ci'])} | "
+                  f"{verdict(s['n'], *s['ratio_ci'])} |")
+                jstat(t, "pattern", k, s, "ALTERNATIVE_FRAMING by pattern")
+        p("")
     out_path.write_text("\n".join(L), encoding="utf-8")
     print(f"wrote {out_path}", file=sys.stderr)
+    if args.json:
+        smp = {}
+        for w in ("pre", "post"):
+            v_all, v_in = shares(w, False), shares(w, True)
+            smp[w] = {
+                "population": ws[w]["population"], "walked": ws[w]["walked"],
+                "kept": len(ws[w]["kept"]), "skips": ws[w]["skips"],
+                "masked_share_median": median(v_all),
+                "masked_share_over_40": sum(1 for x in v_all if x > 40),
+                "masked_share_in_body_median": median(v_in),
+                "masked_share_in_body_over_40": sum(1 for x in v_in
+                                                    if x > 40),
+                "dashes": {k: sum(r["dashes"][k] for r in R[w])
+                           for k in ("tex_emdash", "spaced_endash",
+                                     "unicode_emdash", "unicode_endash")},
+                "findings_outside_sections": sum(r["unassigned"]
+                                                 for r in rows[w]),
+                "words": {t: int(B.W[(w, t)].sum()) for t in TYPES},
+                "papers_with_text": {t: int((B.W[(w, t)] > 0).sum())
+                                     for t in TYPES}}
+        AR.write_json(args.json, "arxiv-bodies", ver, {
+            "report": out_path.name, "layout": args.layout,
+            "sample_want": sample["want"],
+            "bootstrap": {"draws": draws, "seed": seed,
+                          "interval": "percentile 95%, nearest rank for "
+                                      "ratios; one index matrix per window "
+                                      "shared by every text type"},
+            "min_n": MIN_N, "sample": smp,
+            "note": "ratios are post rate over pre rate, two periods; "
+                    "they are not likelihood ratios"}, J)
 
     # console summary
     print(f"\nwords: " + ", ".join(
@@ -1775,7 +1949,13 @@ def main():
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("fetch", help="fetch and prepare the source sample")
+    f = sub.add_parser("fetch", help="fetch and prepare the source sample")
+    f.add_argument("--want", default=str(WANT),
+                   help=f"usable papers per window (default {WANT}); 'all' "
+                        "walks every pre id and post until it matches pre")
+    f.add_argument("--sample-name", metavar="NAME",
+                   help="write sample-NAME.json and papers-NAME.jsonl "
+                        "(default sample.json and papers.jsonl)")
     s = sub.add_parser("selftest", help="masker and section-classifier rows")
     s.add_argument("-v", "--verbose", action="store_true")
     m = sub.add_parser("mask-report", help="masked shares, skips, and a "
@@ -1784,6 +1964,7 @@ def main():
                    help="sentences per window (default 40)")
     m.add_argument("-q", "--quiet", action="store_true",
                    help="figures only, no sentences")
+    m.add_argument("--sample-name", metavar="NAME")
     a = sub.add_parser("analyse", help="run ticfinder on bodies and "
                        "abstracts and write the report")
     a.add_argument("--draws", type=int, default=2000)
@@ -1796,9 +1977,32 @@ def main():
                         "CID|pattern) per window; writes nothing")
     a.add_argument("--type", default="body", choices=TYPES)
     a.add_argument("-n", type=int, default=20)
+    a.add_argument("--sample-name", metavar="NAME",
+                   help="read sample-NAME.json and papers-NAME.jsonl")
+    a.add_argument("--seed", type=int, default=BOOT_SEED_B,
+                   help=f"bootstrap seed (default {BOOT_SEED_B}, the pilot's)")
+    a.add_argument("--layout", choices=("pilot", "full"),
+                   help="report layout (default full with --sample-name "
+                        "full, else pilot)")
+    a.add_argument("--table-sha", metavar="SHA",
+                   help="with --report-only: the ticfinder sha256 prefix the "
+                        "stored table was written with (pinned rebuild)")
+    a.add_argument("--table-dir", metavar="DIR",
+                   help="with --report-only: read sample, records and tables "
+                        "from DIR (a snapshot) instead of private/arxiv/bodies")
+    a.add_argument("--json", metavar="PATH",
+                   help="also write every report row as JSON")
     args = ap.parse_args()
     if args.cmd == "analyse" and args.draws < 1000:
         sys.exit("--draws must be at least 1000")
+    if args.cmd == "analyse":
+        if (args.table_sha or args.table_dir) and not args.report_only \
+                and not args.sample:
+            sys.exit("--table-sha and --table-dir need --report-only")
+        if args.layout is None:
+            args.layout = "full" if args.sample_name == "full" else "pilot"
+    use_paths(getattr(args, "table_dir", None),
+              getattr(args, "sample_name", None))
     if args.cmd != "selftest" and not (AR.ROOT / ".gitignore").read_text() \
             .count("private/"):
         sys.exit("private/ is not in .gitignore; refusing to cache there")

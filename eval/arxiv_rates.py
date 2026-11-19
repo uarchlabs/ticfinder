@@ -24,6 +24,11 @@ Usage:
   eval/arxiv_rates.py fetch
   eval/arxiv_rates.py analyse [--draws 2000] [--report eval/arxiv-rates-DATE.md]
   eval/arxiv_rates.py analyse --report-only      # recompute from the table
+  eval/arxiv_rates.py analyse --report-only --table-sha c1c7d5943a28
+                                 # rebuild from a table written by an older
+                                 # ticfinder (pinned rebuild)
+  eval/arxiv_rates.py analyse ... --json PATH    # also write every report row
+                                                 # as JSON (schema: roadmap s.15)
   eval/arxiv_rates.py analyse --sample CID       # 20 findings per window to
                                                  # the console, for checking
   eval/arxiv_rates.py check [--refresh]          # completeness vs OAI-PMH
@@ -283,10 +288,31 @@ def mask_latex(text):
 
 # ------------------------------------------------------------ analyse
 
-def tf_version():
-    def git(*a):
-        return subprocess.run(["git", "-C", str(ROOT), *a],
-                              capture_output=True, text=True).stdout.strip()
+def _git(*a):
+    return subprocess.run(["git", "-C", str(ROOT), *a],
+                          capture_output=True, text=True).stdout.strip()
+
+
+def pinned_version(digest):
+    """Version record for a table written by an earlier ticfinder.
+
+    The commit is the newest one whose tools/ticfinder.py has this sha256
+    prefix. Exits when no commit matches.
+    """
+    for h in _git("log", "--format=%h", "--", "tools/ticfinder.py").split():
+        blob = subprocess.run(["git", "-C", str(ROOT), "show",
+                               f"{h}:tools/ticfinder.py"],
+                              capture_output=True).stdout
+        if hashlib.sha256(blob).hexdigest()[:len(digest)] == digest:
+            return {"commit": h, "sha256": digest, "pinned": True}
+    sys.exit(f"--table-sha {digest}: no commit of tools/ticfinder.py has "
+             "this sha256")
+
+
+def tf_version(pin=None):
+    if pin:
+        return pinned_version(pin)
+    git = _git
     commit = git("log", "-1", "--format=%h", "--", "tools/ticfinder.py")
     dirty = git("status", "--porcelain", "--", "tools/ticfinder.py")
     digest = hashlib.sha256(TF_PATH.read_bytes()).hexdigest()[:12]
@@ -331,6 +357,44 @@ def cmd_analyse(args):
     if not args.report_only:
         run_analysis()
     write_report(args)
+
+
+# JSON summaries (schema described in eval/TICFINDER_ROADMAP.md s.15).
+JSON_SCHEMA = 1
+
+
+def jnum(x):
+    """A number for JSON: nan becomes null and inf the string "inf"."""
+    if x is None:
+        return None
+    x = float(x)
+    if math.isnan(x):
+        return None
+    if math.isinf(x):
+        return "inf" if x > 0 else "-inf"
+    return x
+
+
+def split_key(level, key):
+    """Named fields of a report key: construction, pattern, subtype, phrase."""
+    parts = key.split("|")
+    names = {"construction": ["construction"],
+             "pattern": ["construction", "pattern"],
+             "subtype": ["construction", "pattern", "subtype"],
+             "phrase": ["construction", "phrase"]}[level]
+    if level == "phrase":
+        parts = [parts[0], "|".join(parts[1:])]
+    elif level == "subtype":
+        parts = parts[:2] + ["|".join(parts[2:])]
+    return dict(zip(names, parts))
+
+
+def write_json(path, kind, ver, extra, rows):
+    out = {"schema": JSON_SCHEMA, "kind": kind,
+           "tf_commit": ver["commit"], "tf_sha256": ver["sha256"],
+           "generated": dt.date.today().isoformat(), **extra, "rows": rows}
+    Path(path).write_text(json.dumps(out, indent=1) + "\n", encoding="utf-8")
+    print(f"wrote {path}", file=sys.stderr)
 
 
 def run_analysis():
@@ -416,10 +480,10 @@ def run_analysis():
 
 # ------------------------------------------------------------ report
 
-def load_table():
+def load_table(pin=None):
     sel, info = selection()
     want = {pid: w for w in sel for pid in sel[w]}
-    ver = tf_version()
+    ver = tf_version(pin)
     rows = defaultdict(list)
     for line in TABLE.read_text(encoding="utf-8").splitlines():
         r = json.loads(line)
@@ -443,7 +507,7 @@ def fmt(x, nd=2):
 
 def write_report(args):
     import numpy as np
-    rows, info, ver = load_table()
+    rows, info, ver = load_table(args.table_sha)
     draws = args.draws
     rng = np.random.default_rng(BOOT_SEED)
     pre, post = rows["pre"], rows["post"]
@@ -592,6 +656,12 @@ def write_report(args):
       f"{fmt(dash[1])} ({fmt(dash[2])} to {fmt(dash[3])}) | |")
     p("")
 
+    J = []      # JSON rows, one per row the report prints
+
+    def jside(a):
+        return {"n": a[0], "papers": a[5], "rate": jnum(a[1]),
+                "rate_lo": jnum(a[2]), "rate_hi": jnum(a[3])}
+
     def table(title, lvl, label):
         p(f"## {title}")
         p("")
@@ -610,6 +680,12 @@ def write_report(args):
               f"{fmt(a[3])}) | {b[0]} | {b[5]} | {fmt(b[1])} ({fmt(b[2])} "
               f"to {fmt(b[3])}) | {fmt(d['ratio'])} ({fmt(d['lo'])} to "
               f"{fmt(d['hi'])}) | {d['verdict']} |")
+            J.append({"table": title, "level": lvl, "key": d["key"],
+                      **split_key(lvl, d["key"]), "text_type": "abstract",
+                      "pre": jside(a), "post": jside(b),
+                      "ratio": jnum(d["ratio"]), "ratio_lo": jnum(d["lo"]),
+                      "ratio_hi": jnum(d["hi"]), "n": d["n"],
+                      "verdict": d["verdict"]})
         p("")
 
     table("Rates per construction", "construction", "construction")
@@ -627,6 +703,34 @@ def write_report(args):
     p("")
     out_path.write_text("\n".join(L), encoding="utf-8")
     print(f"wrote {out_path}", file=sys.stderr)
+    if args.json:
+        sanity = {w: {
+            "papers_population": info[w]["papers"],
+            "papers_analysed": len(rows[w]), "sampled": info[w]["sampled"],
+            "cross_listed_excluded": cross[w],
+            "first_version_span": list(span[w]),
+            "words": int(W[w].sum()),
+            "mean_words": jnum(lens[w][0]),
+            "mean_words_lo": jnum(lens[w][1]),
+            "mean_words_hi": jnum(lens[w][2]),
+            "latex_masked_pct": jnum(masked[w]),
+            "any_latex_masked_pct": jnum(any_masked[w]),
+            "tf_masked_pct_mean": jnum(tfm[w]),
+            "unicode_dashes": 0,
+            "em_dash_proxy": {**jside(dash[0][w])}} for w in ("pre", "post")}
+        for w in ("pre", "post"):
+            del sanity[w]["em_dash_proxy"]["papers"]
+        sanity["em_dash_proxy_ratio"] = {
+            "ratio": jnum(dash[1]), "ratio_lo": jnum(dash[2]),
+            "ratio_hi": jnum(dash[3])}
+        write_json(args.json, "arxiv-rates", ver, {
+            "report": out_path.name,
+            "bootstrap": {"draws": draws, "seed": BOOT_SEED,
+                          "interval": "percentile 95%, nearest rank for "
+                                      "ratios"},
+            "min_n": 20, "sanity": sanity,
+            "note": "ratios are post rate over pre rate, two periods; "
+                    "they are not likelihood ratios"}, J)
 
     # console summary
     print(f"\npapers: pre {info['pre']['papers']} "
@@ -850,7 +954,14 @@ def main():
                    help="print random findings for a construction (or "
                         "CID|pattern) per window; writes nothing")
     a.add_argument("-n", type=int, default=20)
+    a.add_argument("--table-sha", metavar="SHA",
+                   help="with --report-only: the ticfinder sha256 prefix the "
+                        "stored table was written with (pinned rebuild)")
+    a.add_argument("--json", metavar="PATH",
+                   help="also write every report row as JSON")
     args = ap.parse_args()
+    if args.cmd == "analyse" and args.table_sha and not args.report_only:
+        sys.exit("--table-sha needs --report-only")
     if not (ROOT / ".gitignore").read_text().count("private/"):
         sys.exit("private/ is not in .gitignore; refusing to cache there")
     if args.draws < 1000 if args.cmd == "analyse" else False:
