@@ -1270,9 +1270,13 @@ Used in all three phases until calibration (step 8) replaces it.
 - The rule only raises. A pattern or phrase that fell keeps the
   default.
 
-The rule reads the committed reports
-(`eval/arxiv-rates-2026-11-18.md`, `eval/arxiv-bodies-2026-11-18.md`)
-and, for body rows those reports do not hold, the private findings.
+Abstract values come from the committed TF-004 report
+(`eval/arxiv-rates-2026-11-18.md`). The committed TF-005 report gives
+subtype rows for the `body` section type only, so body values over all
+sections are computed from the private per-paper tables with the TF-005
+bootstrap (2,000 draws over papers, seed 5005, the same index matrix).
+That computation reproduces the committed `body` rows exactly, for
+example `use` at 1.33 (0.90 to 2.05).
 
 ### Phase 1: `ALTERNATIVE_FRAMING`
 
@@ -1281,10 +1285,13 @@ and, for body rows those reports do not hold, the private findings.
 `af_rather_than` runs at `med` and `af_instead_of` keeps the
 construction's `low`.
 
-| pattern | abstracts n | abstract ratio (95% CI) | bodies n | body ratio (95% CI) | confidence |
+| pattern | abstracts n | abstract ratio (95% CI) | bodies n | body ratio, all sections (95% CI) | confidence |
 |---|---|---|---|---|---|
-| `af_rather_than` | 164 | 3.84 (2.29 to 8.06) | 490 | 4.60 (3.22 to 6.70) | `med` |
-| `af_instead_of` | 88 | 1.07 (0.68 to 1.90) | 266 | 0.98 (0.72 to 1.34) | `low` |
+| `af_rather_than` | 164 | 3.84 (2.29 to 8.06) | 691 | 4.44 (3.27 to 6.10) | `med` |
+| `af_instead_of` | 88 | 1.07 (0.68 to 1.90) | 373 | 1.02 (0.77 to 1.36) | `low` |
+
+The `body` section type alone gives 4.60 (3.22 to 6.70) and 0.98
+(0.72 to 1.34), with the same verdicts.
 
 The first pattern of a construction has no confidence slot in the
 registry, so `af_rather_than` returns `med` per finding.
@@ -1337,3 +1344,128 @@ abstracts, 853 and 908 in bodies), and none is new.
 **Verdict.** The hypothesis holds. The two patterns differ in blog
 precision and in their arXiv change. The split moves no finding, and
 the migration keeps every waiver.
+
+### Phase 2: `PARTICIPIAL_TAIL`
+
+**Lemma table.** Every lemma with at least 20 findings in either
+corpus. Bodies are all sections. An abstract cell without a ratio has
+fewer than 20 findings, so the TF-004 report does not list it; its
+count comes from the private findings.
+
+Rose in both (22):
+
+| lemma | abstracts n | abstract ratio (95% CI), verdict | bodies n | body ratio (95% CI), verdict |
+|---|---|---|---|---|
+| `achieve` | 188 | 4.45 (2.80 to 8.96) rose | 129 | 9.84 (5.89 to 19.25) rose |
+| `cause` | 28 | 4.66 (1.56 to inf) rose | 78 | 2.95 (1.48 to 6.70) rose |
+| `create` | 25 | inf (inf to inf) rose | 42 | 8.36 (3.64 to 43.04) rose |
+| `deliver` | 36 | 6.09 (2.13 to inf) rose | 24 | 6.97 (2.32 to 36.76) rose |
+| `demonstrate` | 118 | 8.10 (3.95 to 37.68) rose | 85 | 9.38 (4.85 to 25.49) rose |
+| `eliminate` | 48 | 8.24 (2.97 to inf) rose | 45 | 6.45 (3.03 to 18.93) rose |
+| `enable` | 251 | 6.56 (4.15 to 13.89) rose | 363 | 7.04 (4.92 to 10.77) rose |
+| `ensure` | 43 | 4.78 (1.90 to inf) rose | 150 | 24.74 (12.51 to 77.37) rose |
+| `highlight` | 45 | inf (inf to inf) rose | 50 | 68.30 (19.83 to inf) rose |
+| `improve` | 43 | 2.21 (1.05 to 7.09) rose | 49 | 2.40 (1.32 to 4.90) rose |
+| `lead` | 102 | 2.96 (1.72 to 6.81) rose | 200 | 2.37 (1.56 to 3.76) rose |
+| `leave` | 48 | inf (inf to inf) rose | 74 | 5.48 (3.16 to 10.98) rose |
+| `leverage` | 32 | 5.37 (1.82 to inf) rose | 31 | 7.25 (2.59 to inf) rose |
+| `limit` | 62 | 4.08 (2.06 to 19.75) rose | 48 | 4.69 (2.30 to 11.54) rose |
+| `make` | 208 | 2.40 (1.65 to 3.85) rose | 320 | 7.18 (5.18 to 10.43) rose |
+| `offer` | 61 | 6.93 (3.01 to inf) rose | 62 | 6.46 (3.12 to 18.04) rose |
+| `provide` | 73 | 1.82 (1.08 to 3.79) rose | 149 | 3.33 (2.20 to 5.40) rose |
+| `reduce` | 113 | 3.01 (1.80 to 6.55) rose | 137 | 3.15 (2.09 to 4.85) rose |
+| `require` | 43 | 4.78 (1.97 to inf) rose | 81 | 3.98 (2.39 to 7.54) rose |
+| `show` | 54 | 2.87 (1.40 to 9.22) rose | 58 | 2.65 (1.49 to 5.19) rose |
+| `support` | 21 | 3.40 (1.08 to inf) rose | 34 | 5.38 (2.26 to 19.67) rose |
+| `yield` | 24 | 8.24 (2.16 to inf) rose | 76 | 7.43 (3.85 to 19.81) rose |
+
+Flat in both (1):
+
+| lemma | abstracts n | abstract ratio (95% CI), verdict | bodies n | body ratio (95% CI), verdict |
+|---|---|---|---|---|
+| `use` | 73 | 1.09 (0.67 to 2.00) flat | 245 | 1.30 (0.93 to 1.84) flat |
+
+Mixed or too few (39):
+
+| lemma | abstracts n | abstract ratio (95% CI), verdict | bodies n | body ratio (95% CI), verdict |
+|---|---|---|---|---|
+| `account` | 4 | too few | 23 | 9.29 (3.40 to inf) rose |
+| `add` | 3 | too few | 30 | 2.41 (0.93 to 13.87) flat |
+| `address` | 15 | too few | 24 | 15.33 (4.82 to inf) rose |
+| `allow` | 72 | 1.48 (0.87 to 3.12) flat | 259 | 4.72 (3.48 to 6.76) rose |
+| `assume` | 0 | too few | 27 | 0.82 (0.32 to 2.03) flat |
+| `avoid` | 15 | too few | 41 | 3.37 (1.58 to 9.62) rose |
+| `combine` | 20 | 3.22 (1.06 to inf) rose | 14 | 5.11 (1.48 to inf) too few |
+| `compare` | 6 | too few | 21 | 2.79 (1.11 to 11.07) rose |
+| `confirm` | 11 | too few | 39 | inf (inf to inf) rose |
+| `consider` | 7 | too few | 31 | 1.31 (0.56 to 2.75) flat |
+| `correspond` | 9 | too few | 39 | 3.55 (1.78 to 10.52) rose |
+| `cover` | 14 | too few | 22 | 13.94 (4.71 to inf) rose |
+| `enhance` | 7 | too few | 26 | inf (inf to inf) rose |
+| `focus` | 21 | 3.40 (1.11 to inf) rose | 24 | 2.32 (0.99 to 6.62) flat |
+| `form` | 5 | too few | 25 | 7.32 (2.78 to 37.88) rose |
+| `generate` | 14 | too few | 29 | 2.28 (0.96 to 6.16) flat |
+| `give` | 5 | too few | 39 | 3.14 (1.49 to 9.21) rose |
+| `increase` | 16 | too few | 45 | 1.59 (0.84 to 3.09) flat |
+| `incur` | 15 | too few | 20 | 4.18 (1.60 to 20.63) rose |
+| `indicate` | 9 | too few | 106 | 5.32 (3.35 to 10.43) rose |
+| `introduce` | 19 | too few | 29 | 5.34 (2.13 to 23.75) rose |
+| `maintain` | 3 | too few | 20 | 26.48 (6.40 to inf) rose |
+| `match` | 7 | too few | 21 | 13.24 (4.05 to inf) rose |
+| `mean` | 4 | too few | 54 | 1.12 (0.54 to 2.43) flat |
+| `minimize` | 13 | too few | 23 | 3.95 (1.59 to 18.65) rose |
+| `motivate` | 14 | too few | 26 | 10.69 (3.75 to inf) rose |
+| `optimize` | 10 | too few | 21 | 8.36 (2.46 to inf) rose |
+| `outperform` | 31 | 10.75 (2.88 to inf) rose | 13 | 7.67 (2.05 to inf) too few |
+| `prevent` | 4 | too few | 36 | 4.18 (2.08 to 11.17) rose |
+| `produce` | 14 | too few | 47 | 9.52 (3.94 to 47.51) rose |
+| `range` | 6 | too few | 24 | 2.32 (0.98 to 5.99) flat |
+| `reach` | 14 | too few | 28 | 6.41 (2.51 to 41.83) rose |
+| `reflect` | 1 | too few | 49 | 32.75 (11.61 to inf) rose |
+| `represent` | 3 | too few | 30 | 3.25 (1.42 to 9.52) rose |
+| `result` | 82 | 0.92 (0.57 to 1.63) flat | 219 | 2.97 (2.05 to 4.60) rose |
+| `start` | 0 | too few | 27 | 1.50 (0.66 to 3.34) flat |
+| `suggest` | 6 | too few | 39 | 12.20 (4.64 to 68.05) rose |
+| `target` | 16 | too few | 26 | 3.14 (1.24 to 10.34) rose |
+| `validate` | 8 | too few | 22 | 8.83 (2.95 to inf) rose |
+
+**Lemma list: a null result.** `use` is the only lemma flat in both
+corpora. Of the 26 lemmas with at least 20 findings in both corpora,
+22 rose in both. `allow` and `result` were flat in abstracts and rose
+in bodies, and `focus` rose in abstracts and was flat in bodies. A list
+of risers would hold
+nearly every frequent verb, so it does not separate risers from flat
+verbs. The construction is already `high`, so the interim rule has no
+level to raise a lemma to either. No list was added.
+
+**Reading `, using ...` tails.** `arxiv_recheck.py` gained
+`--subtype`, which keeps stored findings whose subtype matches (the
+harvest rule). With `--sources body --subtype use --show 20 --seed
+tf007` it samples 20 of the reproduced body findings per window. 239
+of the 245 stored `use` findings reproduce on the isolated sentence.
+
+| window | instrumental | restating | other |
+|---|---|---|---|
+| pre | 19 | 0 | 1 |
+| post | 17 | 0 | 3 |
+
+An instrumental tail names the method, data, tool or setting (`, using
+a 4-bit counter`, `, using the ImageNet dataset`). None of the 40
+restates the main clause. The four others are parse errors: two list
+items after `e.g.` or inside a parenthesis, one gerund subject, and
+one member of a list of techniques.
+
+**Change.** `participial_tail()` returns per-finding confidence from
+`PT_LEMMA_CONFIDENCE`, which holds `use: med`, one level below the
+construction. The interim rule only raises, so this level comes from
+the reading. It is the only lemma whose level was set that way. Spans,
+subtypes and the pattern name are unchanged, so no fingerprint
+changed. The lemma cannot tell a restating `, using ...` tail from an
+instrumental one, so both report at `med`; rows record that.
+
+**Harvest.** The blogs hold no `use` tail. Summary and `labels.jsonl`
+are byte-identical before and after.
+
+**Verdict.** The lemma list is a null result. The narrower claim holds:
+`, using ...` tails are almost all instrumental, and `use` now runs at
+`med`.

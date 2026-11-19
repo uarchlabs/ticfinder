@@ -1168,8 +1168,16 @@ def participial_tail(doc, nlp):
             continue
         if tok.i < tok.head.i:            # fronted, not a tail
             continue
-        out.append((doc[tok.i - 1:tok.right_edge.i + 1], tok.lemma_))
+        out.append((doc[tok.i - 1:tok.right_edge.i + 1], tok.lemma_,
+                     PT_LEMMA_CONFIDENCE.get(tok.lemma_)))
     return out
+
+
+# Per-lemma confidence, set from readings (roadmap section 14). Most
+# `, using ...` tails give the method (`, using a 4-bit counter`) and the
+# lemma's rate was flat in arXiv abstracts and bodies, so it runs one
+# level below the construction. A lemma not listed keeps `high`.
+PT_LEMMA_CONFIDENCE = {"use": "med"}
 
 
 @construction(

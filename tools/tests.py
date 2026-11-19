@@ -198,6 +198,10 @@ CASES = [
     ("PARTICIPIAL_TAIL", True, "It runs nightly, ensuring the index stays "
                                "fresh."),
     ("PARTICIPIAL_TAIL", False, "Making the change took an afternoon."),
+    ("PARTICIPIAL_TAIL", True,
+     "We rewrote the inner loop, using fewer cycles per entry."),
+    ("PARTICIPIAL_TAIL", True,
+     "We count the misses in hardware, using a 4-bit saturating counter."),
 
     # -- disguise metaphor -----------------------------------------------
     ("DISGUISE_METAPHOR", True, "A bug wrapped in an excuse trenchcoat."),
@@ -359,6 +363,15 @@ PATTERN_CASES = [
      {"af_rather_than": "med"}),
     ("ALTERNATIVE_FRAMING", "Instead of retrying, the client gives up.",
      {"af_instead_of": "low"}),
+    # TF-007 phase 2: lemma `use` runs one level below the construction.
+    # Most `, using ...` tails give the method; the lemma cannot tell a
+    # restating one apart, so both report at med.
+    ("PARTICIPIAL_TAIL", "We rewrote the inner loop, using fewer cycles "
+                         "per entry.", {"participial_tail": "med"}),
+    ("PARTICIPIAL_TAIL", "We count the misses in hardware, using a 4-bit "
+                         "saturating counter.", {"participial_tail": "med"}),
+    ("PARTICIPIAL_TAIL", "The cache warms on startup, making subsequent "
+                         "requests faster.", {"participial_tail": "high"}),
 ]
 
 

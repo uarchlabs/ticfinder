@@ -22,7 +22,9 @@ the private per-paper tables; the scaled rate multiplies the stored count
 by kept / reproduced. Both are point estimates.
 
 --show N prints up to N dropped and N kept findings per window to the
-console, for reading. Nothing is written to disk.
+console, for reading. --subtype S keeps only stored findings whose
+subtype (the harvest.py rule, as in the reports) is S, such as the
+lemma `use` for PARTICIPIAL_TAIL. Nothing is written to disk.
 
   python3 eval/arxiv_recheck.py DISGUISE_METAPHOR --old OLD.py --show 20
 """
@@ -64,6 +66,15 @@ def norm(s):
     return " ".join(s.split())
 
 
+def subtype(label):
+    """Same rule as eval/harvest.py and eval/arxiv_rates.py subtype()."""
+    m = re.search(r"\[([^\[\]]*)\]\s*$", label or "")
+    if not m:
+        return "-"
+    return re.sub(r"^\d+(?:-part \S+| clauses),\s*", "",
+                  m.group(1).strip()) or "-"
+
+
 def detect(mod, cid, doc, nlp):
     """(text, start_char, end_char) of each span the detector produces."""
     if cid in mod.CONSTRUCTIONS:
@@ -80,11 +91,13 @@ def detect(mod, cid, doc, nlp):
              sp.end_char) for sp in spans]
 
 
-def stored(cid, key, path):
+def stored(cid, key, path, sub=None):
     rows = []
     for line in path.read_text(encoding="utf-8").splitlines():
         r = json.loads(line)
         if r["construction"] != cid:
+            continue
+        if sub is not None and subtype(r.get("label")) != sub:
             continue
         t = r.get("type")
         if key == "body" and t not in SECTION_TYPES:
@@ -124,6 +137,8 @@ def main():
     ap.add_argument("--seed", default="tf006")
     ap.add_argument("--sources", default="abs,body",
                     help="comma list of abs, body, bsec, babs")
+    ap.add_argument("--subtype", default=None,
+                    help="only stored findings with this subtype")
     args = ap.parse_args()
     cid = args.construction
 
@@ -140,7 +155,8 @@ def main():
         w = words(key, ppath)
         rates = {}
         for win in WINDOWS:
-            rows = [r for r in stored(cid, key, fpath) if r["window"] == win]
+            rows = [r for r in stored(cid, key, fpath, args.subtype)
+                    if r["window"] == win]
             n_old = n_new = n_new_only = 0
             for r in rows:
                 sent = r["context"]
@@ -175,7 +191,8 @@ def main():
                       *(ratio(rates["post"][i], rates["pre"][i])
                         for i in range(3))))
 
-    print(f"\n{cid}: stored findings rechecked on isolated sentences\n")
+    what = f"{cid} [{args.subtype}]" if args.subtype else cid
+    print(f"\n{what}: stored findings rechecked on isolated sentences\n")
     hdr = ("source", "window", "stored", "old repro", "new kept",
            "new only", "words", "stored /1k", "kept /1k", "scaled /1k")
     print("| " + " | ".join(hdr) + " |")
