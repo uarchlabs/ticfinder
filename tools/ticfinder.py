@@ -1288,8 +1288,16 @@ def disguise_metaphor(doc, nlp):
     `dress up as` are metaphorical on their own. `wrap`, `wear`, `cloak` and
     `veil` are used literally all the time -- 'wrapped in brown paper' -- so
     those additionally require a garment or covering noun as the object.
+
+    `pose` and `pass` are literal without `as` ('posing challenges',
+    'passing tests'), and literal with `as` when transitive or passive
+    ('passing the depth as an argument', 'is posed as an ILP'). They fire
+    only in an `as` frame that is intransitive ('posing as'), reflexive
+    ('passing itself off as') or has `off` ('passed off as'). `pass for`
+    is not supported: 'passing for all seeds' is literal in test prose.
     """
     ALWAYS = {"masquerade", "disguise", "pose", "parade", "pass"}
+    AS_ONLY = {"pose", "pass"}
     NEEDS_GARMENT = {"wrap", "wear", "cloak", "clothe", "veil", "drape",
                      "dress", "mask", "package"}
     GARMENT = {"trenchcoat", "coat", "costume", "clothing", "clothes",
@@ -1324,6 +1332,16 @@ def disguise_metaphor(doc, nlp):
         if not as_frame and lemma in NEEDS_GARMENT and not any(
                 o.lemma_.lower() in GARMENT for o in objs):
             continue
+        if lemma in AS_ONLY:
+            if not as_frame:
+                continue
+            off = any(c.dep_ == "prt" and c.lower_ == "off"
+                      for c in tok.children)
+            other_obj = any(c.dep_ == "dobj"
+                            and not c.lower_.endswith(("self", "selves"))
+                            for c in tok.children)
+            if not off and (tok.tag_ == "VBN" or other_obj):
+                continue
         if tok.dep_ not in ("acl", "advcl", "relcl", "ROOT", "conj",
                             "xcomp", "ccomp"):
             continue

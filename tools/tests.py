@@ -204,6 +204,30 @@ CASES = [
      "A correctness bug wearing a performance costume."),
     ("DISGUISE_METAPHOR", True, "Technical debt masquerading as velocity."),
     ("DISGUISE_METAPHOR", False, "The parcel was wrapped in brown paper."),
+    # `pose` and `pass` need an `as` frame on an intransitive, reflexive
+    # or `off` use (TF-006). Literal uses are transitive or passive.
+    ("DISGUISE_METAPHOR", True, "A rewrite posing as a refactor."),
+    ("DISGUISE_METAPHOR", True, "It was a rewrite passed off as a refactor."),
+    ("DISGUISE_METAPHOR", True, "Speculation passing itself off as "
+                                "evidence."),
+    ("DISGUISE_METAPHOR", False, "These workloads pose significant "
+                                 "challenges."),
+    ("DISGUISE_METAPHOR", False, "These workloads are posing significant "
+                                 "challenges."),
+    ("DISGUISE_METAPHOR", False, "Posing the question this way helps."),
+    ("DISGUISE_METAPHOR", False, "The design passes all regression tests."),
+    ("DISGUISE_METAPHOR", False, "A design passing all regression tests."),
+    ("DISGUISE_METAPHOR", False, "It uses message passing between cores."),
+    ("DISGUISE_METAPHOR", False, "The value is passed as an argument."),
+    ("DISGUISE_METAPHOR", False, "The step required passing the depth as "
+                                 "an argument."),
+    ("DISGUISE_METAPHOR", False, "The caller reads the depth, passing it "
+                                 "as an argument."),
+    ("DISGUISE_METAPHOR", False, "The problem is posed as an integer "
+                                 "program."),
+    # Literal `passing for` is common in verification prose, so `pass for`
+    # is not supported.
+    ("DISGUISE_METAPHOR", False, "The test is passing for all seeds."),
 
     # -- emphatic reflexive ----------------------------------------------
     ("EMPHATIC_REFLEXIVE", True, "It cannot evaluate the rule document "
