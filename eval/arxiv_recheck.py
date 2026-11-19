@@ -3,7 +3,9 @@
 
 Reads the stored findings for CONSTRUCTION from the TF-004 abstracts
 (private/arxiv/findings.jsonl) and the TF-005 bodies
-(private/arxiv/bodies/findings.jsonl). Each stored sentence is parsed on
+(private/arxiv/bodies/findings.jsonl). TF-005 sources: all sections
+(body), the `body` section type alone (bsec), and the sample abstracts
+(babs). Each stored sentence is parsed on
 its own and run through the old detector (--old, a copy of the committed
 tools/ticfinder.py) and the new one (the working tree). Reports, per
 source and window:
@@ -11,7 +13,8 @@ source and window:
   stored      findings in the stored table
   old repro   stored findings the old code reproduces on the isolated
               sentence (same matched text)
-  new kept    of those, findings the new code still produces
+  new kept    of those, findings the new code still produces (a new
+              span that covers the old one counts)
 
 The reproduction rate shows how far an isolated parse differs from the
 in-document parse. The adjusted rate is kept findings over the words in
@@ -42,6 +45,8 @@ SOURCES = [
      PRIVATE / "per_paper.jsonl"),
     ("body", "TF-005 bodies, all sections", PRIVATE / "bodies" /
      "findings.jsonl", PRIVATE / "bodies" / "per_paper.jsonl"),
+    ("bsec", "TF-005 bodies, body sections", PRIVATE / "bodies" /
+     "findings.jsonl", PRIVATE / "bodies" / "per_paper.jsonl"),
     ("babs", "TF-005 sample abstracts", PRIVATE / "bodies" /
      "findings.jsonl", PRIVATE / "bodies" / "per_paper.jsonl"),
 ]
@@ -60,7 +65,7 @@ def norm(s):
 
 
 def detect(mod, cid, doc, nlp):
-    """Matched texts the module's detector produces for cid on doc."""
+    """(text, start_char, end_char) of each span the detector produces."""
     if cid in mod.CONSTRUCTIONS:
         spans = [h[0] for h in mod.run_construction(cid, doc, nlp)]
     elif cid in mod.PHRASE_PATTERNS:
@@ -71,7 +76,8 @@ def detect(mod, cid, doc, nlp):
     else:
         raise SystemExit(f"{cid}: not a structural or built-in phrase "
                          "construction")
-    return [norm(sp.text.strip().replace("\n", " ")) for sp in spans]
+    return [(norm(sp.text.strip().replace("\n", " ")), sp.start_char,
+             sp.end_char) for sp in spans]
 
 
 def stored(cid, key, path):
@@ -85,6 +91,8 @@ def stored(cid, key, path):
             continue
         if key == "babs" and t != "abstract":
             continue
+        if key == "bsec" and t != "body":
+            continue
         rows.append(r)
     return rows
 
@@ -96,7 +104,7 @@ def words(key, path):
         x = r["words"]
         if isinstance(x, dict):
             x = (sum(x[t] for t in SECTION_TYPES) if key == "body"
-                 else x["abstract"])
+                 else x["body"] if key == "bsec" else x["abstract"])
         w[r["window"]] += x
     return w
 
@@ -115,7 +123,7 @@ def main():
     ap.add_argument("--show", type=int, default=0)
     ap.add_argument("--seed", default="tf006")
     ap.add_argument("--sources", default="abs,body",
-                    help="comma list of abs, body, babs")
+                    help="comma list of abs, body, bsec, babs")
     args = ap.parse_args()
     cid = args.construction
 
@@ -142,14 +150,20 @@ def main():
                                    detect(new, cid, doc, nlp))
                 o, n = cache[sent]
                 t = norm(r["text"])
-                if t not in o:
-                    if t in n:
+                at = [(a, b) for x, a, b in o if x == t]
+                if not at:
+                    if any(x == t for x, _, _ in n):
                         n_new_only += 1
                     continue
                 n_old += 1
-                if t in n:
+                # Kept when a new span covers the old one: a fix may widen
+                # a span to the left ('More significantly,').
+                cover = [x for x, a, b in n
+                         if any(a <= oa and ob <= b for oa, ob in at)]
+                if cover:
                     n_new += 1
-                    reading[win]["kept"].append((label, r))
+                    reading[win]["kept"].append((label, dict(
+                        r, text=cover[0])))
                 else:
                     reading[win]["dropped"].append((label, r))
             kw = w[win] / 1000

@@ -1388,8 +1388,20 @@ PHRASE_PATTERNS = {
         "med",
         [
             [{"LOWER": {"IN": ["crucially", "importantly", "critically",
-                               "notably", "tellingly", "significantly"]}},
+                               "notably", "tellingly"]}},
              {"LOWER": ","}],
+            # Mid-sentence `significantly,` is a manner adverb ('drops
+            # significantly, about 73%'), so only sentence-initial use is
+            # a booster (TF-006). 'More significantly,' and 'Even more
+            # significantly,' are boosters too; the Matcher cannot look
+            # behind a token, so those spans start at the sentence start.
+            [{"LOWER": "significantly", "IS_SENT_START": True},
+             {"LOWER": ","}],
+            [{"LOWER": {"IN": ["more", "most"]}, "IS_SENT_START": True},
+             {"LOWER": "significantly"}, {"LOWER": ","}],
+            [{"LOWER": "even", "IS_SENT_START": True},
+             {"LOWER": {"IN": ["more", "most"]}},
+             {"LOWER": "significantly"}, {"LOWER": ","}],
             [{"LOWER": "and"}, {"LOWER": {"IN": ["this", "that"]}},
              {"LEMMA": "be"}, {"LOWER": "the"},
              {"LOWER": {"IN": ["real", "true", "actual", "core"]}}],

@@ -229,6 +229,31 @@ CASES = [
     # is not supported.
     ("DISGUISE_METAPHOR", False, "The test is passing for all seeds."),
 
+    # -- hollow booster (phrase pattern, runs through analyse) ------------
+    # `significantly,` is a booster only at the start of a sentence;
+    # mid-sentence it is a manner adverb (TF-006).
+    ("HOLLOW_BOOSTER", True, "Significantly, the cache never misses."),
+    ("HOLLOW_BOOSTER", True, "Notably, this needs no extra hardware."),
+    ("HOLLOW_BOOSTER", True, "And, more importantly, it removes the stall."),
+    ("HOLLOW_BOOSTER", True, "Crucially, the order is preserved."),
+    ("HOLLOW_BOOSTER", True, "The fix is small. Significantly, it needs "
+                             "no new state."),
+    ("HOLLOW_BOOSTER", False, "The number of writes drops significantly, "
+                              "about 73%."),
+    ("HOLLOW_BOOSTER", False, "It does not affect throughput significantly, "
+                              "but it costs area."),
+    ("HOLLOW_BOOSTER", False, "The miss rate fell significantly, from 9% "
+                              "to 4%."),
+    # `more significantly,` is a booster where `significantly` is not the
+    # sentence start. The span starts at `more`.
+    ("HOLLOW_BOOSTER", True, "More significantly, the table needs no new "
+                             "port."),
+    ("HOLLOW_BOOSTER", True, "Even more significantly, the precharge time "
+                             "doubles."),
+    ("HOLLOW_BOOSTER", True, "Most significantly, nothing else changes."),
+    ("HOLLOW_BOOSTER", False, "Power fell, but area grew more "
+                              "significantly, by about 40%."),
+
     # -- emphatic reflexive ----------------------------------------------
     ("EMPHATIC_REFLEXIVE", True, "It cannot evaluate the rule document "
                                  "itself."),
@@ -317,18 +342,24 @@ EM_DASH_KINDS = [
 
 
 def test_detectors(nlp):
+    extra = []
+    for name in tf.DEFAULT_PHRASE_FILES:
+        if (HERE / name).exists():
+            extra.extend(tf.load_phrase_file(HERE / name))
+    phrase_ids = set(tf.PHRASE_PATTERNS) | {e["id"] for e in extra}
     for cid, want, text in CASES:
-        if cid not in tf.CONSTRUCTIONS:
+        if cid not in tf.CONSTRUCTIONS and cid not in phrase_ids:
             check("detectors", f"{cid} missing", False)
             continue
-        # Cases containing markdown go through analyse(), which applies
-        # masking AND the inline-code suppression that run_construction
-        # alone does not see.
-        if "`" in text:
+        # Cases containing markdown, and phrase-list constructions, go
+        # through analyse(), which applies masking AND the inline-code
+        # suppression that run_construction alone does not see.
+        if "`" in text or cid not in tf.CONSTRUCTIONS:
             with tempfile.TemporaryDirectory() as d:
                 pth = Path(d) / "c.md"
                 pth.write_text(text + "\n", encoding="utf-8")
-                found, _ = tf.analyse(str(pth), nlp, only={cid})
+                found, _ = tf.analyse(str(pth), nlp, only={cid},
+                                      extra=extra)
             got = any(x.construction == cid for x in found)
         else:
             got = bool(tf.run_construction(cid, nlp(text), nlp))

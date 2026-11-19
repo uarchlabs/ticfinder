@@ -391,7 +391,8 @@ Tidied after TF-004. Step numbers are kept stable because task files
 cite them, so they do not give the order of work. The order is listed
 after the steps.
 
-Done:
+Done: steps 1 to 6, 9 and 10. Planned: steps 7, 8 and 11 to 14. The
+list stays in step order, so the numbers render as written.
 
 1. Drop `harvest.py` into `ticfinder/eval/`, run it, and confirm the
    baseline numbers (TF-001, section 8).
@@ -414,9 +415,6 @@ Done:
    `BORROWED_RIGOUR` and `more/less ... than` were flat. `EM_DASH` could
    not be measured. Results in section 11. `harvest.py` gained
    `--by-subtype` and `--summary-only`.
-
-Planned:
-
 7. **Collect the public design and spec baseline** (5.3, section 6):
    pre-2022 PEPs, IETF and Rust RFCs, RISC-V manuals and open hardware
    design docs. Check per-file masked percentages before trusting counts.
@@ -435,9 +433,14 @@ Planned:
    introductions. `EM_DASH` rose 5.3 times in bodies, and
    `HOLLOW_BOOSTER` rose 3.3 times. Results in section 12. A full run
    is recommended after steps 10 and 11.
-10. **`DISGUISE_METAPHOR` fix** (from TF-004). `pose` and `pass` fire
-    without `as`: every arXiv finding read was `posing challenges` or a
-    literal `passing`. Test rows first.
+10. **`DISGUISE_METAPHOR` and `HOLLOW_BOOSTER` fixes** (TF-006). Done.
+    `pose` and `pass` now need an `as` frame that is intransitive,
+    reflexive or has `off`. Of 69 arXiv findings the old code
+    reproduces, the new code keeps 4, and none of the 4 is real.
+    `significantly,` fires only at the start of a sentence, or as
+    `More`/`Even more significantly,` there. That drops 31 manner
+    adverbs and no real booster. The adjusted `HOLLOW_BOOSTER` body
+    ratio is 4.07, against 3.31 in TF-005. Results in section 13.
 11. **Pattern splits from TF-004.** `rather than` apart from
     `instead of`; a lemma list for the `PARTICIPIAL_TAIL` verbs that
     rose; confidence per phrase for `LLM_DICTION` and
@@ -448,12 +451,16 @@ Planned:
     `CORRECTIVE_CONTRAST`, `ALTERNATIVE_FRAMING` and `PARTICIPIAL_TAIL`.
 13. Scan-statistic density (5.4), then subtree mining (5.5). This was
     step 9 before TF-004.
+14. **Full arXiv body run** (recommended in section 12). All usable
+    pre papers (about 775) and a matched post sample, so that one
+    analysis measures the fixed and split patterns. Goes after steps
+    10 and 11. The source cache is reusable.
 
-Order: 9 and 7 do not depend on each other and can run side by side.
-10 is small and can go at any time. 11 waits for 9, whose section rates
-may change the evidence for the splits. 8 needs 7 and uses 9 as its
-prior. 12 needs new labels from blog editing, so it goes when they
-exist. 13 comes last.
+Order: 9 and 10 are done. 11 and 7 do not depend on each other and can
+run side by side. 14 goes after 11, so that one analysis measures the
+fixed and split patterns. 8 needs 7 and uses 14's body ratios as its
+prior (9's if 14 has not run). 12 needs new labels from blog editing, so
+it goes when they exist. 13 comes last.
 
 ## 8. TF-001 results (2026-11-17)
 
@@ -1101,3 +1108,145 @@ four times the pre words. That narrows the intervals for the rare rows
 steps 10 and 11, so that one analysis measures the fixed and split
 patterns. The source cache is reusable; analysis took about 4 seconds
 per paper.
+
+## 13. TF-006 results (2026-11-18)
+
+Both fixes follow the same method. Test rows come first and fail
+before the change. `make regress` and `harvest.py --by-subtype` run
+before and after. `eval/arxiv_recheck.py` takes the stored arXiv
+findings for one construction (TF-004 abstracts, TF-005 bodies),
+parses each stored sentence on its own, and runs the committed and the
+new detector on it. A stored finding is reproduced when the old code
+gives the same matched text. It is kept when a new span covers it. The
+adjusted rate is kept findings over the words in the private per-paper
+tables, a point estimate. The committed arXiv reports were not rerun
+(step 14).
+
+### Phase 1: `DISGUISE_METAPHOR`
+
+**Fix.** `pose` and `pass` fire only with an `as` frame. The frame
+must be intransitive (`posing as`), reflexive (`passing itself off
+as`) or have `off` (`passed off as`). A literal `as` use is passive or
+has an object: `is passed as an argument`, `is posed as an integer
+program`, `passing it as an argument`. Those stay silent. `pass for`
+is not supported, because `passing for all seeds` is literal in
+verification prose and parses the same way as the disguise use. The
+other verbs are unchanged. 14 new rows; 7 of the 11 negatives failed
+before the fix. The other 4 were already silent. The detector reads
+only participles, so it never fired on finite `pose` or `passes`.
+
+**Harvest.** The 3 `DISGUISE_METAPHOR` labels were all literal `pass`
+(1 accepted, 2 deleted, 0 rewritten). All 3 drop out, so prec* cannot
+be measured before or after. Totals went from 142 accepted, 54
+rewritten and 304 deleted to 141, 54 and 302. No other row changed.
+The one accepted label has a waiver in the pacino waiver directory,
+which now matches nothing and shows as stale.
+
+**arXiv recheck.**
+
+| source | window | stored | reproduced | kept | stored /1k | kept /1k |
+|---|---|---|---|---|---|---|
+| TF-004 abstracts | pre | 3 | 3 | 0 | 0.017 | 0.000 |
+| TF-004 abstracts | post | 24 | 23 | 0 | 0.048 | 0.000 |
+| TF-005 bodies, all sections | pre | 20 | 19 | 2 | 0.015 | 0.002 |
+| TF-005 bodies, all sections | post | 24 | 24 | 2 | 0.026 | 0.002 |
+
+The isolated parse reproduces 69 of 71 stored findings. The new code
+adds none. The adjusted body ratio is 1.39 on 2 findings against 2, so
+it carries no information. The abstract ratio is undefined.
+
+**Reading.** Counts only.
+
+| group | real / read |
+|---|---|
+| pre dropped | 0 / 20 (all) |
+| post dropped | 0 / 20 (sampled from 45) |
+| pre kept | 0 / 2 |
+| post kept | 0 / 2 |
+
+The other 25 post findings were scanned for `off`, `-self` and
+`posing as`, and none matched. Dropped findings are `posing ...
+challenges` and literal `pass` (`passing tests`, `message passing`,
+`passed as input`). Three of the 4 kept findings come from `mask ...
+as` and `package ... as`, which this fix did not change. The fourth is
+`passing off ... as`, used literally about counterfeit parts.
+
+**Verdict.** The hypothesis holds. The fix removes every false
+positive read and loses no real instance. The TF-004 rise for this
+construction measured `posing challenges`. A candidate follow-up is a
+literal `package as` and `mask as` with an `as` frame, which needs
+rows first.
+
+### Phase 2: `HOLLOW_BOOSTER`
+
+**Phrase rows.** `test_detectors()` routes a row whose id is a phrase
+construction (built in or from the phrase file) through
+`analyse(..., only={cid})`. The verbose detector output for the
+existing rows is identical before and after the change.
+
+**Fix.** `significantly` left the shared booster pattern. It now has
+three patterns: `Significantly ,` with `IS_SENT_START`, `More` or
+`Most significantly ,` at the start of a sentence, and `Even more` or
+`Even most significantly ,` there. The other booster words keep their
+pattern and span. Phrase patterns carry no pattern name, so the
+fingerprint of a finding that keeps its span is unchanged. 12 new
+rows; the 3 manner-adverb negatives failed before the change.
+
+The first version used `IS_SENT_START` alone. On the stored findings
+it dropped 2 real boosters, `More significantly,` and `Even more
+significantly,`, so the two `more` patterns were added with rows first.
+The Matcher cannot look behind a token, so those spans start at `More`
+or `Even`. This changes the matched text and fingerprint of those
+findings only. No waiver holds `HOLLOW_BOOSTER`. A mid-sentence
+comparative (`area grew more significantly, by about 40%`) stays
+silent, which is why the `more` patterns are anchored at the start of
+the sentence.
+
+**Harvest.** No `HOLLOW_BOOSTER` labels. Summary and `labels.jsonl` are
+byte-identical before and after.
+
+**arXiv recheck.** The old code reproduces every stored finding, and
+the new code adds none.
+
+| source | window | stored | kept | stored /1k | kept /1k |
+|---|---|---|---|---|---|
+| TF-004 abstracts | pre | 10 | 9 | 0.056 | 0.050 |
+| TF-004 abstracts | post | 40 | 37 | 0.080 | 0.074 |
+| TF-005 bodies, all sections | pre | 74 | 57 | 0.057 | 0.044 |
+| TF-005 bodies, all sections | post | 158 | 148 | 0.170 | 0.159 |
+| TF-005 body sections | pre | 51 | 39 | 0.056 | 0.042 |
+| TF-005 body sections | post | 121 | 114 | 0.184 | 0.173 |
+
+| source | stored ratio | adjusted ratio |
+|---|---|---|
+| TF-004 abstracts | 1.43 | 1.47 |
+| TF-005 bodies, all sections | 2.98 | 3.62 |
+| TF-005 body sections | 3.31 (2.25 to 4.93) | 4.07 |
+
+The 3.31 in section 12 is the `body` section type. All sections give
+2.98 in the committed report. Both adjusted ratios rose, as predicted,
+because the removed findings sit mostly in pre.
+
+**Reading.** Counts only.
+
+| group | real / read |
+|---|---|
+| pre dropped | 0 / 18 (all) |
+| post dropped | 0 / 13 (all) |
+| pre kept | 20 / 20 (sampled from 66) |
+| post kept | 20 / 20 (sampled from 185) |
+
+Every dropped finding is a manner or degree adverb before a comma
+(`slowed down significantly, resulting in`). Kept findings are
+`Notably,`, `Importantly,`, `Crucially,`, `Critically,` and the two
+`more significantly,` forms.
+
+**Not covered.** In markdown the bullet token takes the sentence start,
+so `- Significantly,` and `**Significantly,**` no longer fire.
+`And, significantly,` does not fire either. Neither form occurs in the
+pacino markdown, and `\item` is blanked in the arXiv text.
+
+**Verdict.** The hypothesis holds with one correction. Sentence-initial
+use alone dropped `More significantly,`, a real booster. With the
+`more` patterns, the fix removes 31 false positives and no real
+instance. The adjusted body ratio rises from 3.31 to 4.07.

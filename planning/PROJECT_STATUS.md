@@ -48,7 +48,7 @@ moves there in the planning update that closes it.
 | Priority | Item                                    | Status              |
 |----------|-----------------------------------------|---------------------|
 | low | clause-list hypothesis (`TRICOLON`): rewritten findings are mostly lists of clauses, accepted ones mostly lists of noun phrases. Found post hoc in TF-003 phase 2. Clause series: 15 of 19 rewritten, 44 of 84 accepted (prec* 0.25). Noun-phrase series: 4 rewritten, 40 accepted (prec* 0.09; only 4 rewritten, so weak). Evidence: `notes/tricolon-referent-null-2026-11-18.md`, roadmap s.10. | Untested. Test on labels harvested after 2026-11-18, with the cut fixed before looking. If it holds: a `[clausal]` subtype (no waiver moves) or a `tricolon_clausal` pattern (mutable on its own, moved waivers go stale), as in TF-003 options (a)/(b). If not: record a null result and close. |
-| -   | `harvest.py --by-subtype` | Planned as TF-004 requirement 9. |
+| -   | `harvest.py --by-subtype` | Closed: delivered in TF-004 with `--summary-only` (roadmap s.11). |
 
 ---
 

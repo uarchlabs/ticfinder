@@ -2,8 +2,8 @@
 
 Terms used in the ticfinder roadmap, task files and notes, grouped by
 where they come from. Table 1 holds standard terms. Table 2 holds
-ticfinder's own terms, often an ordinary word with a stretched meaning. Table 3 holds terms coined in TF-003, TF-004 and the TF-005 draft,
-which have no meaning outside this project.
+ticfinder's own terms, often an ordinary word with a stretched meaning. Table 3 holds terms coined in TF-003 to TF-006, which have no
+meaning outside this project.
 
 ## Table 1. Standard terms, used in their usual sense
 
@@ -28,6 +28,13 @@ which have no meaning outside this project.
 | OAI-PMH | a standard protocol for harvesting repository metadata; arXiv offers it next to its search API |
 | percentile interval | a bootstrap interval made from the 2.5th and 97.5th percentiles of the resampled values |
 | paired bootstrap | resampling the same papers for two measurements, so their difference keeps its pairing (planned for TF-005) |
+| manner adverb | an adverb that says how or how much a verb happened: "the writes drop significantly, about 73%" |
+| sentence adverb | an adverb that comments on the whole clause after it: "Significantly, the cache never misses." `HOLLOW_BOOSTER` looks for these |
+| transitive, intransitive | a verb with a direct object ("passing the depth"), and one without ("posing as a refactor") |
+| reflexive pronoun | a "-self" pronoun that refers back to the subject: "passing itself off as evidence" |
+| passive | a clause whose subject receives the action: "the value is passed as an argument" |
+| particle | the small word of a phrasal verb: the "off" in "passed off as" |
+| lookbehind | a match condition on the text before the match; spaCy's Matcher has none, so a pattern can only test tokens inside its own span |
 
 ## Table 2. Project terms: borrowed words with a ticfinder meaning, defined in CLAUDE.md or the roadmap
 
@@ -46,8 +53,12 @@ which have no meaning outside this project.
 | subtype | the bracketed tail of a finding's label, without the member-count field: `[3-part NOUN, list-like]` gives `list-like` | the rule is in `harvest.py`'s `subtype()`; a plain comma split would break `[X, not Y]` |
 | rate | findings per 1,000 words, pooled: total findings over total words | long documents weigh more; TF-005 adds the mean of per-paper rates |
 | ratio | post-window rate over pre-window rate | it measures change over time, not a likelihood ratio between LLM and human text |
+| phrase construction | a construction defined by token patterns, built in (`PHRASE_PATTERNS`) or from the phrase file, rather than by a parse function | its patterns carry no pattern name; since TF-006 its test rows run through `analyse()` |
+| fingerprint | the short hash that identifies a finding for waivers, over construction, pattern, matched text and sentence | widening a span changes it; offsets and line numbers are never part of it |
+| waiver, stale waiver | a fingerprint the editor marked as acceptable; stale when no current finding matches it | a detector fix can make a waiver stale without invalidating it; `--prune-stale` removes it |
+| all sections, body sections | in TF-005, all four section types together, against the `body` section type alone | the TF-005 `HOLLOW_BOOSTER` ratio 3.31 is body sections; all sections give 2.98 |
 
-## Table 3. Terms from TF-003, TF-004 and TF-005 with no outside standing
+## Table 3. Terms from TF-003 to TF-006 with no outside standing
 
 | term | meaning | where |
 |---|---|---|
@@ -68,3 +79,12 @@ which have no meaning outside this project.
 | sanity reading | reading 20 random findings per window and counting the real instances | TF-004, TF-005 |
 | text type | where the counted text comes from: abstract, introduction, body, conclusion or related work | TF-005 draft |
 | ratio of ratios | a construction's body ratio over its abstract ratio | TF-005 draft |
+| recheck | rerunning stored arXiv findings under the committed and the new detector, each stored sentence parsed on its own (`eval/arxiv_recheck.py`) | TF-006 |
+| isolated parse | parsing one stored sentence without the rest of its document; it reproduced 69 of 71 and 282 of 282 stored findings | TF-006 |
+| reproduced | a stored finding that the old code gives again, with the same matched text, on the isolated sentence | TF-006 |
+| kept, dropped | a reproduced finding that a new span still covers, and one that no new span covers | TF-006 |
+| covering span | a new span that contains the old one, as `More significantly,` contains `significantly,`; it counts as kept | TF-006 phase 2 |
+| adjusted rate, adjusted ratio | kept findings over the words in the private per-paper tables, and its post over pre ratio; a point estimate | TF-006 |
+| scaled rate | the stored count times kept over reproduced, over the same words; it corrects for findings the isolated parse misses | TF-006 |
+| `as` frame | an `as` phrase on `pose` or `pass`; it counts as a disguise only when the verb is intransitive, reflexive or has `off` | TF-006 phase 1 |
+| anchored pattern | a pattern whose first token must start a sentence (`IS_SENT_START`); without lookbehind, the anchor word sits in the span | TF-006 phase 2 |
