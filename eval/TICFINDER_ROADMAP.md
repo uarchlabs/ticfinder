@@ -441,11 +441,17 @@ list stays in step order, so the numbers render as written.
     `More`/`Even more significantly,` there. That drops 31 manner
     adverbs and no real booster. The adjusted `HOLLOW_BOOSTER` body
     ratio is 4.07, against 3.31 in TF-005. Results in section 13.
-11. **Pattern splits from TF-004.** `rather than` apart from
-    `instead of`; a lemma list for the `PARTICIPIAL_TAIL` verbs that
-    rose; confidence per phrase for `LLM_DICTION` and
-    `CONSULTANT_REGISTER`. Measure each with `harvest.py --by-subtype`
-    and the arXiv tables.
+11. **Pattern splits from TF-004** (TF-007). Done. `rather than` and
+    `instead of` are now separate patterns, `af_rather_than` at `med`
+    and `af_instead_of` at `low`, and `--migrate-waivers` rekeys
+    waivers written under the old name. A lemma list for the
+    `PARTICIPIAL_TAIL` verbs that rose is a null result, because 22 of
+    the 26 frequent verbs rose in both corpora. A reading found `,
+    using ...` tails almost all instrumental, so lemma `use` runs at
+    `med`. Phrase entries may now carry a confidence per phrase or per
+    matched form. Six forms that rose in both corpora run at `med`.
+    Levels come from an interim rule over the arXiv ratios until step 8.
+    Harvest labels did not change. Results in section 14.
 12. **Licensing, continued from step 5.** Fresh labels for the
     `TRICOLON` clause and noun split, then the licensing tests for
     `CORRECTIVE_CONTRAST`, `ALTERNATIVE_FRAMING` and `PARTICIPIAL_TAIL`.
@@ -1469,3 +1475,107 @@ are byte-identical before and after.
 **Verdict.** The lemma list is a null result. The narrower claim holds:
 `, using ...` tails are almost all instrumental, and `use` now runs at
 `med`.
+
+### Phase 3: per-phrase confidence
+
+**Phrase table.** Every `LLM_DICTION` and `CONSULTANT_REGISTER`
+matched text, lowercased, with at least 20 findings in either corpus.
+Both constructions match by lemma, so one entry gives several rows
+(`leverage`, `leverages`, `leveraging`, `leveraged`). Abstract
+values come from the TF-004 report, which lists rows with at least 20
+findings; smaller counts come from the private findings. Body values
+cover all sections, with the TF-005 bootstrap (2,000 draws over papers,
+seed 5005). Summed over phrases, the body counts equal the per-paper
+construction counts (4,091 and 2,274).
+
+| construction | matched text | abstracts n | abstract ratio (95% CI) | verdict | bodies n | body ratio, all sections (95% CI) | verdict | interim |
+| `CONSULTANT_REGISTER` | `leverages` | 185 | 3.54 (2.25 to 6.84) | rose | 178 | 2.81 (1.76 to 4.56) | rose | `med` |
+| `CONSULTANT_REGISTER` | `leveraging` | 219 | 1.88 (1.32 to 2.88) | rose | 258 | 2.00 (1.36 to 3.03) | rose | `med` |
+| `CONSULTANT_REGISTER` | `optimizing` | 139 | 1.81 (1.19 to 2.98) | rose | 237 | 1.53 (1.05 to 2.30) | rose | `med` |
+| `CONSULTANT_REGISTER` | `at scale` | 12 | - | too few | 28 | 6.41 (2.45 to 42.94) | rose | `low` |
+| `CONSULTANT_REGISTER` | `holistic` | 33 | 0.96 (0.45 to 2.30) | flat | 44 | 1.53 (0.55 to 5.41) | flat | `low` |
+| `CONSULTANT_REGISTER` | `leverage` | 86 | 0.83 (0.53 to 1.34) | flat | 311 | 0.97 (0.69 to 1.38) | flat | `low` |
+| `CONSULTANT_REGISTER` | `leveraged` | 18 | - | too few | 58 | 0.63 (0.30 to 1.31) | flat | `low` |
+| `CONSULTANT_REGISTER` | `optimize` | 201 | 1.24 (0.89 to 1.82) | flat | 345 | 0.96 (0.64 to 1.48) | flat | `low` |
+| `CONSULTANT_REGISTER` | `optimized` | 388 | 1.19 (0.92 to 1.59) | flat | 634 | 1.37 (1.03 to 1.83) | rose | `low` |
+| `CONSULTANT_REGISTER` | `optimizes` | 96 | 1.36 (0.85 to 2.51) | flat | 89 | 1.56 (0.94 to 2.64) | flat | `low` |
+| `LLM_DICTION` | `comprehensive` | 206 | 1.64 (1.16 to 2.50) | rose | 278 | 3.51 (1.83 to 6.38) | rose | `med` |
+| `LLM_DICTION` | `essential` | 176 | 1.89 (1.33 to 3.00) | rose | 250 | 2.16 (1.45 to 3.41) | rose | `med` |
+| `LLM_DICTION` | `landscape` | 28 | 4.66 (1.62 to inf) | rose | 39 | 6.37 (2.20 to 45.74) | rose | `med` |
+| `LLM_DICTION` | `crucial` | 133 | 1.18 (0.82 to 1.86) | flat | 159 | 2.71 (1.86 to 3.93) | rose | `low` |
+| `LLM_DICTION` | `dynamic` | 520 | 1.01 (0.79 to 1.30) | flat | 1106 | 1.11 (0.77 to 1.59) | flat | `low` |
+| `LLM_DICTION` | `dynamics` | 52 | 1.50 (0.58 to 8.03) | flat | 86 | 2.35 (1.05 to 5.86) | rose | `low` |
+| `LLM_DICTION` | `harness` | 24 | 0.87 (0.34 to 5.05) | flat | 42 | 8.36 (1.39 to 47.29) | rose | `low` |
+| `LLM_DICTION` | `innovative` | 33 | 2.01 (0.88 to 8.97) | flat | 33 | 3.21 (1.33 to 9.57) | rose | `low` |
+| `LLM_DICTION` | `orchestrate` | 8 | - | too few | 22 | 0.96 (0.33 to 2.51) | flat | `low` |
+| `LLM_DICTION` | `paradigm` | 191 | 0.82 (0.57 to 1.29) | flat | 196 | 1.51 (0.78 to 2.90) | flat | `low` |
+| `LLM_DICTION` | `paradigms` | 42 | 1.15 (0.57 to 2.89) | flat | 48 | 1.79 (0.75 to 3.93) | flat | `low` |
+| `LLM_DICTION` | `robust` | 121 | 1.45 (0.96 to 2.42) | flat | 169 | 2.18 (1.28 to 3.93) | rose | `low` |
+| `LLM_DICTION` | `seamless` | 24 | 2.51 (0.95 to inf) | flat | 51 | 6.50 (2.55 to 22.43) | rose | `low` |
+| `LLM_DICTION` | `significant` | 622 | 1.22 (1.01 to 1.49) | rose | 1320 | 0.80 (0.64 to 1.01) | flat | `low` |
+| `LLM_DICTION` | `versatile` | 32 | 1.55 (0.69 to 5.62) | flat | 40 | 1.26 (0.41 to 4.63) | flat | `low` |
+| `LLM_DICTION` | `vital` | 25 | 0.76 (0.35 to 2.16) | flat | 18 | 0.89 (0.15 to 2.93) | too few | `low` |
+
+**Agreement.** 22 rows have at least 20 findings in both corpora. The
+verdicts agree for 14, and the body ratio lies inside the abstract
+interval for 17. Of the 8 rows whose verdicts differ, 7 rose in bodies
+and were flat in abstracts (`crucial`, `robust`, `seamless`,
+`innovative`, `harness`, `dynamics`, `optimized`). Bodies hold
+several times the words, so they detect smaller changes. The eighth,
+`significant`, rose slightly in abstracts, 1.22 (1.01 to 1.49), and
+was flat in bodies, 0.80 (0.64 to 1.01). No row fell in either corpus,
+so no phrase is listed as a candidate for removal.
+
+Of the words TF-004 named, `leverages`, `landscape`, `essential`
+and `comprehensive` rose in both corpora. `increasingly` belongs to
+`VAGUE_QUANTIFIER`, which this task did not cover. Of the flat words,
+`dynamic`, `paradigm` and `optimize` stayed flat in bodies, and
+`robust` (2.18) and `crucial` (2.71) rose there.
+
+**Lemma entries.** `leverage` and `optimize` hold forms with
+different verdicts. The task stopped there and the user chose a
+per-form override. That keeps one lemma entry, which fires on exactly
+the tokens it did before, and leaves the phrase list unchanged.
+
+**Format.** An entry in `phrases` is a string or an object
+`{"phrase": ..., "confidence": ..., "forms": {...}}`. `confidence`
+sets the phrase's level. `forms` maps a matched text, lowercased, to
+a level. A string keeps the construction's level. `load_phrase_file()`
+rejects an unknown key, an empty phrase, a bad level and a `forms`
+value that is not a mapping. `analyse()` still adds one Matcher key
+per construction and finds the phrase again from the span's token
+values. The matched text, the empty pattern name and the fingerprint
+are unchanged; a `waivers` test checks the fingerprint. The shorthand
+forms still load.
+
+**Applied.** By the rule, six forms run at `med`, all through
+`forms`, because the rule's unit is the matched text: `comprehensive`,
+`essential` and `landscape` in `LLM_DICTION`, and `leverages`,
+`leveraging` and `optimizing` in `CONSULTANT_REGISTER`. Rarer forms
+of the same entries (`landscapes`, 5 findings; `essentials`, 2) keep
+`low`. No phrase is raised by its entry `confidence`.
+
+**Harvest.** The blogs hold 9 findings from these lists (`harness`,
+`significant`, `dynamic`, `delve`, `values added`), and none is a
+raised form. Summary and `labels.jsonl` are byte-identical.
+Confidence counts on the harvest blogs, before and after:
+
+| findings | high | med | low |
+|---|---|---|---|
+| final version | 29 | 26 | 89 |
+| removed in editing | 53 | 133 | 170 |
+
+On the arXiv findings the change is visible. The share of findings at
+`med` rises from pre to post:
+
+| source | construction | pre | post |
+|---|---|---|---|
+| TF-004 abstracts | `LLM_DICTION` | 0.13 | 0.18 |
+| TF-004 abstracts | `CONSULTANT_REGISTER` | 0.25 | 0.40 |
+| TF-005 bodies, all sections | `LLM_DICTION` | 0.09 | 0.19 |
+| TF-005 bodies, all sections | `CONSULTANT_REGISTER` | 0.25 | 0.34 |
+
+**Verdict.** The hypothesis holds. Body and abstract ratios agree for
+most phrases with enough findings, and the lists hold both risers and
+flat words. Per-phrase levels separate them where one level per list
+could not.

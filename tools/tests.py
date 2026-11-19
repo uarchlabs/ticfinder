@@ -18,6 +18,7 @@ hook.
 """
 
 import importlib.util
+import json
 import os
 import subprocess
 import sys
@@ -375,6 +376,30 @@ PATTERN_CASES = [
 ]
 
 
+# Phrase-list confidence per matched text (TF-007 phase 3):
+# (construction, text, {matched text, lowercased: confidence}). Raised
+# forms rose in arXiv abstracts and bodies; the others keep the
+# construction's low.
+PHRASE_CONF_CASES = [
+    ("LLM_DICTION", "The survey gives a comprehensive view of the field.",
+     {"comprehensive": "med"}),
+    ("LLM_DICTION", "The schedule is dynamic.", {"dynamic": "low"}),
+    ("LLM_DICTION", "The landscapes differ.", {"landscapes": "low"}),
+    ("CONSULTANT_REGISTER", "The design leverages a shared buffer.",
+     {"leverages": "med"}),
+    ("CONSULTANT_REGISTER", "Leveraging a shared buffer, the design saves "
+                            "area.", {"leveraging": "med"}),
+    ("CONSULTANT_REGISTER", "We leverage a shared buffer.",
+     {"leverage": "low"}),
+    ("CONSULTANT_REGISTER", "The buffer was leveraged across products.",
+     {"leveraged": "low"}),
+    ("CONSULTANT_REGISTER", "We are optimizing the inner loop.",
+     {"optimizing": "med"}),
+    ("CONSULTANT_REGISTER", "The inner loop is optimized.",
+     {"optimized": "low"}),
+]
+
+
 def test_detectors(nlp):
     extra = []
     for name in tf.DEFAULT_PHRASE_FILES:
@@ -399,6 +424,44 @@ def test_detectors(nlp):
             got = bool(tf.run_construction(cid, nlp(text), nlp))
         check("detectors", f"{cid} {'fires' if want else 'silent'}",
               got == want, f"want={want} got={got}: {text[:70]}")
+
+    for cid, text, want in PHRASE_CONF_CASES:
+        with tempfile.TemporaryDirectory() as d:
+            pth = Path(d) / "c.md"
+            pth.write_text(text + "\n", encoding="utf-8")
+            found, _ = tf.analyse(str(pth), nlp, only={cid}, extra=extra)
+        got = {" ".join(x.text.split()).lower(): x.confidence
+               for x in found if x.construction == cid}
+        check("detectors", f"{cid} confidence {sorted(want)}",
+              got == want, f"want={want} got={got}: {text[:70]}")
+
+    # Phrase entries as objects: a per-phrase level, a per-form level, and
+    # a plain string that keeps the construction's level.
+    with tempfile.TemporaryDirectory() as d:
+        pf = Path(d) / "p.json"
+        pf.write_text(json.dumps({"constructions": [
+            {"id": "T_TEXT", "confidence": "low", "phrases": [
+                "deep dive", {"phrase": "ground truth", "confidence": "med"}]},
+            {"id": "T_LEMMA", "confidence": "low", "match_lemma": True,
+             "phrases": [{"phrase": "leverage",
+                          "forms": {"leverages": "high"}}]}]}),
+            encoding="utf-8")
+        ex = tf.load_phrase_file(pf)
+        pth = Path(d) / "c.md"
+        pth.write_text("A deep dive into ground truth. It leverages X. "
+                       "We leverage Y.\n", encoding="utf-8")
+        found, _ = tf.analyse(str(pth), nlp, only={"T_TEXT", "T_LEMMA"},
+                              extra=ex)
+        got = sorted((x.construction, x.text.lower(), x.confidence)
+                     for x in found)
+        want = [("T_LEMMA", "leverage", "low"),
+                ("T_LEMMA", "leverages", "high"),
+                ("T_TEXT", "deep dive", "low"),
+                ("T_TEXT", "ground truth", "med")]
+        check("detectors", "phrase objects set confidence per phrase/form",
+              got == want, f"got {got}")
+        check("detectors", "phrase findings keep an empty pattern name",
+              all(x.pattern == "" for x in found))
 
     for cid, text, want in PATTERN_CASES:
         hits = tf.run_construction(cid, nlp(text), nlp)
@@ -911,6 +974,30 @@ def test_waivers(nlp):
               "2 waived" in r.stdout and "old-style" not in r.stdout,
               r.stdout[-300:])
 
+    # A per-phrase confidence override must not change a finding's id.
+    with tempfile.TemporaryDirectory() as d:
+        src = Path(d) / "conf.md"
+        src.write_text("It leverages a comprehensive table.\n",
+                       encoding="utf-8")
+
+        def ids(phrases):
+            pf = Path(d) / "p.json"
+            pf.write_text(json.dumps({"constructions": [
+                {"id": "T", "confidence": "low", "match_lemma": True,
+                 "phrases": phrases}]}), encoding="utf-8")
+            ex = tf.load_phrase_file(pf)
+            f, _ = tf.analyse(str(src), nlp, only={"T"}, extra=ex)
+            return {(tf.fingerprint(x), x.confidence) for x in f}
+        plain = ids(["comprehensive", "leverage"])
+        over = ids([{"phrase": "comprehensive", "confidence": "med"},
+                    {"phrase": "leverage", "forms": {"leverages": "med"}}])
+        check("waivers", "confidence override keeps fingerprints",
+              len(plain) == 2 and {i for i, _ in plain} == {i for i, _ in over},
+              f"{sorted(plain)} {sorted(over)}")
+        check("waivers", "confidence override changes the level",
+              {c for _, c in plain} == {"low"} and {c for _, c in over}
+              == {"med"}, f"{sorted(plain)} {sorted(over)}")
+
     check("waivers", "ids are 6 hex chars",
           all(len(x) == 6 and all(ch in "0123456789abcdef" for ch in x)
               for x in a))
@@ -1110,6 +1197,41 @@ def test_cli():
             capture_output=True, text=True, env=env, cwd=str(d))
         check("cli", "invalid confidence rejected", r.returncode != 0,
               r.stdout[-200:])
+
+        # phrase entries: string or {"phrase", "confidence", "forms"}
+        def load(obj):
+            f = d / "pl.json"
+            f.write_text(json.dumps(obj), encoding="utf-8")
+            return tf.load_phrase_file(f)
+
+        def rejects(obj):
+            try:
+                load(obj)
+            except ValueError:
+                return True
+            return False
+        ok = load({"constructions": [{"id": "X", "phrases": [
+            "a b", {"phrase": "c", "confidence": "med"},
+            {"phrase": "d", "forms": {"ds": "high"}}]}]})
+        check("cli", "phrase objects load as phrase strings",
+              ok and ok[0]["phrases"] == ["a b", "c", "d"], str(ok))
+        check("cli", "shorthand list still loads",
+              load(["a", "b"])[0]["phrases"] == ["a", "b"])
+        check("cli", "shorthand mapping still loads",
+              load({"J": ["a"]})[0]["id"] == "J")
+        for name, bad_entry in [
+                ("bad phrase confidence", {"phrase": "c",
+                                           "confidence": "urgent"}),
+                ("bad form confidence", {"phrase": "c",
+                                         "forms": {"cs": "urgent"}}),
+                ("forms not a mapping", {"phrase": "c", "forms": ["cs"]}),
+                ("missing phrase", {"confidence": "med"}),
+                ("empty phrase", {"phrase": " "}),
+                ("unknown key", {"phrase": "c", "level": "med"}),
+                ("not a string or object", 3)]:
+            check("cli", f"phrase entry rejected: {name}",
+                  rejects({"constructions": [{"id": "X",
+                                              "phrases": [bad_entry]}]}))
 
         # html report
         r = run("--html", str(d / "rep"))

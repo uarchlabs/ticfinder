@@ -2,7 +2,7 @@
 
 Terms used in the ticfinder roadmap, task files and notes, grouped by
 where they come from. Table 1 holds standard terms. Table 2 holds
-ticfinder's own terms, often an ordinary word with a stretched meaning. Table 3 holds terms coined in TF-003 to TF-006, which have no
+ticfinder's own terms, often an ordinary word with a stretched meaning. Table 3 holds terms coined in TF-003 to TF-007, which have no
 meaning outside this project.
 
 ## Table 1. Standard terms, used in their usual sense
@@ -58,7 +58,7 @@ meaning outside this project.
 | waiver, stale waiver | a fingerprint the editor marked as acceptable; stale when no current finding matches it | a detector fix can make a waiver stale without invalidating it; `--prune-stale` removes it |
 | all sections, body sections | in TF-005, all four section types together, against the `body` section type alone | the TF-005 `HOLLOW_BOOSTER` ratio 3.31 is body sections; all sections give 2.98 |
 
-## Table 3. Terms from TF-003 to TF-006 with no outside standing
+## Table 3. Terms from TF-003 to TF-007 with no outside standing
 
 | term | meaning | where |
 |---|---|---|
@@ -88,3 +88,11 @@ meaning outside this project.
 | scaled rate | the stored count times kept over reproduced, over the same words; it corrects for findings the isolated parse misses | TF-006 |
 | `as` frame | an `as` phrase on `pose` or `pass`; it counts as a disguise only when the verb is intransitive, reflexive or has `off` | TF-006 phase 1 |
 | anchored pattern | a pattern whose first token must start a sentence (`IS_SENT_START`); without lookbehind, the anchor word sits in the span | TF-006 phase 2 |
+| interim rule | sets a confidence from arXiv ratios until calibration: `med` when the interval lies above 1 in both TF-004 abstracts and TF-005 bodies, each with at least 20 findings; never more than one level above the construction | roadmap section 14, TF-007 |
+| rename map | `RENAMED_PATTERNS` in `ticfinder.py`, new pattern name to old; `--migrate-waivers` uses it to rekey waivers written under the old name | TF-007 phase 1 |
+| old-style id | a waiver id computed the old way: the sentence cut at 240 characters, an old pattern name, or both; a normal run counts them and `--migrate-waivers` rekeys them | TF-001, TF-007 phase 1 |
+| per-finding confidence | a level a detector returns with one finding, overriding its pattern and construction | TF-007 phases 1 and 2 |
+| instrumental tail | a participial tail that names the method, data or tool (`, using a 4-bit counter`); against a restating tail, which repeats the main clause | TF-007 phase 2 |
+| per-phrase confidence | a level set on one phrase-file entry with `{"phrase": ..., "confidence": ...}` | TF-007 phase 3 |
+| per-form override | a level set on one matched text, lowercased, of a lemma entry, through the entry's `forms` | TF-007 phase 3 |
+| matched text | a phrase finding's text, whitespace-normalised and lowercased; the key of the TF-004 phrase rows and of `forms` | TF-004, TF-007 phase 3 |

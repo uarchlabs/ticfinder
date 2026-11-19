@@ -621,6 +621,17 @@ def load_phrase_file(path):
 
         ["ground truth", "deep dive"]
         {"JARGON": ["ground truth"], "FILLER": ["at the end of the day"]}
+
+    An entry in "phrases" is a string, which reports at the
+    construction's confidence, or an object:
+
+        {"phrase": "leverage", "confidence": "low",
+         "forms": {"leverages": "med", "leveraging": "med"}}
+
+    "confidence" sets the level for the phrase. "forms" sets it for one
+    matched text, lowercased, which is how a lemma entry's word forms are
+    told apart. Both are optional. Matching and fingerprints do not
+    depend on either.
     """
     data = json.loads(Path(path).read_text(encoding="utf-8"))
 
@@ -639,25 +650,69 @@ def load_phrase_file(path):
         if not phrases:
             continue
         conf = c.get("confidence", "low")
-        if conf not in ("high", "med", "low"):
+        if conf not in LEVELS:
             raise ValueError(f"{path}: bad confidence {conf!r} in {c['id']} "
                              f"(use high, med or low)")
+        strings, levels = [], {}
+        for ph in phrases:
+            ph, level = _phrase_entry(path, c["id"], ph)
+            strings.append(ph)
+            if level:
+                levels[ph] = level
         out.append({
             "id": c["id"],
             "label": c.get("label", "Overused phrase"),
             "note": c.get("note", "Flagged from a user phrase list."),
             "confidence": conf,
             "lemma": bool(c.get("match_lemma", False)),
-            "phrases": phrases,
+            "phrases": strings,
+            "levels": levels,
         })
     return out
 
 
-def phrase_patterns(entry, nlp):
+LEVELS = ("high", "med", "low")
+
+
+def _phrase_entry(path, cid, ph):
+    """(phrase, (confidence or None, {form: confidence}) or None)."""
+    if isinstance(ph, str):
+        return ph, None
+    where = f"{path}: phrase entry in {cid}"
+    if not isinstance(ph, dict):
+        raise ValueError(f"{where} must be a string or an object, "
+                         f"not {ph!r}")
+    extra = set(ph) - {"phrase", "confidence", "forms"}
+    if extra:
+        raise ValueError(f"{where} has unknown key(s) {sorted(extra)}")
+    text = ph.get("phrase")
+    if not isinstance(text, str) or not text.strip():
+        raise ValueError(f"{where} needs a non-empty 'phrase': {ph!r}")
+    conf = ph.get("confidence")
+    if conf is not None and conf not in LEVELS:
+        raise ValueError(f"{where}: bad confidence {conf!r} for {text!r} "
+                         f"(use high, med or low)")
+    forms = ph.get("forms", {})
+    if not isinstance(forms, dict):
+        raise ValueError(f"{where}: 'forms' for {text!r} must map matched "
+                         f"text to a confidence")
+    for k, v in forms.items():
+        if v not in LEVELS:
+            raise ValueError(f"{where}: bad confidence {v!r} for form "
+                             f"{k!r} of {text!r} (use high, med or low)")
+    forms = {" ".join(k.split()).lower(): v for k, v in forms.items()}
+    return text, ((conf, forms) if conf or forms else None)
+
+
+def phrase_patterns(entry, nlp, keys=None):
     """Turn phrase strings into Matcher patterns.
 
     Tokenised with spaCy so contractions and punctuation line up with the
     document -- "don't" is two tokens, not one.
+
+    When `keys` is a dict, it is filled with each pattern's token values
+    mapped to its phrase, so a match can be traced back to the phrase
+    that produced it (phrase_key() gives the same values for a span).
     """
     key = "LEMMA" if entry["lemma"] else "LOWER"
     pats = []
@@ -670,7 +725,23 @@ def phrase_patterns(entry, nlp):
             continue
         pats.append([{key: (t.lemma_.lower() if entry["lemma"]
                             else t.lower_)} for t in toks])
+        if keys is not None:
+            keys.setdefault(tuple(d[key] for d in pats[-1]), ph)
     return pats
+
+
+def phrase_key(span, lemma):
+    """The token values a phrase pattern compared against this span."""
+    return tuple((t.lemma_ if lemma else t.lower_)
+                 for t in span if not t.is_space)
+
+
+def phrase_confidence(entry, phrase, span):
+    """Confidence for one phrase-list match: the matched form's level,
+    then the phrase's, then the construction's."""
+    conf, forms = entry["levels"].get(phrase) or (None, {})
+    text = " ".join(span.text.split()).lower()
+    return forms.get(text) or conf or entry["confidence"]
 
 
 def discover_phrase_files(explicit):
@@ -1773,7 +1844,7 @@ def analyse(path, nlp, only=None, extra=(), disabled=(), code_mask=None):
 
     # phrasal
     matcher = Matcher(nlp.vocab)
-    meta = {}
+    meta, levels = {}, {}
     for cid, (label, note, conf, pats) in PHRASE_PATTERNS.items():
         if only and cid not in only:
             continue
@@ -1787,15 +1858,25 @@ def analyse(path, nlp, only=None, extra=(), disabled=(), code_mask=None):
             continue
         if cid in disabled:
             continue
-        pats = phrase_patterns(entry, nlp)
+        keys = {}
+        pats = phrase_patterns(entry, nlp, keys)
         if not pats:
             continue
         matcher.add(cid, pats)
         meta[cid] = (entry["label"], entry["note"], entry["confidence"])
+        if entry.get("levels"):
+            levels[cid] = (entry, keys)
     for mid, ms, me in (matcher(doc) if len(matcher) else []):
         cid = nlp.vocab.strings[mid]
         label, note, conf = meta[cid]
-        add(cid, label, doc[ms:me], note, conf)
+        span = doc[ms:me]
+        if cid in levels:
+            # One Matcher key per construction, so the phrase is found
+            # again from the span's token values.
+            entry, keys = levels[cid]
+            phrase = keys.get(phrase_key(span, entry["lemma"]))
+            conf = phrase_confidence(entry, phrase, span)
+        add(cid, label, span, note, conf)
 
     # em dash
     if not only or "EM_DASH" in only:
