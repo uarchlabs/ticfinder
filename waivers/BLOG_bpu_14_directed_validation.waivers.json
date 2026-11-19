@@ -72,9 +72,9 @@
       "enabled": false,
       "text": "The task chose the rules table, called the decisions note subordinate implementation guidance, and u"
     },
-    "aaed6a": {
+    "f57553": {
       "construction": "ALTERNATIVE_FRAMING",
-      "pattern": "af_rather_instead",
+      "pattern": "af_rather_than",
       "line_when_waived": 204,
       "enabled": false,
       "text": "rather than"
@@ -156,9 +156,9 @@
       "enabled": false,
       "text": "every simulation and lint target in the Makefile runs, whether or not it is a dependency of  all , a"
     },
-    "875495": {
+    "d40beb": {
       "construction": "ALTERNATIVE_FRAMING",
-      "pattern": "af_rather_instead",
+      "pattern": "af_rather_than",
       "line_when_waived": 362,
       "enabled": false,
       "text": "Rather than correct one document"
@@ -205,9 +205,9 @@
       "enabled": false,
       "text": "It confirmed `age = (lcl_epoch - EPC) mod 4`, and an effective usefulness of the raw value at age 0,"
     },
-    "656ee5": {
+    "bf73b9": {
       "construction": "ALTERNATIVE_FRAMING",
-      "pattern": "af_rather_instead",
+      "pattern": "af_instead_of",
       "line_when_waived": 422,
       "enabled": false,
       "text": "instead of the counter value"
@@ -219,9 +219,9 @@
       "enabled": false,
       "text": "a 32-bit input port, not a static parameter"
     },
-    "040f42": {
+    "7efeee": {
       "construction": "ALTERNATIVE_FRAMING",
-      "pattern": "af_rather_instead",
+      "pattern": "af_rather_than",
       "line_when_waived": 438,
       "enabled": false,
       "text": "rather than"
@@ -254,9 +254,9 @@
       "enabled": false,
       "text": "the allocation write-data field order, the  pred_strong  carryover, and the stored final-target fiel"
     },
-    "23a97b": {
+    "39d7e4": {
       "construction": "ALTERNATIVE_FRAMING",
-      "pattern": "af_rather_instead",
+      "pattern": "af_instead_of",
       "line_when_waived": 587,
       "enabled": false,
       "text": "instead of demonstrating it"

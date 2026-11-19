@@ -23,9 +23,9 @@
       "enabled": true,
       "text": "by construction"
     },
-    "2dbccf": {
+    "6d1ef5": {
       "construction": "ALTERNATIVE_FRAMING",
-      "pattern": "af_rather_instead",
+      "pattern": "af_rather_than",
       "line_when_waived": 130,
       "enabled": true,
       "text": "rather than"
@@ -51,9 +51,9 @@
       "enabled": false,
       "text": "a hint, not a verdict"
     },
-    "f56351": {
+    "d16646": {
       "construction": "ALTERNATIVE_FRAMING",
-      "pattern": "af_rather_instead",
+      "pattern": "af_rather_than",
       "line_when_waived": 182,
       "enabled": false,
       "text": "rather than alarming"
@@ -107,9 +107,9 @@
       "enabled": false,
       "text": "its id, the construction, the line it was waived at and the text that was waived"
     },
-    "fc0ebf": {
+    "8480ab": {
       "construction": "ALTERNATIVE_FRAMING",
-      "pattern": "af_rather_instead",
+      "pattern": "af_rather_than",
       "line_when_waived": 355,
       "enabled": false,
       "text": "rather than"
@@ -128,9 +128,9 @@
       "enabled": false,
       "text": "That is also why  rather than  /  instead of  /  less...than  live under  ALTERNATIVE_FRAMING"
     },
-    "cdf59b": {
+    "1488dd": {
       "construction": "ALTERNATIVE_FRAMING",
-      "pattern": "af_rather_instead",
+      "pattern": "af_rather_than",
       "line_when_waived": 365,
       "enabled": false,
       "text": "rather than"
@@ -142,9 +142,9 @@
       "enabled": false,
       "text": "ticfinder_off ,  ticfinder-off  and  ticfinder"
     },
-    "eec9fe": {
+    "b75d15": {
       "construction": "ALTERNATIVE_FRAMING",
-      "pattern": "af_rather_instead",
+      "pattern": "af_rather_than",
       "line_when_waived": 421,
       "enabled": true,
       "text": "rather than"

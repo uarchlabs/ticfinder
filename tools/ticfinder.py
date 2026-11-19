@@ -421,6 +421,31 @@ def legacy_fingerprint(f):
     return fingerprint(replace(f, context=f.context[:LEGACY_CONTEXT_CHARS]))
 
 
+# Pattern renames, new name to old name. A finding's id hashes its pattern
+# name, so a rename makes every waiver for that pattern look stale.
+# legacy_fingerprints() recomputes the id under the old name so
+# --migrate-waivers can rekey those waivers. TF-007 split af_rather_instead.
+RENAMED_PATTERNS = {
+    "af_rather_than": "af_rather_instead",
+    "af_instead_of": "af_rather_instead",
+}
+
+
+def legacy_fingerprints(f):
+    """Every old-style id a finding may have been waived under.
+
+    The pre-TF-001 sentence cut, the pattern's old name, and both at once.
+    The current id is left out.
+    """
+    olds = {legacy_fingerprint(f)}
+    oldname = RENAMED_PATTERNS.get(f.pattern)
+    if oldname:
+        g = replace(f, pattern=oldname)
+        olds |= {fingerprint(g), legacy_fingerprint(g)}
+    olds.discard(fingerprint(f))
+    return olds
+
+
 def waiver_path(src, waiver_dir=None, explicit=None):
     """Where the waivers for one source file live.
 
@@ -914,19 +939,33 @@ def cc_negated_apposition(doc, nlp):
     "on the table. Expect false positives in technical writing; mute this id "
     "with --off if it is not earning its place.",
     "low")
-def af_rather_instead(doc, nlp):
-    """rather than X, Y / instead of X, Y.
+def af_rather_than(doc, nlp):
+    """rather than X, Y.
 
-    Purely lexical -- no negation, no structural check. Kept at low
-    confidence and behind its own id so it can be muted without losing the
-    diagnostic patterns.
+    Purely lexical -- no negation, no structural check. Split from
+    'instead of' in TF-007: 'rather than' rose in arXiv abstracts and
+    bodies and has the higher blog precision, so it runs at med by the
+    interim rule (roadmap section 14). The construction stays low, and
+    the first pattern of a construction has no confidence of its own, so
+    the level is returned per finding.
     """
+    return [(span, sub, "med")
+            for span, sub in _af_phrase(doc, "rather", "than")]
+
+
+@pattern("ALTERNATIVE_FRAMING")
+def af_instead_of(doc, nlp):
+    """instead of X, Y. Flat in arXiv, so the construction's low."""
+    return _af_phrase(doc, "instead", "of")
+
+
+def _af_phrase(doc, first, second):
     out = []
     for tok in doc:
-        if tok.lower_ not in ("rather", "instead"):
+        if tok.lower_ != first:
             continue
         nxt = doc[tok.i + 1] if tok.i + 1 < len(doc) else None
-        if nxt is None or nxt.lower_ not in ("than", "of"):
+        if nxt is None or nxt.lower_ != second:
             continue
         anchor = tok.head
         lo = min(tok.i, anchor.left_edge.i)
@@ -1901,8 +1940,8 @@ def report(path, findings, stats, plain=False, show_stats=False,
             bits.append(f"{stats['stale']} stale (no longer in the text)")
         if stats.get("legacy"):
             bits.append(f"{stats['legacy']} of them old-style ids for "
-                        f"sentences over {LEGACY_CONTEXT_CHARS} chars "
-                        f"(--migrate-waivers rekeys them)")
+                        f"sentences over {LEGACY_CONTEXT_CHARS} chars or "
+                        f"renamed patterns (--migrate-waivers rekeys them)")
         line = ", ".join(bits)
         if stats.get("waiver_file"):
             line += f" [{stats['waiver_file']}]"
@@ -2260,15 +2299,19 @@ def main():
                   f"{'s' if len(waivers) != 1 else ''} -> {wpath}")
             dirty = False
 
-        # Old ids differ from new ones only for sentences over 240 chars.
+        # Old ids differ from new ones for sentences over 240 chars and
+        # for findings whose pattern was renamed (RENAMED_PATTERNS).
         legacy = {}
         for x in f:
-            old = legacy_fingerprint(x)
-            if old != x.fp and old in all_ids and x.fp not in all_ids:
-                legacy[old] = x
+            for old in legacy_fingerprints(x):
+                if old in all_ids and x.fp not in all_ids:
+                    legacy[old] = x
         if args.migrate_waivers and legacy and not args.no_waivers:
             for old, x in sorted(legacy.items(), key=lambda kv: kv[1].line):
                 entry = waivers.pop(old)
+                if isinstance(entry, dict) and entry.get("pattern") \
+                        == RENAMED_PATTERNS.get(x.pattern):
+                    entry["pattern"] = x.pattern
                 waivers[x.fp] = entry
                 if old in held:
                     held.discard(old)

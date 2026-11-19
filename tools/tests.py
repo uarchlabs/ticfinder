@@ -22,6 +22,7 @@ import os
 import subprocess
 import sys
 import tempfile
+from dataclasses import replace
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -56,7 +57,8 @@ def check(section, name, ok, detail=""):
 EXPECTED = {
     "CORRECTIVE_CONTRAST": ["cc_coordinated", "cc_cleft",
                             "cc_parallel_sibling", "cc_negated_apposition"],
-    "ALTERNATIVE_FRAMING": ["af_rather_instead", "af_less_than"],
+    "ALTERNATIVE_FRAMING": ["af_rather_than", "af_instead_of",
+                            "af_less_than"],
     "NEG_ESCALATION": ["neg_escalation"],
     "GAPPED_ANTITHESIS": ["gapped_antithesis"],
     "ABSTRACT_ADVERB": ["abstract_adverb"],
@@ -341,6 +343,25 @@ EM_DASH_KINDS = [
 ]
 
 
+# Which pattern fires, and at what confidence: (construction, text,
+# {pattern name: confidence}). TF-007 split af_rather_instead by phrase.
+PATTERN_CASES = [
+    ("ALTERNATIVE_FRAMING", "We hash the key rather than compare it.",
+     {"af_rather_than": "med"}),
+    ("ALTERNATIVE_FRAMING", "Use a table instead of a CAM.",
+     {"af_instead_of": "low"}),
+    ("ALTERNATIVE_FRAMING",
+     "We hash the key rather than compare it, and use a table instead of "
+     "a CAM.",
+     {"af_rather_than": "med", "af_instead_of": "low"}),
+    ("ALTERNATIVE_FRAMING",
+     "Rather than rewriting it, we patched the caller.",
+     {"af_rather_than": "med"}),
+    ("ALTERNATIVE_FRAMING", "Instead of retrying, the client gives up.",
+     {"af_instead_of": "low"}),
+]
+
+
 def test_detectors(nlp):
     extra = []
     for name in tf.DEFAULT_PHRASE_FILES:
@@ -364,6 +385,14 @@ def test_detectors(nlp):
         else:
             got = bool(tf.run_construction(cid, nlp(text), nlp))
         check("detectors", f"{cid} {'fires' if want else 'silent'}",
+              got == want, f"want={want} got={got}: {text[:70]}")
+
+    for cid, text, want in PATTERN_CASES:
+        hits = tf.run_construction(cid, nlp(text), nlp)
+        got = {}
+        for _span, _sub, conf, pname in hits:
+            got[pname] = conf
+        check("detectors", f"{cid} patterns {sorted(want)}: {text[:30]}",
               got == want, f"want={want} got={got}: {text[:70]}")
 
     count_cases = [
@@ -817,6 +846,57 @@ def test_waivers(nlp):
         w, _ = tf.load_waivers(wp, str(src))
         check("waivers", "--migrate-waivers rekeys old ids",
               new in w and old not in w, f"{sorted(w)} {r.stderr[-200:]}")
+
+    # A waiver written under a renamed pattern (TF-007: af_rather_instead
+    # became af_rather_than and af_instead_of) is reported as old-style,
+    # rekeyed by --migrate-waivers, and held afterwards.
+    with tempfile.TemporaryDirectory() as d:
+        src = Path(d) / "renamed.md"
+        src.write_text("We hash the key rather than compare it.\n\n"
+                       "Use a table instead of a CAM.\n", encoding="utf-8")
+        f, _ = tf.analyse(str(src), nlp, only={"ALTERNATIVE_FRAMING"})
+        f = [x for x in f if x.pattern in ("af_rather_than",
+                                           "af_instead_of")]
+        check("waivers", "renamed patterns found", len(f) == 2,
+              str([(x.pattern, x.text) for x in f]))
+        olds = {tf.fingerprint(replace(x, pattern="af_rather_instead")): x
+                for x in f}
+        news = {tf.fingerprint(x) for x in f}
+        check("waivers", "old pattern name gives a different id",
+              not (set(olds) & news))
+        check("waivers", "renamed id is listed as legacy",
+              all(old in tf.legacy_fingerprints(x)
+                  for old, x in olds.items()))
+        wp = tf.waiver_path(str(src))
+        tf.save_waivers(wp, str(src), {old: {
+            "construction": x.construction, "pattern": "af_rather_instead",
+            "line_when_waived": x.line, "enabled": True, "text": x.text}
+            for old, x in olds.items()})
+        before = wp.read_text(encoding="utf-8")
+        env = dict(os.environ)
+        env["COLUMNS"] = "100"
+        cmd = [sys.executable, str(SCRIPT), str(src), "--plain",
+               "--only", "ALTERNATIVE_FRAMING"]
+        r = subprocess.run(cmd, capture_output=True, text=True, env=env,
+                           cwd=d)
+        check("waivers", "renamed-pattern waiver reported as old-style",
+              "--migrate-waivers" in r.stdout, r.stdout[-300:])
+        check("waivers", "renamed-pattern waiver file untouched",
+              wp.read_text(encoding="utf-8") == before)
+        r = subprocess.run(cmd + ["--migrate-waivers"], capture_output=True,
+                           text=True, env=env, cwd=d)
+        w, _ = tf.load_waivers(wp, str(src))
+        check("waivers", "--migrate-waivers rekeys renamed pattern",
+              set(w) == news, f"{sorted(w)} {r.stderr[-200:]}")
+        check("waivers", "migrated entry records the new pattern",
+              sorted(v.get("pattern") for v in w.values())
+              == ["af_instead_of", "af_rather_than"],
+              str([v.get("pattern") for v in w.values()]))
+        r = subprocess.run(cmd, capture_output=True, text=True, env=env,
+                           cwd=d)
+        check("waivers", "migrated renamed-pattern waivers are held",
+              "2 waived" in r.stdout and "old-style" not in r.stdout,
+              r.stdout[-300:])
 
     check("waivers", "ids are 6 hex chars",
           all(len(x) == 6 and all(ch in "0123456789abcdef" for ch in x)

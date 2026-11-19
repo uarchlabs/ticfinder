@@ -1250,3 +1250,90 @@ pacino markdown, and `\item` is blanked in the arXiv text.
 use alone dropped `More significantly,`, a real booster. With the
 `more` patterns, the fix removes 31 false positives and no real
 instance. The adjusted body ratio rises from 3.31 to 4.07.
+
+## 14. TF-007 results (2026-11-19)
+
+Step 11: pattern splits and interim confidence from the TF-004 and
+TF-005 ratios. Each phase ran `make regress` and `harvest.py
+--by-subtype` before and after.
+
+### Interim confidence rule
+
+Used in all three phases until calibration (step 8) replaces it.
+
+- A pattern, lemma or phrase gets `med` when its ratio interval lies
+  above 1 in both the TF-004 abstracts and the TF-005 bodies (all
+  sections), with at least 20 findings in each corpus (pre and post
+  together). Otherwise it keeps its construction's confidence.
+- A level is never raised more than one step above the construction's
+  confidence.
+- The rule only raises. A pattern or phrase that fell keeps the
+  default.
+
+The rule reads the committed reports
+(`eval/arxiv-rates-2026-11-18.md`, `eval/arxiv-bodies-2026-11-18.md`)
+and, for body rows those reports do not hold, the private findings.
+
+### Phase 1: `ALTERNATIVE_FRAMING`
+
+**Split.** `af_rather_instead` became `af_rather_than` and
+`af_instead_of`. Spans and subtypes are unchanged. By the rule,
+`af_rather_than` runs at `med` and `af_instead_of` keeps the
+construction's `low`.
+
+| pattern | abstracts n | abstract ratio (95% CI) | bodies n | body ratio (95% CI) | confidence |
+|---|---|---|---|---|---|
+| `af_rather_than` | 164 | 3.84 (2.29 to 8.06) | 490 | 4.60 (3.22 to 6.70) | `med` |
+| `af_instead_of` | 88 | 1.07 (0.68 to 1.90) | 266 | 0.98 (0.72 to 1.34) | `low` |
+
+The first pattern of a construction has no confidence slot in the
+registry, so `af_rather_than` returns `med` per finding.
+
+**Rename map.** `RENAMED_PATTERNS` in `ticfinder.py` maps each new
+pattern name to the old one. `legacy_fingerprints()` returns every
+old-style id a finding may carry: the pre-TF-001 sentence cut, the old
+pattern name, and both. A normal run counts these as old-style ids.
+`--migrate-waivers` rekeys them. When an entry's `pattern` field held
+the old name, it now holds the new one.
+
+**Fingerprints.** The id of every finding from the two new patterns
+changed. Affected waivers:
+
+| directory | `rather than` | `instead of` | total |
+|---|---|---|---|
+| this repo, `waivers/` | 11 | 4 | 15 |
+| `$PACINO/waivers` | 12 | 7 | 19 |
+
+The task file counted 20 and 9. It missed the 5 in
+`BLOG_bpu_13_contradiction_detection.waivers.json`, whose entries
+have an empty `pattern` field. One of those 5 also carried a
+pre-TF-001 id and became held after migration (bpu_13: 11 waived and
+3 stale before, 12 and 2 after). `save_waivers()` sorts entries by
+line, so the bpu_13 file was reordered; its contents changed only in
+the 5 ids.
+
+**Harvest.** Totals 141 accepted, 54 rewritten, 302 deleted, as
+before. `ALTERNATIVE_FRAMING` rows:
+
+| run | pattern | subtype | rewr | del | acc | open | prec* |
+|---|---|---|---|---|---|---|---|
+| before | `af_rather_instead` | rather than | 14 | 77 | 12 | 0 | 0.54 |
+| before | `af_rather_instead` | instead of | 1 | 3 | 7 | 0 | 0.12 |
+| after, no migration | `af_rather_than` | rather than | 14 | 77 | 0 | 12 | 1.00 |
+| after, no migration | `af_instead_of` | instead of | 1 | 3 | 0 | 7 | 1.00 |
+| after, migrated copy | `af_rather_than` | rather than | 14 | 77 | 12 | 0 | 0.54 |
+| after, migrated copy | `af_instead_of` | instead of | 1 | 3 | 7 | 0 | 0.12 |
+
+The migrated run equals the baseline row for row once the pattern is
+renamed. The only other change in `labels.jsonl` is the confidence of
+the 103 `rather than` rows. The committed `labels.jsonl` comes from
+the migrated copy, so it matches `$PACINO` once its waivers are
+migrated.
+
+**arXiv recheck.** `arxiv_recheck.py ALTERNATIVE_FRAMING` against the
+committed code: every reproduced finding is kept (108 and 395 in
+abstracts, 853 and 908 in bodies), and none is new.
+
+**Verdict.** The hypothesis holds. The two patterns differ in blog
+precision and in their arXiv change. The split moves no finding, and
+the migration keeps every waiver.
