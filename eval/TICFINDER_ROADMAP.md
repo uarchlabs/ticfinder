@@ -423,13 +423,18 @@ Planned:
 8. **Per-pattern LRs** for the design and spec registers: the public
    baseline and the author's specs against the `pacino` LLM specs, with
    the arXiv change as a prior.
-9. **arXiv paper bodies, a pilot** (TF-005). About 200 papers per
-   window from the TF-004 set, from LaTeX source. Needs a LaTeX masker
-   for full papers. Reports rates per section next to the same papers'
-   abstracts, which tests whether the abstract ratios hold for whole
-   papers. It also gives `EM_DASH` a measurement through TeX dashes, and
-   intervals for the constructions that were too rare in abstracts.
-   A full run is a separate decision.
+   Before it starts, have harvest and the arXiv scripts write JSON
+   summaries that step 8 can read directly.
+9. **arXiv paper bodies, a pilot** (TF-005). Done: 200 papers per
+   window from the TF-004 set, measured from v1 LaTeX source with a new
+   masker in `eval/arxiv_bodies.py`. For 5 of the 7 constructions with
+   enough findings, the body ratio lies inside the abstract interval.
+   `ABSTRACT_ADVERB` rose more in bodies and `TRICOLON` less. The
+   introduction ratios match the abstract ratios. Body ratios are not
+   smaller, so the LLM change is not confined to abstracts and
+   introductions. `EM_DASH` rose 5.3 times in bodies, and
+   `HOLLOW_BOOSTER` rose 3.3 times. Results in section 12. A full run
+   is recommended after steps 10 and 11.
 10. **`DISGUISE_METAPHOR` fix** (from TF-004). `pose` and `pass` fire
     without `as`: every arXiv finding read was `posing challenges` or a
     literal `passing`. Test rows first.
@@ -909,3 +914,190 @@ the regrouped one.
 
 No difference. `tools/tests.py` is unchanged; this table stands in for
 a test row.
+
+## 12. TF-005 results (2026-11-18)
+
+### arXiv cs.AR paper bodies, a pilot
+
+**Data.** Each window's TF-004 primary `cs.AR` ids were shuffled with
+seed `20261118-bodies-<window>` and walked in order until 200 papers
+had usable LaTeX source. Source came from
+`export.arxiv.org/e-print/<id>v1`, the v1 version, so a pre-window body
+cannot hold a later revision. The API abstracts are the latest version,
+as in TF-004. Source, expanded text and findings are under
+`private/arxiv/`; the committed table is `eval/arxiv-bodies-2026-11-18.md`.
+
+| measure | pre | post |
+|---|---|---|
+| walked / kept | 246 / 200 | 223 / 200 |
+| skipped: PDF only | 41 | 13 |
+| skipped: no main file found | 0 | 8 |
+| skipped: under 300 words after masking | 4 | 2 |
+| skipped: placeholder text (pages as images) | 1 | 0 |
+| body words (all sections) | 1,298,043 | 931,293 |
+| mean paper length, words | 6,490 | 4,656 |
+| abstract words | 38,478 | 37,794 |
+
+The pre side lost more papers to PDF-only source, which may select for
+LaTeX users. Post papers are shorter. Rates are per 1,000 words, so
+length does not bias them.
+
+**Method.** `eval/arxiv_bodies.py`. The main file is the one with
+`\documentclass` and `\begin{document}`; `\input` and `\include` are
+expanded. A LaTeX masker blanks in place: preamble, comments, back
+matter, math, floats and code with their captions, references,
+footnotes, headings, command names, the abstract and the
+acknowledgements. Text commands keep their argument. TeX `---` becomes
+U+2014. `selftest` holds 64 rows on synthetic LaTeX. Sections are
+classified from `\section` headings: the first section or an
+"introduction" heading is introduction, then conclusion, related and
+body by keyword. ticfinder ran with its defaults at 69e1743 (sha256
+c1c7d5943a28), with no uncommitted changes. The bootstrap uses 2,000
+draws over papers, seed 5005, with one index matrix per window shared
+by all text types, so the comparisons between text types are paired.
+
+**Masking checks.** The median masked share inside the kept body is
+29.9% pre and 33.8% post; 39 and 56 papers exceed 40%, almost all
+because of large figures and tables. No float was left unclosed. A
+spot-check of 40 random masked sentences per window found LaTeX
+residue in 1 pre and 0 post, under the pilot limit of 2. An automatic
+scan of all 102k sentences found user reference macros
+(`\Fig{fig:x}`) leaking label keys; the masker drops them now, with
+self-test rows.
+
+**Hypothesis: abstract ratios hold for bodies.** Rows with at least 20
+findings in both windows of both text types. Ratio is post rate over
+pre rate.
+
+| construction | abstract ratio (95% CI) | body ratio (95% CI) | body over abstract (95% CI) | inside |
+|---|---|---|---|---|
+| `PARTICIPIAL_TAIL` | 3.31 (2.51 to 4.53) | 4.06 (3.46 to 4.74) | 1.22 (0.88 to 1.61) | yes |
+| `TRICOLON` | 1.80 (1.48 to 2.23) | 1.41 (1.27 to 1.57) | 0.79 (0.63 to 0.95) | no |
+| `LLM_DICTION` | 1.20 (0.90 to 1.60) | 1.29 (1.03 to 1.63) | 1.08 (0.81 to 1.44) | yes |
+| `CONSULTANT_REGISTER` | 1.16 (0.79 to 1.73) | 1.52 (1.19 to 1.96) | 1.31 (0.89 to 1.94) | yes |
+| `ALTERNATIVE_FRAMING` | 1.10 (0.67 to 1.85) | 1.17 (1.02 to 1.34) | 1.06 (0.64 to 1.73) | yes |
+| `VAGUE_QUANTIFIER` | 0.96 (0.61 to 1.53) | 1.10 (0.74 to 1.56) | 1.14 (0.66 to 1.97) | yes |
+| `ABSTRACT_ADVERB` | 0.93 (0.54 to 1.60) | 1.84 (1.50 to 2.25) | 1.98 (1.21 to 3.34) | no |
+
+The hypothesis holds for 5 of 7 constructions, so it is not rejected.
+The test is weak: 200 abstracts hold about 38k words per window, and
+the abstract intervals are wide. The two exceptions differ in kind.
+
+- `TRICOLON`: the sample's abstract ratio (1.80) is high against the
+  full TF-004 set (1.44, 1.32 to 1.56). The body ratio (1.41) agrees
+  with TF-004. The exception comes from the 200-abstract sample.
+- `ABSTRACT_ADVERB`: the body ratio (1.84) is above both the sample
+  abstract ratio and TF-004's (1.27, 1.02 to 1.59). This construction
+  rose more in bodies.
+
+**Alternative: LLM editing concentrates in abstracts and
+introductions.** The introduction ratios lie inside the abstract
+intervals for all 7 rows. The body ratios are not smaller. For 8 of
+10 rows the body ratio lies inside the introduction interval. The two
+exceptions are larger in bodies: `ABSTRACT_ADVERB` by 1.54 times and
+`BORROWED_RIGOUR` by 2.35 times. Only `TRICOLON` is smaller in bodies than
+in sample abstracts. The data does not support the alternative for
+these constructions.
+
+**Related work and conclusions.** The report also compares these
+sections with abstracts and with bodies. Related sections hold 167k
+words pre and 105k post. Conclusions hold 46k and 32k. Against abstracts, the section
+ratio lies inside the abstract interval for 6 of 7 rows (related) and
+5 of 6 (conclusion). Body intervals are narrow, so the fairer test
+against bodies is the paired ratio of ratios. Its interval excludes 1
+for five rows:
+
+| row | section over body (95% CI) |
+|---|---|
+| related: `ALTERNATIVE_FRAMING` | 1.48 (1.11 to 1.95) |
+| related: `ABSTRACT_ADVERB` | 0.69 (0.51 to 0.94) |
+| related: `BORROWED_RIGOUR` | 0.52 (0.30 to 0.97) |
+| conclusion: `TRICOLON` | 1.36 (1.07 to 1.72) |
+| conclusion: `ABSTRACT_ADVERB` | 0.52 (0.29 to 0.88) |
+
+For `PARTICIPIAL_TAIL` the conclusion ratio is 1.60 times the abstract
+ratio (1.05 to 2.41). These sections have few findings. With about 40
+paired comparisons, one or two of these rows could be chance.
+`ABSTRACT_ADVERB` and `BORROWED_RIGOUR` rose most in body sections.
+
+**What changed most in bodies** (construction or pattern, at least 20
+findings):
+
+| row | pre rate | post rate | ratio (95% CI) | in TF-004 abstracts |
+|---|---|---|---|---|
+| `EM_DASH` | 0.18 | 0.95 | 5.28 (2.87 to 10.98) | not measurable |
+| `cc_negated_apposition` | 0.02 | 0.10 | 4.96 (2.37 to 11.53) | too few |
+| `PARTICIPIAL_TAIL` | 1.13 | 4.57 | 4.06 (3.46 to 4.74) | 3.14 |
+| `HOLLOW_BOOSTER` | 0.06 | 0.18 | 3.31 (2.25 to 4.93) | flat, few |
+| `af_rather_instead` | 0.29 | 0.74 | 2.51 (2.01 to 3.14) | 2.15 |
+| `ABSTRACT_ADVERB` | 0.47 | 0.86 | 1.84 (1.50 to 2.25) | 1.27 |
+| `BORROWED_RIGOUR` | 0.16 | 0.26 | 1.60 (1.16 to 2.18) | 1.02, flat |
+| `CORRECTIVE_CONTRAST` | 0.29 | 0.40 | 1.41 (1.06 to 1.91) | 1.04, flat |
+| `af_less_than` | 0.74 | 0.47 | 0.64 (0.53 to 0.78) | 0.90, flat |
+| `EMPTY_FRAME` | 0.11 | 0.07 | 0.62 (0.39 to 0.96) | too few |
+| `HEDGE_STACK` | 0.02 | 0.01 | 0.25 (0.05 to 0.73) | too few |
+
+`BORROWED_RIGOUR` and `CORRECTIVE_CONTRAST` were flat in abstracts and
+rose in bodies. TF-004 listed both as candidates to lower in this
+register; the body data says to keep them. `HEDGE_STACK` fell, on 26
+findings.
+
+**`EM_DASH`.** Bodies have the dashes that abstracts lack. The kept
+text held 259 TeX `---` pre and 350 post, and 1 Unicode em dash pre
+against 433 post. The rate rose in every section, from 3.6 times in
+introductions to 8.8 in conclusions (55 findings there). One caveat:
+spaced ` -- ` (219 pre, 195 post) is an en dash in TeX that some
+authors use as an em dash, and ticfinder does not count it. Counted as
+em dashes, they bring the ratio over all sections from 4.9 to about
+3.3. Either way it rose.
+
+**Sanity reading.** 20 random body findings per window for the three
+constructions with the largest body ratio change (`EM_DASH`,
+`PARTICIPIAL_TAIL`, `HEDGE_STACK`), plus `HOLLOW_BOOSTER` since
+`EM_DASH` was in the three. Counts only.
+
+| construction | pre: real / read | post: real / read |
+|---|---|---|
+| `EM_DASH` | 19 / 20 | 18 / 20 |
+| `PARTICIPIAL_TAIL` | 18 / 20 | 20 / 20 |
+| `HEDGE_STACK` | 20 / 20 | 4 / 4 |
+| `HOLLOW_BOOSTER` | 15 / 20 | 20 / 20 |
+
+- `EM_DASH` misses are en dashes in a byte range and in a hyphenated
+  compound.
+- `PARTICIPIAL_TAIL` misses are a participle followed by a coordinated
+  main verb, and a gerund subject.
+- `HOLLOW_BOOSTER` misses are all the manner adverb `significantly,`
+  before a comma (`drop significantly, about 73%`). Post findings are
+  sentence-initial `Notably,`, `Crucially,` and `Importantly,`. The
+  misses sit in pre, so the true ratio is higher than 3.3. A fix needs
+  a test row first.
+
+**Check against TF-004.** The sample's abstract counts equal the
+TF-004 per-paper counts for the same papers. The sample's abstract
+ratio lies inside the TF-004 interval for 9 of 17 rows, and the TF-004
+ratio lies inside the sample interval for 14 of 17. A 200-paper
+interval is two to three times as wide as the TF-004 one, so about half
+the sample points are expected inside it by sampling alone. The rows
+where neither holds are `TRICOLON` (above) and `FRAME_MARKER` (5 and 0
+findings). This is what sampling 200 papers costs: abstract ratios from
+the pilot alone are not reliable, and bodies give 25 to 34 times the
+words.
+
+**For step 8.** Use the body ratios (all sections) as the prior, with
+the TF-004 abstract ratios as a check. Bodies are closer to the design
+register and hold 25 to 34 times the words per paper. They also give
+`EM_DASH` a value. Where the two agree, either serves. Where they differ
+(`ABSTRACT_ADVERB`, `BORROWED_RIGOUR`, `CORRECTIVE_CONTRAST`), the body
+value is the one in register. Both remain ratios over a mixed post
+window, so they understate the LLM rate and are not LRs. The topic
+shift noted in section 11 applies here too.
+
+**A full run.** Worth doing. The pre window has 955 papers, and at this
+pilot's skip rate about 775 have usable source, which would give about
+four times the pre words. That narrows the intervals for the rare rows
+(`HEDGE_STACK`, `GAPPED_ANTITHESIS`, `cc_parallel_sibling`,
+`DISGUISE_METAPHOR`) and makes subtype splits measurable. Do it after
+steps 10 and 11, so that one analysis measures the fixed and split
+patterns. The source cache is reusable; analysis took about 4 seconds
+per paper.

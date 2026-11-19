@@ -30,6 +30,7 @@ import argparse
 import gzip
 import io
 import json
+import math
 import random
 import re
 import sys
@@ -38,7 +39,7 @@ import time
 import urllib.error
 import urllib.request
 import zlib
-from collections import Counter
+from collections import Counter, defaultdict
 from pathlib import PurePosixPath
 
 sys.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parent))
@@ -1116,8 +1117,657 @@ def cmd_mask_report(args):
         print()
 
 
+# ------------------------------------------------------------- analyse
+
+TABLE_B = BODY / "per_paper.jsonl"
+FIND_B = BODY / "findings.jsonl"
+TMP_B = AR.TMP
+BOOT_SEED_B = 5005
+SECTION_TYPES = ["introduction", "body", "related", "conclusion"]
+TYPES = ["abstract"] + SECTION_TYPES + ["all"]
+TF004_REPORT = AR.HERE / "arxiv-rates-2026-11-18.md"
+MIN_N = 20
+
+
+def sha(s):
+    return __import__("hashlib").sha256(s.encode("utf-8")).hexdigest()[:16]
+
+
+def section_of(spans, pos):
+    for lo, hi, c in spans:
+        if lo <= pos < hi:
+            return c
+    return None
+
+
+def counts_of(findings):
+    by = {"construction": Counter(), "pattern": Counter(),
+          "subtype": Counter()}
+    for f in findings:
+        pat = f.pattern or "-"
+        by["construction"][f.construction] += 1
+        by["pattern"][f"{f.construction}|{pat}"] += 1
+        by["subtype"][f"{f.construction}|{pat}|{AR.subtype(f.label)}"] += 1
+    return by
+
+
+def kept_papers():
+    sample, recs = load_records()
+    return sample, [(w, p, recs[(w, p)]) for w in sample["windows"]
+                    for p in sample["windows"][w]["kept"]]
+
+
+def run_body_analysis():
+    ver = AR.tf_version()
+    sample, papers = kept_papers()
+    done = {}
+    if TABLE_B.exists():
+        for line in TABLE_B.read_text(encoding="utf-8").splitlines():
+            r = json.loads(line)
+            done[r["id"]] = r
+    tf = AR.load_tf()
+    nlp = tf.load_model("en_core_web_md")
+    nlp.max_length = 5_000_000
+    extra = []
+    for f in tf.discover_phrase_files(None):
+        extra.extend(tf.load_phrase_file(f))
+    TMP_B.mkdir(parents=True, exist_ok=True)
+    rows, allf = [], []
+    old_f = defaultdict(list)
+    if FIND_B.exists():
+        for line in FIND_B.read_text(encoding="utf-8").splitlines():
+            f = json.loads(line)
+            old_f[f["id"]].append(f)
+    t0, n_new = time.monotonic(), 0
+    for i, (window, pid, rec) in enumerate(papers, 1):
+        src = (EXP / (pid.replace("/", "_") + ".tex")).read_text(
+            encoding="utf-8")
+        masked, info = mask_tex(src)
+        abstract = json.loads(AR.paper_file(pid).read_text(
+            encoding="utf-8"))["abstract"]
+        abs_masked, abs_nblank = AR.mask_latex(abstract)
+        key = (ver["sha256"], sha(masked), sha(abs_masked))
+        r = done.get(pid)
+        if r and (r["tf_sha256"], r["mask_sha"], r["abs_sha"]) == key:
+            rows.append(r)
+            allf.extend(old_f[pid])
+            continue
+        n_new += 1
+        spans = info["sections"]
+        # words per section: tokenise the text ticfinder parses (its own
+        # masking of the .txt input), so the counts match stats["words"]
+        tf_text = tf.mask_markdown(masked, {}, tf.CODE_MASK, markdown=False)
+        words = Counter()
+        for tok in nlp.make_doc(tf_text):
+            if tok.is_alpha:
+                c = section_of(spans, tok.idx)
+                words[c or "outside"] += 1
+        tmp = TMP_B / (pid.replace("/", "_") + ".txt")
+        res = {}
+        for kind, text in (("body", masked), ("abstract", abs_masked)):
+            tmp.write_text(text, encoding="utf-8")
+            try:
+                res[kind] = tf.analyse(str(tmp), nlp, None, extra, set())
+            finally:
+                tmp.unlink()
+        bf, bstats = res["body"]
+        af, astats = res["abstract"]
+        per_type = defaultdict(list)
+        unassigned = 0
+        for f in bf:
+            c = section_of(spans, f.start)
+            if c is None:
+                unassigned += 1
+                continue
+            per_type[c].append(f)
+            allf.append({"id": pid, "window": window, "type": c,
+                         "construction": f.construction,
+                         "pattern": f.pattern or "-", "label": f.label,
+                         "text": f.text, "context": f.context})
+        for f in af:
+            per_type["abstract"].append(f)
+            allf.append({"id": pid, "window": window, "type": "abstract",
+                         "construction": f.construction,
+                         "pattern": f.pattern or "-", "label": f.label,
+                         "text": f.text, "context": f.context})
+        wt = {t: words.get(t, 0) for t in SECTION_TYPES}
+        wt["abstract"] = astats["words"]
+        cnt = {t: counts_of(per_type[t]) for t in ["abstract"]
+               + SECTION_TYPES}
+        r = {"id": pid, "window": window, "tf_sha256": ver["sha256"],
+             "mask_sha": key[1], "abs_sha": key[2], "words": wt,
+             "words_outside": words.get("outside", 0),
+             "words_check": [sum(words.values()), bstats["words"]],
+             "unassigned": unassigned,
+             "tf_masked_pct": bstats["masked_pct"],
+             "abs_latex_masked": abs_nblank, "counts": cnt}
+        rows.append(r)
+        if n_new % 20 == 0:
+            print(f"  {i}/{len(papers)} papers, "
+                  f"{time.monotonic() - t0:.0f}s", file=sys.stderr)
+    TABLE_B.write_text("".join(json.dumps(r) + "\n" for r in rows),
+                       encoding="utf-8")
+    FIND_B.write_text("".join(json.dumps(f) + "\n" for f in allf),
+                      encoding="utf-8")
+    try:
+        TMP_B.rmdir()
+    except OSError:
+        pass
+    print(f"analysed {n_new} papers ({len(rows) - n_new} up to date)",
+          file=sys.stderr)
+
+
+def load_body_table():
+    ver = AR.tf_version()
+    sample, papers = kept_papers()
+    want = {(w, p) for w, p, _ in papers}
+    rows = defaultdict(list)
+    for line in TABLE_B.read_text(encoding="utf-8").splitlines():
+        r = json.loads(line)
+        if (r["window"], r["id"]) in want and r["tf_sha256"] == ver["sha256"]:
+            rows[r["window"]].append(r)
+    for w in sample["windows"]:
+        if len(rows[w]) != len(sample["windows"][w]["kept"]):
+            sys.exit(f"{w}: table has {len(rows[w])} papers for this "
+                     "ticfinder version; run analyse")
+        rows[w].sort(key=lambda r: r["id"])
+        for r in rows[w]:
+            r["words"]["all"] = sum(r["words"][t] for t in SECTION_TYPES)
+            r["counts"]["all"] = {}
+            for lvl in ("construction", "pattern", "subtype"):
+                c = Counter()
+                for t in SECTION_TYPES:
+                    c.update(r["counts"][t][lvl])
+                r["counts"]["all"][lvl] = c
+    return sample, rows, ver
+
+
+class Boot:
+    """Paired bootstrap: one index matrix per window, shared by every text
+    type and every key, so comparisons between text types are paired."""
+
+    def __init__(self, rows, draws, seed):
+        import numpy as np
+        self.np = np
+        self.rows = rows
+        rng = np.random.default_rng(seed)
+        self.idx = {w: rng.integers(0, len(rows[w]),
+                                    size=(draws, len(rows[w])))
+                    for w in ("pre", "post")}
+        self.W = {(w, t): np.array([r["words"][t] for r in rows[w]],
+                                   dtype=float)
+                  for w in rows for t in TYPES}
+        self.Wd = {k: v[self.idx[k[0]]].sum(axis=1)
+                   for k, v in self.W.items()}
+        self.cache = {}
+
+    def counts(self, w, t, lvl, key):
+        return self.np.array([r["counts"][t][lvl].get(key, 0)
+                              for r in self.rows[w]], dtype=float)
+
+    def stat(self, t, lvl, key):
+        ck = (t, lvl, key)
+        if ck in self.cache:
+            return self.cache[ck]
+        np = self.np
+        out = {}
+        for w in ("pre", "post"):
+            c = self.counts(w, t, lvl, key)
+            W = self.W[(w, t)]
+            pooled = c.sum() / W.sum() * 1000 if W.sum() else math.nan
+            with np.errstate(divide="ignore", invalid="ignore"):
+                bd = c[self.idx[w]].sum(axis=1) / self.Wd[(w, t)] * 1000
+                pr = np.where(W > 0, c / np.where(W > 0, W, 1) * 1000, np.nan)
+                mean = np.nanmean(pr)
+                md = np.nanmean(pr[self.idx[w]], axis=1)
+            out[w] = {"n": int(c.sum()), "papers": int((c > 0).sum()),
+                      "rate": pooled, "ci": pct(bd), "mean": mean,
+                      "mean_ci": pct(md), "draws": bd}
+        with np.errstate(divide="ignore", invalid="ignore"):
+            a, b = out["pre"]["rate"], out["post"]["rate"]
+            ratio = b / a if a else (math.inf if b else math.nan)
+            rd = out["post"]["draws"] / out["pre"]["draws"]
+        res = {"o": out, "ratio": ratio, "ratio_draws": rd,
+               "ratio_ci": pct(rd, nearest=True),
+               "n": out["pre"]["n"] + out["post"]["n"]}
+        self.cache[ck] = res
+        return res
+
+
+def pct(a, nearest=False):
+    import numpy as np
+    if np.isnan(a).all():
+        return (math.nan, math.nan)
+    if nearest:
+        return tuple(np.nanpercentile(a, [2.5, 97.5], method="nearest"))
+    return tuple(np.nanpercentile(a, [2.5, 97.5]))
+
+
+def verdict(n, lo, hi):
+    if n < MIN_N:
+        return "too few"
+    if lo > 1:
+        return "rose"
+    if hi < 1:
+        return "fell"
+    return "flat"
+
+
+def tf004_intervals():
+    """{level: {key: (n, ratio, lo, hi)}} from the committed TF-004 report."""
+    out = {"construction": {}, "pattern": {}}
+    sect = None
+    rx = re.compile(r"^\| `([^`]+)` \| (\d+) \| \d+ \| [^|]+ \| (\d+) \| \d+ "
+                    r"\| [^|]+ \| (\S+) \((\S+) to (\S+)\) \|")
+    for line in TF004_REPORT.read_text(encoding="utf-8").splitlines():
+        if line.startswith("## Rates per construction"):
+            sect = "construction"
+        elif line.startswith("## Rates per pattern"):
+            sect = "pattern"
+        elif line.startswith("## "):
+            sect = None
+        m = rx.match(line)
+        if sect and m:
+            key = m.group(1).replace(" / ", "|")
+            f = [float(x) if x not in ("-",) else math.nan
+                 for x in m.group(4, 5, 6)]
+            out[sect][key] = (int(m.group(2)) + int(m.group(3)), *f)
+    return out
+
+
 def cmd_analyse(args):
-    sys.exit("analyse is phase 2 and is not written yet")
+    if args.sample:
+        return show_body_sample(args.sample, args.type, args.n)
+    if not args.report_only:
+        run_body_analysis()
+    write_body_report(args)
+
+
+def show_body_sample(cid, typ, n):
+    """Console only: n random findings per window for a construction (or
+    CID|pattern) in one text type. Writes nothing."""
+    sample, papers = kept_papers()
+    want = {(w, p) for w, p, _ in papers}
+    pool = defaultdict(list)
+    for line in FIND_B.read_text(encoding="utf-8").splitlines():
+        f = json.loads(line)
+        if (f["window"], f["id"]) not in want:
+            continue
+        if typ != "all" and f["type"] != typ:
+            continue
+        if typ == "all" and f["type"] == "abstract":
+            continue
+        if f["construction"] == cid or \
+                f"{f['construction']}|{f['pattern']}" == cid:
+            pool[f["window"]].append(f)
+    rng = random.Random(f"{BODY_SEED}-check-{cid}-{typ}")
+    for w in ("pre", "post"):
+        pick = rng.sample(pool[w], min(n, len(pool[w])))
+        print(f"\n=== {cid} [{typ}] {w}: {len(pick)} of {len(pool[w])}")
+        for i, f in enumerate(pick, 1):
+            print(f"\n[{w} {i}] ({f['type']}) {f['label']}\n  MATCH: "
+                  f"{f['text']}\n  SENT:  {f['context'][:400]}")
+
+
+def ci_txt(x, ci):
+    return f"{AR.fmt(x)} ({AR.fmt(ci[0])} to {AR.fmt(ci[1])})"
+
+
+def median(v):
+    v = sorted(v)
+    n = len(v)
+    return v[n // 2] if n % 2 else (v[n // 2 - 1] + v[n // 2]) / 2
+
+
+def compare(B, keys, lvl, ta, tb):
+    """Rows with >= MIN_N findings in both windows of both text types."""
+    out = []
+    for k in keys:
+        if lvl == "pattern" and single_pattern(B, k):
+            continue        # same counts as its construction row
+        a, b = B.stat(ta, lvl, k), B.stat(tb, lvl, k)
+        cells = [a["o"]["pre"]["n"], a["o"]["post"]["n"],
+                 b["o"]["pre"]["n"], b["o"]["post"]["n"]]
+        if min(cells) < MIN_N:
+            continue
+        with B.np.errstate(divide="ignore", invalid="ignore"):
+            rr = b["ratio_draws"] / a["ratio_draws"]
+        rr_pt = b["ratio"] / a["ratio"] if a["ratio"] else math.nan
+        lo, hi = a["ratio_ci"]
+        out.append({"key": k, "a": a, "b": b, "cells": cells,
+                    "rr": rr_pt, "rr_ci": pct(rr, nearest=True),
+                    "inside": lo <= b["ratio"] <= hi})
+    return out
+
+
+def single_pattern(B, key):
+    """True when a construction has only this one pattern in the data."""
+    cid = key.split("|")[0]
+    pats = {k for w in B.rows for r in B.rows[w] for t in TYPES
+            for k in r["counts"][t]["pattern"] if k.split("|")[0] == cid}
+    return pats == {key}
+
+
+def write_body_report(args):
+    import numpy as np
+    sample, rows, ver = load_body_table()
+    _, recs = load_records()
+    draws = args.draws
+    B = Boot(rows, draws, BOOT_SEED_B)
+    keys = {lvl: sorted({k for w in rows for r in rows[w] for t in TYPES
+                         for k in r["counts"][t][lvl]})
+            for lvl in ("construction", "pattern", "subtype")}
+    today = __import__("datetime").date.today().isoformat()
+    out_path = AR.Path(args.report or AR.HERE / f"arxiv-bodies-{today}.md")
+    L = []
+    p = L.append
+
+    p("# ticfinder construction rates in arXiv cs.AR paper bodies, a pilot")
+    p("")
+    p(f"Generated {today} by `eval/arxiv_bodies.py` (TF-005). Aggregates "
+      "only: no paper text, titles or ids.")
+    p("")
+    p("## Setup")
+    p("")
+    p("| item | value |")
+    p("|---|---|")
+    p("| papers | TF-004 primary `cs.AR` sets (month manifests); windows by "
+      "v1 date: pre 2018-01-01 to 2021-12-31, post 2025-01-01 to the "
+      "latest TF-004 date |")
+    p(f"| sample | each window's ids shuffled with seed "
+      f"`{BODY_SEED}-bodies-<window>`; walked in order, the first {WANT} "
+      "with usable LaTeX source kept |")
+    p("| source | `export.arxiv.org/e-print/<id>v1` (the v1 source, so a "
+      "body cannot hold a later revision), 3.5 s between requests |")
+    p("| abstracts | the same papers' API abstracts (latest version, as in "
+      "TF-004), masked with the TF-004 masker |")
+    p(f"| ticfinder | `tools/ticfinder.py` at {ver['commit']} (sha256 "
+      f"{ver['sha256']}); defaults: `en_core_web_md`, code masker on, "
+      "`ticfinder-phrases.json`; text analysed as `.txt` |")
+    p("| LaTeX masker | `arxiv_bodies.py`, blanks in place: preamble, "
+      "comments, back matter (bibliography and appendices), math, floats "
+      "and code with captions, references, labels, URLs, footnotes, "
+      "headings, command names (text commands keep their argument), "
+      "`\\item` markers, the abstract and acknowledgements. TeX `---` "
+      "becomes U+2014 and two spaces. `selftest` holds its rows |")
+    p(f"| sections | {SECTION_RULE} Findings are assigned to a section by "
+      "offset |")
+    p(f"| bootstrap | {draws} draws over papers, seed {BOOT_SEED_B}; one "
+      "index matrix per window shared by every text type, so comparisons "
+      "between text types are paired; percentile 95% intervals (nearest "
+      "rank for ratios) |")
+    p("| rates | pooled: total findings / total words x 1,000; mean: the "
+      "mean of per-paper rates over papers with words in that text type. "
+      "Words are alphabetic spaCy tokens after masking |")
+    p("")
+
+    # sample and masking
+    p("## Sample and masking")
+    p("")
+    p("| measure | pre | post |")
+    p("|---|---|---|")
+    ws = sample["windows"]
+    p(f"| TF-004 primary papers | {ws['pre']['population']} | "
+      f"{ws['post']['population']} |")
+    p(f"| walked / kept | {ws['pre']['walked']} / {len(ws['pre']['kept'])} "
+      f"| {ws['post']['walked']} / {len(ws['post']['kept'])} |")
+    for why in ("no source", "PDF only", "no main file found",
+                "unpack error", "other format", "too little text",
+                "placeholder text"):
+        p(f"| skipped: {why} | {ws['pre']['skips'].get(why, 0)} | "
+          f"{ws['post']['skips'].get(why, 0)} |")
+    R = {w: [recs[(w, pid)] for pid in ws[w]["kept"]] for w in ws}
+
+    def shares(w, inbody):
+        v = []
+        for r in R[w]:
+            if inbody:
+                v.append(100 * (r["blanked"] - r["structural"])
+                         / max(r["nonws"] - r["structural"], 1))
+            else:
+                v.append(100 * r["blanked"] / max(r["nonws"], 1))
+        return v
+    for inbody, lab in ((False, "masked share, all non-space characters"),
+                        (True, "masked share inside the kept body")):
+        cells = []
+        for w in ("pre", "post"):
+            v = shares(w, inbody)
+            cells.append(f"min {min(v):.1f}%, median {median(v):.1f}%, max "
+                         f"{max(v):.1f}%; {sum(1 for x in v if x > 40)} "
+                         "over 40%")
+        p(f"| {lab} | {cells[0]} | {cells[1]} |")
+    for lab, f in (("several main-file candidates (longest expanded text "
+                    "kept)", lambda r: r["candidates"] > 1),
+                   ("papers with no `\\section`",
+                    lambda r: r["n_headings"] == 0)):
+        p(f"| {lab} | {sum(1 for r in R['pre'] if f(r))} | "
+          f"{sum(1 for r in R['post'] if f(r))} |")
+    p(f"| unresolved `\\input` / `\\include` | "
+      f"{sum(r['unresolved'] for r in R['pre'])} | "
+      f"{sum(r['unresolved'] for r in R['post'])} |")
+    for k, lab in (("tex_emdash", "TeX `---` in kept text"),
+                   ("spaced_endash", "spaced ` -- ` in kept text"),
+                   ("unicode_emdash", "Unicode em dash in kept text"),
+                   ("unicode_endash", "Unicode en dash in kept text")):
+        p(f"| {lab} | {sum(r['dashes'][k] for r in R['pre'])} | "
+          f"{sum(r['dashes'][k] for r in R['post'])} |")
+    p(f"| ticfinder masked_pct, mean per paper | "
+      f"{np.mean([r['tf_masked_pct'] for r in rows['pre']]):.2f}% | "
+      f"{np.mean([r['tf_masked_pct'] for r in rows['post']]):.2f}% |")
+    p(f"| findings outside any section | "
+      f"{sum(r['unassigned'] for r in rows['pre'])} | "
+      f"{sum(r['unassigned'] for r in rows['post'])} |")
+    mism = {w: sum(1 for r in rows[w]
+                   if r["words_check"][0] != r["words_check"][1])
+            for w in rows}
+    p(f"| papers where section words do not sum to ticfinder's count | "
+      f"{mism['pre']} | {mism['post']} |")
+    p("")
+
+    p("## Words per text type")
+    p("")
+    p("| text type | pre words | pre papers with text | post words | "
+      "post papers with text |")
+    p("|---|---|---|---|---|")
+    for t in TYPES:
+        a, b = B.W[("pre", t)], B.W[("post", t)]
+        p(f"| {t} | {int(a.sum()):,} | {int((a > 0).sum())} | "
+          f"{int(b.sum()):,} | {int((b > 0).sum())} |")
+    p("")
+    rng = np.random.default_rng(BOOT_SEED_B + 1)
+
+    def mean_ci(a):
+        d = a[rng.integers(0, len(a), size=(draws, len(a)))].mean(axis=1)
+        return a.mean(), *np.percentile(d, [2.5, 97.5])
+    for t, lab in (("all", "mean paper length, all sections"),
+                   ("abstract", "mean abstract length")):
+        a, b = mean_ci(B.W[("pre", t)]), mean_ci(B.W[("post", t)])
+        p(f"{lab.capitalize()}, words (95% interval): pre {a[0]:,.0f} "
+          f"({a[1]:,.0f} to {a[2]:,.0f}), post {b[0]:,.0f} ({b[1]:,.0f} to "
+          f"{b[2]:,.0f}).")
+        p("")
+
+    # EM_DASH
+    p("## `EM_DASH` per text type")
+    p("")
+    p("| text type | pre n | pre rate (95% CI) | post n | post rate "
+      "(95% CI) | ratio (95% CI) | verdict |")
+    p("|---|---|---|---|---|---|---|")
+    for t in TYPES:
+        s = B.stat(t, "construction", "EM_DASH")
+        a, b = s["o"]["pre"], s["o"]["post"]
+        p(f"| {t} | {a['n']} | {ci_txt(a['rate'], a['ci'])} | {b['n']} | "
+          f"{ci_txt(b['rate'], b['ci'])} | "
+          f"{ci_txt(s['ratio'], s['ratio_ci'])} | "
+          f"{verdict(s['n'], *s['ratio_ci'])} |")
+    p("")
+
+    # comparisons
+    comps = {}
+    for ta, tb in (("abstract", "body"), ("introduction", "body"),
+                   ("abstract", "introduction"), ("abstract", "all"),
+                   ("abstract", "related"), ("body", "related"),
+                   ("abstract", "conclusion"), ("body", "conclusion")):
+        for lvl in ("construction", "pattern"):
+            comps[(ta, tb, lvl)] = compare(B, keys[lvl], lvl, ta, tb)
+
+    def comp_table(ta, tb, title, note):
+        p(f"## {title}")
+        p("")
+        p(note)
+        p("")
+        p(f"| row | {ta} n pre / post | {ta} ratio (95% CI) | {tb} n pre / "
+          f"post | {tb} ratio (95% CI) | {tb} over {ta} (95% CI) | "
+          f"{tb} ratio inside {ta} interval |")
+        p("|---|---|---|---|---|---|---|")
+        for lvl in ("construction", "pattern"):
+            for d in comps[(ta, tb, lvl)]:
+                c = d["cells"]
+                key = d["key"].replace("|", " / ")
+                p(f"| `{key}` | {c[0]} / {c[1]} | "
+                  f"{ci_txt(d['a']['ratio'], d['a']['ratio_ci'])} | "
+                  f"{c[2]} / {c[3]} | "
+                  f"{ci_txt(d['b']['ratio'], d['b']['ratio_ci'])} | "
+                  f"{ci_txt(d['rr'], d['rr_ci'])} | "
+                  f"{'yes' if d['inside'] else 'no'} |")
+        n_in = sum(d["inside"] for lvl in ("construction", "pattern")
+                   for d in comps[(ta, tb, lvl)])
+        n_all = sum(len(comps[(ta, tb, lvl)]) for lvl in ("construction",
+                                                          "pattern"))
+        p("")
+        p(f"{n_in} of {n_all} rows have the {tb} ratio inside the {ta} "
+          "interval.")
+        p("")
+    note = (f"Construction and pattern rows with at least {MIN_N} findings "
+            "in both windows of both text types. A ratio is post rate over "
+            "pre rate. The ratio of ratios uses the same bootstrap draws "
+            "for both text types (paired).")
+    comp_table("abstract", "body", "Abstract against body", note)
+    comp_table("introduction", "body", "Introduction against body", note)
+    comp_table("abstract", "introduction", "Abstract against introduction",
+               note)
+    comp_table("abstract", "all", "Abstract against all sections", note)
+    comp_table("abstract", "related", "Abstract against related work", note)
+    comp_table("body", "related", "Body against related work", note)
+    comp_table("abstract", "conclusion", "Abstract against conclusion",
+               note)
+    comp_table("body", "conclusion", "Body against conclusion", note)
+
+    # TF-004 check
+    ref = tf004_intervals()
+    p("## Check against TF-004")
+    p("")
+    p("The sample's abstract ratio against the TF-004 interval for the full "
+      "abstract sets (955 and 2,627 papers), for rows with at least 20 "
+      "findings in TF-004.")
+    p("")
+    p("| row | TF-004 ratio (95% CI) | sample abstract n pre / post | sample "
+      "abstract ratio (95% CI) | sample ratio inside TF-004 interval | "
+      "TF-004 ratio inside sample interval |")
+    p("|---|---|---|---|---|---|")
+    outside, rev_out = [], []
+    nchk = 0
+    for lvl in ("construction", "pattern"):
+        for k, (n, r4, lo4, hi4) in sorted(ref[lvl].items()):
+            if n < MIN_N or (lvl == "pattern" and single_pattern(B, k)):
+                continue
+            s = B.stat("abstract", lvl, k)
+            ins = lo4 <= s["ratio"] <= hi4
+            nchk += 1
+            rev = s["ratio_ci"][0] <= r4 <= s["ratio_ci"][1]
+            if not ins:
+                outside.append(k)
+            if not rev:
+                rev_out.append(k)
+            p(f"| `{k.replace('|', ' / ')}` | {AR.fmt(r4)} ({AR.fmt(lo4)} to "
+              f"{AR.fmt(hi4)}) | {s['o']['pre']['n']} / "
+              f"{s['o']['post']['n']} | {ci_txt(s['ratio'], s['ratio_ci'])}"
+              f" | {'yes' if ins else 'no'} | {'yes' if rev else 'no'} |")
+    p("")
+    p(f"{nchk - len(outside)} of {nchk} sample abstract ratios lie inside "
+      f"the TF-004 interval; the TF-004 ratio lies inside the sample "
+      f"interval for {nchk - len(rev_out)} of {nchk}. The sample's abstract "
+      "counts equal the TF-004 per-paper counts for the same papers (same "
+      "abstracts, same ticfinder), so the differences come from drawing "
+      "200 papers, and from keeping only papers with usable LaTeX. A "
+      "200-paper interval is two to three times as wide as the TF-004 one, "
+      "so about half of the sample points are expected inside the narrower "
+      "TF-004 interval by sampling alone.")
+    p("")
+
+    # rate tables per text type
+    def rate_table(t, lvl, minn):
+        rs = []
+        for k in keys[lvl]:
+            s = B.stat(t, lvl, k)
+            if s["n"] == 0 or s["n"] < minn:
+                continue
+            rs.append((k, s))
+        rs.sort(key=lambda x: (-(x[1]["ratio"] if not math.isnan(
+            x[1]["ratio"]) else -1), -x[1]["n"]))
+        p(f"| {lvl} | pre n | pre pooled (95% CI) | pre mean per paper "
+          "(95% CI) | post n | post pooled (95% CI) | post mean per paper "
+          "(95% CI) | ratio (95% CI) | verdict |")
+        p("|---|---|---|---|---|---|---|---|---|")
+        for k, s in rs:
+            a, b = s["o"]["pre"], s["o"]["post"]
+            p(f"| `{k.replace('|', ' / ')}` | {a['n']} | "
+              f"{ci_txt(a['rate'], a['ci'])} | "
+              f"{ci_txt(a['mean'], a['mean_ci'])} | {b['n']} | "
+              f"{ci_txt(b['rate'], b['ci'])} | "
+              f"{ci_txt(b['mean'], b['mean_ci'])} | "
+              f"{ci_txt(s['ratio'], s['ratio_ci'])} | "
+              f"{verdict(s['n'], *s['ratio_ci'])} |")
+        p("")
+    p("## Rates per text type")
+    p("")
+    p("Sorted by ratio. `n` is findings; the verdict is `rose` when the "
+      "ratio interval is above 1, `fell` below, `flat` when it spans 1, "
+      f"`too few` under {MIN_N} findings in both windows together. "
+      "Construction tables list every row with a finding; pattern tables "
+      f"list rows with at least {MIN_N}.")
+    p("")
+    for t in TYPES:
+        p(f"### {t}")
+        p("")
+        rate_table(t, "construction", 1)
+        rate_table(t, "pattern", MIN_N)
+    p("### body, subtypes with at least 20 findings")
+    p("")
+    rate_table("body", "subtype", MIN_N)
+    npat = sum(1 for k in keys["pattern"] if B.stat("body", "pattern",
+                                                    k)["n"] >= MIN_N)
+    p(f"With {npat} body pattern rows at 95%, a few `rose` or `fell` "
+      "verdicts near an interval edge are expected by chance.")
+    p("")
+    out_path.write_text("\n".join(L), encoding="utf-8")
+    print(f"wrote {out_path}", file=sys.stderr)
+
+    # console summary
+    print(f"\nwords: " + ", ".join(
+        f"{t} {int(B.W[('pre', t)].sum()):,}/{int(B.W[('post', t)].sum()):,}"
+        for t in TYPES))
+    for (ta, tb, lvl), ds in comps.items():
+        if lvl != "construction" and (ta, tb) != ("abstract", "body"):
+            continue
+        print(f"\n{ta} vs {tb} ({lvl}): {sum(d['inside'] for d in ds)} of "
+              f"{len(ds)} inside")
+        for d in ds:
+            print(f"  {d['key']:<44} {ta[:5]} "
+                  f"{ci_txt(d['a']['ratio'], d['a']['ratio_ci']):<22} "
+                  f"{tb[:5]} {ci_txt(d['b']['ratio'], d['b']['ratio_ci']):<22}"
+                  f" rr {ci_txt(d['rr'], d['rr_ci']):<22} "
+                  f"{'in' if d['inside'] else 'OUT'}")
+    print(f"\nTF-004 check: {nchk - len(outside)} of {nchk} inside; outside: "
+          f"{outside}; TF-004 point outside sample interval: {rev_out}")
+    big = []
+    for k in keys["construction"]:
+        s = B.stat("body", "construction", k)
+        if s["n"] >= MIN_N and s["ratio"] and not math.isinf(s["ratio"]):
+            big.append((abs(math.log(s["ratio"])), k, s["ratio"]))
+    big.sort(reverse=True)
+    print("largest body ratio change (constructions, n>=20): "
+          + ", ".join(f"{k} {r:.2f}" for _, k, r in big[:5]))
 
 
 def main():
@@ -1134,9 +1784,21 @@ def main():
                    help="sentences per window (default 40)")
     m.add_argument("-q", "--quiet", action="store_true",
                    help="figures only, no sentences")
-    a = sub.add_parser("analyse", help="phase 2")
+    a = sub.add_parser("analyse", help="run ticfinder on bodies and "
+                       "abstracts and write the report")
     a.add_argument("--draws", type=int, default=2000)
+    a.add_argument("--report", help="output path (default "
+                   "eval/arxiv-bodies-<today>.md)")
+    a.add_argument("--report-only", action="store_true",
+                   help="recompute the report from the per-paper table")
+    a.add_argument("--sample", metavar="CID",
+                   help="print random findings for a construction (or "
+                        "CID|pattern) per window; writes nothing")
+    a.add_argument("--type", default="body", choices=TYPES)
+    a.add_argument("-n", type=int, default=20)
     args = ap.parse_args()
+    if args.cmd == "analyse" and args.draws < 1000:
+        sys.exit("--draws must be at least 1000")
     if args.cmd != "selftest" and not (AR.ROOT / ".gitignore").read_text() \
             .count("private/"):
         sys.exit("private/ is not in .gitignore; refusing to cache there")
