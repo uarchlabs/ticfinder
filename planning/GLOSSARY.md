@@ -2,7 +2,7 @@
 
 Terms used in the ticfinder roadmap, task files and notes, grouped by
 where they come from. Table 1 holds standard terms. Table 2 holds
-ticfinder's own terms, often an ordinary word with a stretched meaning. Table 3 holds terms coined in TF-003 to TF-007, which have no
+ticfinder's own terms, often an ordinary word with a stretched meaning. Table 3 holds terms coined in TF-003 to TF-008, which have no
 meaning outside this project.
 
 ## Table 1. Standard terms, used in their usual sense
@@ -58,7 +58,7 @@ meaning outside this project.
 | waiver, stale waiver | a fingerprint the editor marked as acceptable; stale when no current finding matches it | a detector fix can make a waiver stale without invalidating it; `--prune-stale` removes it |
 | all sections, body sections | in TF-005, all four section types together, against the `body` section type alone | the TF-005 `HOLLOW_BOOSTER` ratio 3.31 is body sections; all sections give 2.98 |
 
-## Table 3. Terms from TF-003 to TF-007 with no outside standing
+## Table 3. Terms from TF-003 to TF-008 with no outside standing
 
 | term | meaning | where |
 |---|---|---|
@@ -96,3 +96,11 @@ meaning outside this project.
 | per-phrase confidence | a level set on one phrase-file entry with `{"phrase": ..., "confidence": ...}` | TF-007 phase 3 |
 | per-form override | a level set on one matched text, lowercased, of a lemma entry, through the entry's `forms` | TF-007 phase 3 |
 | matched text | a phrase finding's text, whitespace-normalised and lowercased; the key of the TF-004 phrase rows and of `forms` | TF-004, TF-007 phase 3 |
+| pilot | the TF-005 body run: the first 200 usable papers per window | TF-005, TF-008 |
+| full run | the TF-008 body run: every usable pre paper (778) and as many post papers, walked in the same shuffle as the pilot | TF-008 |
+| pilot subset | the pilot's 400 papers taken from the full run's tables and bootstrapped with the pilot's seed; its rows differ from the pilot report only where code changed | TF-008 phase 3 |
+| prefix check | confirming that the pilot's kept papers are the first 200 kept in each full window, in order, with the same skip reasons | TF-008 phase 2 |
+| code effect, sample effect | a change in a row caused by a detector change, against one caused by measuring more papers | TF-008 phase 3 |
+| width ratio | a ratio interval's width over another's, both on the log scale; sampling 3.9 times the papers predicts about 0.51 | TF-008 phase 3 |
+| pinned rebuild | rewriting a report from a stored table written by an earlier ticfinder, named by its sha256 prefix with `--table-sha` | TF-008 phase 1 |
+| JSON summary | the numbers of a report or of the harvest summary as one JSON object, schema 1, for step 8 to read (`--json`) | TF-008 phase 1 |

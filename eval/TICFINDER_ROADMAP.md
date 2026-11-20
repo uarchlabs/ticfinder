@@ -391,7 +391,7 @@ Tidied after TF-004. Step numbers are kept stable because task files
 cite them, so they do not give the order of work. The order is listed
 after the steps.
 
-Done: steps 1 to 6 and 9 to 11. Planned: steps 7, 8 and 12 to 14. The
+Done: steps 1 to 6, 9 to 11 and 14. Planned: steps 7, 8, 12 and 13. The
 list stays in step order, so the numbers render as written.
 
 1. Drop `harvest.py` into `ticfinder/eval/`, run it, and confirm the
@@ -457,10 +457,19 @@ list stays in step order, so the numbers render as written.
     `CORRECTIVE_CONTRAST`, `ALTERNATIVE_FRAMING` and `PARTICIPIAL_TAIL`.
 13. Scan-statistic density (5.4), then subtree mining (5.5). This was
     step 9 before TF-004.
-14. **Full arXiv body run** (recommended in section 12). All usable
-    pre papers (about 775) and a matched post sample, so that one
-    analysis measures the fixed and split patterns. Goes after steps
-    10 and 11. The source cache is reusable.
+14. **Full arXiv body run** (recommended in section 12). Done
+    (TF-008, section 15). Every pre id was walked and 778 papers kept,
+    and the post shuffle was walked until it kept 778 too; the pilot's
+    papers are the first 200 of each. One analysis at 651302d measures
+    the fixed and split patterns. All 39 construction and pattern ratios
+    with at least 20 findings lie inside their pilot intervals, and the
+    intervals are about half as wide on the log scale, as sampling
+    predicts. The pilot subset rebuilt from the new tables differs from
+    the pilot report only in the rows TF-006 and TF-007 changed. Every
+    level TF-007 raised still rises. `increasingly` is the one new
+    candidate for `med`. `GAPPED_ANTITHESIS` and `NEG_ESCALATION` read
+    poorly in papers. The reports and their JSON summaries are inputs
+    for step 8.
 
 Order: 9 and 10 are done. 11 and 7 do not depend on each other and can
 run side by side. 14 goes after 11, so that one analysis measures the
@@ -1665,3 +1674,237 @@ and sanity tables match as well.
 **Cleanups.** The section 7 "Done:" line now lists step 11. The README
 describes phrase-entry objects and `--migrate-waivers` for renamed
 patterns.
+
+### Phase 2: the full fetch
+
+**Fetch.** `fetch --want all --sample-name full` walks every pre id,
+then the post shuffle until it keeps as many papers as pre kept. It
+writes `sample-full.json` and `papers-full.jsonl` and leaves the pilot's
+`sample.json` and `papers.jsonl` as they were. The run took 7,200 s at
+3.5 s spacing and fetched 1,352 archives. The papers the pilot walked
+came from the cache. The cache now holds 1,821 archives, 4.4 GB.
+
+| measure | pre | post |
+|---|---|---|
+| ids in the window | 955 | 2,627 |
+| walked / kept | 955 / 778 | 866 / 778 |
+| PDF only | 158 (16.5%; pilot 16.7%) | 62 (7.2%; pilot 5.8%) |
+| no main file found | 0 | 24 (2.8%; pilot 3.6%) |
+| too little text | 16 (1.7%; pilot 1.6%) | 2 (0.2%; pilot 0.9%) |
+| placeholder text | 2 (0.2%; pilot 0.4%) | 0 |
+| no source | 1 (0.1%; pilot 0) | 0 |
+
+Skip rates by reason are close to the pilot's.
+
+**Prefix check.** In each window the pilot's kept papers are the first
+200 kept in the full sample, in the same order. The 246 pre and 223
+post papers the pilot walked have the same status in both runs.
+
+**Masking checks.** `selftest` passes. The median masked share inside
+the kept body is 30.4% pre and 33.2% post (pilot 29.9% and 33.8%). 134
+and 203 papers exceed 40%, which is 17% and 26% of the sample (pilot 20%
+and 28%). One paper per window has a float with no `\end`, so the
+masker blanks from its `\begin` to the end of the paper: from 47% of the
+way through in the pre paper and 59% in the post one. Neither is in the
+pilot subset. The task allowed a masker change only for residue, so
+both stay as they are.
+
+The spot-check of 40 random masked sentences per window found LaTeX
+residue in 1 pre and 1 post, under the pilot limit of 2. The pre
+sentence holds an unmasked table body run into the next sentence, with
+a TeX opening quote; the post one holds a TeX opening quote. Two more
+pre sentences show escaped underscores with a blank where the backslash
+was (`smac _ann`). The underscores are the paper's own characters, so
+they were not counted.
+
+### Phase 3: analysis
+
+**Run.** `analyse --sample-name full --seed 8008 --json` ran at
+651302d (sha256 81ade1e30516) with no uncommitted changes. It wrote
+`eval/arxiv-bodies-full-2026-11-19.md` and
+`eval/arxiv-bodies-full-2026-11-19.json`. 1,556 papers took 6,561 s. The
+JSON's 1,003 rows render to the report's table rows exactly. The new
+per-paper tables replaced the pilot's in `private/arxiv/bodies/`; the
+pilot's are in `private/arxiv/bodies-tf005/`. For the full layout the
+default report name is `arxiv-bodies-full-<date>.md`, and the script
+refuses to overwrite the pilot report unless the rebuild is pinned.
+
+**Report additions.** Besides the pilot report's tables, the full
+report has subtype rows for all sections (260 rows), per-phrase rows
+keyed by matched text for all sections (96) and for the `body` section
+type (76), and an `ALTERNATIVE_FRAMING` table with `af_rather_than`,
+`af_instead_of` and `af_less_than` apart per text type (18). Every row
+has at least 20 findings. The per-paper tables gained a `phrase` level.
+
+**Check against TF-004.** The report lists 15 of 17 rows inside. One
+of the two outside, `af_rather_instead`, is an artifact: TF-007 renamed
+the pattern, so the check finds no sample findings under the old name.
+Summing `af_rather_than` and `af_instead_of` gives a sample abstract
+ratio of 1.74 (1.14 to 2.77) against TF-004's 2.15 (1.56 to 3.29), and
+each lies inside the other's interval. The other row,
+`DISGUISE_METAPHOR`, differs because TF-004 measured the detector
+before TF-006 fixed it. The check table's code was out of scope here.
+Mapping old names through `RENAMED_PATTERNS` would fix it.
+
+**Code effect against sample effect.** The pilot subset, rebuilt from
+the full tables with the pilot's bootstrap (seed 5005, pilot layout),
+was compared with the committed pilot JSON row by row. These rows
+differ:
+
+| construction | rows | cause |
+|---|---|---|
+| `DISGUISE_METAPHOR` | 9 (5 changed, 4 now under 20 findings) | TF-006 phase 1 |
+| `HOLLOW_BOOSTER` | 10 | TF-006 phase 2 |
+| `ALTERNATIVE_FRAMING` patterns | 26 (`af_rather_instead` rows replaced by `af_rather_than` and `af_instead_of` rows, and the TF-004 check row) | TF-007 phase 1 |
+
+No other row differs in any value. This is the expected set, so every
+other difference between the pilot and the full run is a sample effect.
+The TF-007 `use` change set a confidence level, which the tables do not
+record.
+
+**H1 and H2.** The table lists the constructions and patterns that have
+at least 20 findings in both runs, counted over all sections. The pilot
+column is the pilot subset at the
+current code (seed 5005), which equals the committed pilot report except
+in the rows above. Width ratio is the full interval's width over the
+pilot's, both on the log scale. Fifteen single-pattern rows repeat
+their construction's row and are left out; `TRICOLON / tricolon`
+differs from its construction by 1 and 5 findings and has the same
+ratio and interval.
+
+| key | pilot n | pilot ratio (95% CI) | full n | full ratio (95% CI) | inside | width ratio |
+|---|---|---|---|---|---|---|
+| `ABSTRACT_ADVERB` | 1,569 | 1.57 (1.31 to 1.89) | 5,787 | 1.53 (1.39 to 1.68) | yes | 0.52 |
+| `ALTERNATIVE_FRAMING` | 2,306 | 1.23 (1.08 to 1.40) | 9,206 | 1.13 (1.05 to 1.23) | yes | 0.61 |
+| `ALTERNATIVE_FRAMING / af_instead_of` | 373 | 1.02 (0.77 to 1.36) | 1,618 | 0.85 (0.74 to 0.98) | yes | 0.50 |
+| `ALTERNATIVE_FRAMING / af_less_than` | 1,242 | 0.66 (0.55 to 0.79) | 5,034 | 0.60 (0.54 to 0.66) | yes | 0.53 |
+| `ALTERNATIVE_FRAMING / af_rather_than` | 691 | 4.44 (3.27 to 6.10) | 2,554 | 5.22 (4.37 to 6.23) | yes | 0.57 |
+| `BORROWED_RIGOUR` | 580 | 1.13 (0.86 to 1.47) | 2,399 | 1.16 (0.99 to 1.35) | yes | 0.58 |
+| `CLOSER` | 162 | 1.06 (0.70 to 1.60) | 653 | 1.15 (0.94 to 1.39) | yes | 0.47 |
+| `CONSULTANT_REGISTER` | 2,274 | 1.45 (1.20 to 1.76) | 9,070 | 1.46 (1.31 to 1.65) | yes | 0.62 |
+| `CORRECTIVE_CONTRAST` | 803 | 1.35 (1.05 to 1.74) | 2,984 | 1.45 (1.28 to 1.65) | yes | 0.51 |
+| `CORRECTIVE_CONTRAST / cc_cleft` | 85 | 0.52 (0.27 to 0.93) | 243 | 0.49 (0.34 to 0.70) | yes | 0.58 |
+| `CORRECTIVE_CONTRAST / cc_coordinated` | 586 | 1.25 (0.99 to 1.59) | 2,243 | 1.33 (1.18 to 1.49) | yes | 0.50 |
+| `CORRECTIVE_CONTRAST / cc_negated_apposition` | 100 | 4.94 (2.53 to 10.76) | 378 | 5.00 (3.45 to 7.07) | yes | 0.50 |
+| `CORRECTIVE_CONTRAST / cc_parallel_sibling` | 32 | 1.58 (0.73 to 3.30) | 120 | 2.24 (1.44 to 3.49) | yes | 0.59 |
+| `EMPHATIC_REFLEXIVE` | 283 | 1.07 (0.75 to 1.58) | 1,132 | 1.19 (0.99 to 1.42) | yes | 0.48 |
+| `EMPTY_FRAME` | 186 | 0.65 (0.42 to 0.99) | 644 | 0.62 (0.50 to 0.77) | yes | 0.51 |
+| `EM_DASH` | 1,214 | 4.94 (2.77 to 9.81) | 4,522 | 6.32 (4.61 to 8.96) | yes | 0.53 |
+| `FRAME_MARKER` | 145 | 0.73 (0.46 to 1.15) | 507 | 0.67 (0.53 to 0.84) | yes | 0.51 |
+| `GAPPED_ANTITHESIS` | 44 | 1.53 (0.79 to 2.93) | 152 | 1.14 (0.80 to 1.55) | yes | 0.50 |
+| `HEDGE_STACK` | 34 | 0.50 (0.17 to 1.26) | 85 | 0.48 (0.27 to 0.84) | yes | 0.56 |
+| `HOLLOW_BOOSTER` | 205 | 3.62 (2.44 to 5.42) | 838 | 3.24 (2.69 to 3.96) | yes | 0.49 |
+| `LLM_DICTION` | 4,091 | 1.39 (1.17 to 1.67) | 14,967 | 1.37 (1.25 to 1.50) | yes | 0.51 |
+| `PARTICIPIAL_TAIL` | 6,064 | 4.03 (3.49 to 4.62) | 23,294 | 3.51 (3.25 to 3.82) | yes | 0.59 |
+| `TRICOLON` | 8,534 | 1.47 (1.32 to 1.63) | 33,688 | 1.42 (1.34 to 1.50) | yes | 0.54 |
+| `VAGUE_QUANTIFIER` | 570 | 1.24 (0.98 to 1.54) | 2,228 | 1.11 (0.98 to 1.25) | yes | 0.54 |
+
+H1 holds: all 39 full ratios lie inside the pilot intervals. The
+`body` section type alone gives the same, 39 of 39. H2 holds: the
+median width ratio is 0.52 (range 0.47 to 0.62; `body` alone 0.52,
+range 0.44 to 0.62). With 3.9 times the papers, sampling alone predicts
+0.51. Seven verdicts changed, all from `flat`: `FRAME_MARKER`,
+`HEDGE_STACK` and `af_instead_of` now fall, and `cc_coordinated` and
+`cc_parallel_sibling` now rise (the other two are the single-pattern
+rows of `FRAME_MARKER` and `HEDGE_STACK`).
+
+**H3 and H4.** The TF-007 items, all sections. TF-004 values are the
+abstract rows (for `rather than` and `instead of`, the subtypes of the
+old `af_rather_instead`; for `use`, the TF-007 phase 2 table). Pilot
+values are the pilot subset and equal the TF-007 tables. The rule
+column applies the interim rule with the full body values; no level was
+changed.
+
+| item | TF-004 abstracts | pilot bodies | full bodies | level | rule |
+|---|---|---|---|---|---|
+| `rather than` | 3.84 (2.29 to 8.06) rose | 4.44 (3.27 to 6.10) rose | 5.22 (4.37 to 6.23) rose | `med` | `med` |
+| `instead of` | 1.07 (0.68 to 1.90) flat | 1.02 (0.77 to 1.36) flat | 0.85 (0.74 to 0.98) fell | `low` | `low` |
+| lemma `use` | 1.09 (0.67 to 2.00) flat | 1.30 (0.93 to 1.84) flat | 1.20 (1.02 to 1.42) rose | `med` | no raise (construction `high`) |
+| `leverages` | 3.54 (2.25 to 6.84) rose | 2.81 (1.76 to 4.56) rose | 2.15 (1.70 to 2.76) rose | `med` | `med` |
+| `leveraging` | 1.88 (1.32 to 2.88) rose | 2.00 (1.36 to 3.03) rose | 1.88 (1.43 to 2.50) rose | `med` | `med` |
+| `optimizing` | 1.81 (1.19 to 2.98) rose | 1.53 (1.05 to 2.30) rose | 1.81 (1.47 to 2.26) rose | `med` | `med` |
+| `at scale` | too few (12) | 6.41 (2.45 to 42.94) rose | 3.27 (1.79 to 7.49) rose | `low` | `low` |
+| `holistic` | 0.96 (0.45 to 2.30) flat | 1.53 (0.55 to 5.41) flat | 1.64 (0.99 to 2.76) flat | `low` | `low` |
+| `leverage` | 0.83 (0.53 to 1.34) flat | 0.97 (0.69 to 1.38) flat | 0.95 (0.77 to 1.17) flat | `low` | `low` |
+| `leveraged` | too few (18) | 0.63 (0.30 to 1.31) flat | 0.62 (0.40 to 0.94) fell | `low` | `low` |
+| `optimize` | 1.24 (0.89 to 1.82) flat | 0.96 (0.64 to 1.48) flat | 1.26 (1.05 to 1.53) rose | `low` | `low` |
+| `optimized` | 1.19 (0.92 to 1.59) flat | 1.37 (1.03 to 1.83) rose | 1.28 (1.09 to 1.50) rose | `low` | `low` |
+| `optimizes` | 1.36 (0.85 to 2.51) flat | 1.56 (0.94 to 2.64) flat | 1.87 (1.42 to 2.50) rose | `low` | `low` |
+| `comprehensive` | 1.64 (1.16 to 2.50) rose | 3.51 (1.83 to 6.38) rose | 2.63 (2.01 to 3.45) rose | `med` | `med` |
+| `essential` | 1.89 (1.33 to 3.00) rose | 2.16 (1.45 to 3.41) rose | 2.12 (1.70 to 2.69) rose | `med` | `med` |
+| `landscape` | 4.66 (1.62 to inf) rose | 6.37 (2.20 to 45.74) rose | 5.58 (3.36 to 10.12) rose | `med` | `med` |
+| `crucial` | 1.18 (0.82 to 1.86) flat | 2.71 (1.86 to 3.93) rose | 1.95 (1.53 to 2.52) rose | `low` | `low` |
+| `dynamic` | 1.01 (0.79 to 1.30) flat | 1.11 (0.77 to 1.59) flat | 1.12 (0.93 to 1.34) flat | `low` | `low` |
+| `dynamics` | 1.50 (0.58 to 8.03) flat | 2.35 (1.05 to 5.86) rose | 2.33 (1.43 to 4.01) rose | `low` | `low` |
+| `harness` | 0.87 (0.34 to 5.05) flat | 8.36 (1.39 to 47.29) rose | 3.28 (1.28 to 10.89) rose | `low` | `low` |
+| `innovative` | 2.01 (0.88 to 8.97) flat | 3.21 (1.33 to 9.57) rose | 2.72 (1.67 to 4.89) rose | `low` | `low` |
+| `orchestrate` | too few (8) | 0.96 (0.33 to 2.51) flat | 1.02 (0.60 to 1.68) flat | `low` | `low` |
+| `paradigm` | 0.82 (0.57 to 1.29) flat | 1.51 (0.78 to 2.90) flat | 1.24 (0.80 to 2.02) flat | `low` | `low` |
+| `paradigms` | 1.15 (0.57 to 2.89) flat | 1.79 (0.75 to 3.93) flat | 1.37 (0.77 to 2.53) flat | `low` | `low` |
+| `robust` | 1.45 (0.96 to 2.42) flat | 2.18 (1.28 to 3.93) rose | 2.08 (1.53 to 2.88) rose | `low` | `low` |
+| `seamless` | 2.51 (0.95 to inf) flat | 6.50 (2.55 to 22.43) rose | 5.07 (3.15 to 8.99) rose | `low` | `low` |
+| `significant` | 1.22 (1.01 to 1.49) rose | 0.80 (0.64 to 1.01) flat | 0.89 (0.79 to 0.99) fell | `low` | `low` |
+| `versatile` | 1.55 (0.69 to 5.62) flat | 1.26 (0.41 to 4.63) flat | 1.90 (1.04 to 3.78) rose | `low` | `low` |
+| `vital` | 0.76 (0.35 to 2.16) flat | too few (18) | 0.78 (0.44 to 1.25) flat | `low` | `low` |
+| `increasingly` | 1.99 (1.49 to 2.73) rose | 3.59 (2.39 to 5.72) rose | 2.47 (1.99 to 3.11) rose | `low` | `med` |
+
+Full body counts run from 82 (`orchestrate`) to 4,842 (`significant`).
+
+H3 holds in part. `rather than` and the six raised forms still rise,
+with intervals well above 1, so no raised item has to come down.
+`instead of` and `use` did not stay flat. `instead of` now falls, 0.85
+(0.74 to 0.98), and `use` now rises, 1.20 (1.02 to 1.42). Both
+intervals end within 0.02 of 1. The rule only raises, so `instead of`
+keeps `low`. `use` sits at `med` from the TF-007 reading, below its
+construction, and the rule does not apply to it.
+
+H4 holds. `crucial`, `robust`, `seamless`, `innovative`, `harness`,
+`dynamics` and `optimized` all still rise in bodies, and each interval
+narrowed. Each was flat in TF-004 abstracts, so the rule keeps them at
+`low`.
+
+**Candidates for step 8.** One level would change by the rule:
+`increasingly` (`VAGUE_QUANTIFIER`, `low`) rose in TF-004 abstracts and
+in both body runs, so the rule gives `med`. It already qualified with
+the pilot values; TF-007 did not cover `VAGUE_QUANTIFIER`. Three more
+are worth a look, though the rule changes none of them:
+
+- `significant`: up in abstracts, down in bodies.
+- `use`: up in bodies, after TF-007 set it below its construction.
+- `optimize` and `optimizes`: up in bodies, while `leverage` is flat.
+
+**Sanity reading.** 20 random full-run findings per window in the
+`body` section type for the three constructions with the largest change
+in body ratio between pilot and full run, `GAPPED_ANTITHESIS` (1.67 to
+1.14), `HEDGE_STACK` (0.25 to 0.34) and `CLOSER` (0.92 to 1.19), and for
+`NEG_ESCALATION`, the one construction newly measurable (12 body
+findings in the pilot, 28 in the full run). Counts only.
+
+| construction | pre: real / read | post: real / read |
+|---|---|---|
+| `GAPPED_ANTITHESIS` | 9 / 20 | 4 / 20 |
+| `HEDGE_STACK` | 20 / 20 | 13 / 13 |
+| `CLOSER` | 18 / 20 | 20 / 20 |
+| `NEG_ESCALATION` | 0 / 18 | 0 / 10 |
+
+- `GAPPED_ANTITHESIS` misses are mostly the `[before/after]` subtype
+  firing on procedure sequences (`is first X and then Y`), whose
+  predicates are not opposed. Real instances are opposed pairs
+  (`set ... and cleared`, `increased or decreased`,
+  `wins ... but loses`). Post has more procedure sequences, so the ratio of real
+  instances is below the reported 1.14; these counts put it near 0.5.
+- `HEDGE_STACK` findings are all `is not necessarily` or
+  `may or may not`, as the patterns intend.
+- `CLOSER` misses are `in short` inside another phrase
+  (`short read alignment`, `short intervals`).
+- `NEG_ESCALATION` has no real instance. Every finding is two
+  coordinated negated clauses, each with its own predicate; none has a
+  gapped second conjunct that raises the modality. Its 0.73 ratio
+  measures parse noise. A test row should come before any fix.
+
+**Verdict.** The full run confirms the pilot. Every ratio lies inside
+its pilot interval and the intervals narrowed by about half, as
+sampling predicts. The TF-007 levels stand. Step 8 can use the full
+body ratios as its prior, with `increasingly` as the one new candidate
+for `med` and `GAPPED_ANTITHESIS` and `NEG_ESCALATION` as precision
+problems that show up in papers.
