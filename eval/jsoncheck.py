@@ -1,0 +1,134 @@
+#!/usr/bin/env python3
+"""Check an arXiv JSON summary against its text report.
+
+Usage: python3 eval/jsoncheck.py SUMMARY.json REPORT.md
+
+Renders every JSON row in the report's cell format (2 decimals, intervals
+as "v (lo to hi)") and compares the multiset of rendered rows with the
+report's table rows. The setup, sample, words and sanity tables are
+skipped. Also checks that no numeric field holds a string other than
+"inf". Prints MATCH and exits 0 when the two agree, or prints up to 5
+rows from each side and exits 1.
+
+Handles the "arxiv-rates" (TF-004) and "arxiv-bodies" (TF-005 pilot and
+TF-008 full run) kinds. The harvest summary has a different row shape and
+is not covered.
+"""
+import json
+import sys
+from collections import Counter
+
+
+def f(x):
+    if x is None:
+        return "-"
+    if x == "inf":
+        return "inf"
+    return f"{x:.2f}"
+
+
+def ci(v, lo, hi):
+    return f"{f(v)} ({f(lo)} to {f(hi)})"
+
+
+def c(d):
+    return ci(d["value"], d["lo"], d["hi"])
+
+
+def key(r):
+    return r["key"].replace("|", " / ")
+
+
+def render(kind, r):
+    t = r["table"]
+    if kind == "arxiv-rates":
+        a, b = r["pre"], r["post"]
+        return (f"| `{key(r)}` | {a['n']} | {a['papers']} | "
+                f"{ci(a['rate'], a['rate_lo'], a['rate_hi'])} | {b['n']} | "
+                f"{b['papers']} | {ci(b['rate'], b['rate_lo'], b['rate_hi'])}"
+                f" | {ci(r['ratio'], r['ratio_lo'], r['ratio_hi'])} | "
+                f"{r['verdict']} |")
+    if t == "EM_DASH per text type":
+        a, b = r["pre"], r["post"]
+        return (f"| {r['text_type']} | {a['n']} | "
+                f"{ci(a['rate'], a['rate_lo'], a['rate_hi'])} | {b['n']} | "
+                f"{ci(b['rate'], b['rate_lo'], b['rate_hi'])} | "
+                f"{ci(r['ratio'], r['ratio_lo'], r['ratio_hi'])} | "
+                f"{r['verdict']} |")
+    if t == "Check against TF-004":
+        x = r["tf004"]
+        return (f"| `{key(r)}` | {ci(x['value'], x['lo'], x['hi'])} | "
+                f"{r['n_pre']} / {r['n_post']} | {c(r['sample_ratio'])} | "
+                f"{'yes' if r['sample_inside_tf004'] else 'no'} | "
+                f"{'yes' if r['tf004_inside_sample'] else 'no'} |")
+    if t == "ALTERNATIVE_FRAMING by pattern":
+        return (f"| {r['text_type']} | `{r['pattern']}` | {r['pre']['n']} | "
+                f"{r['post']['n']} | "
+                f"{ci(r['ratio'], r['ratio_lo'], r['ratio_hi'])} | "
+                f"{r['verdict']} |")
+    if "text_type_b" in r:
+        return (f"| `{key(r)}` | {r['n_a']['pre']} / {r['n_a']['post']} | "
+                f"{c(r['ratio_a'])} | {r['n_b']['pre']} / {r['n_b']['post']}"
+                f" | {c(r['ratio_b'])} | {c(r['ratio_of_ratios'])} | "
+                f"{'yes' if r['inside'] else 'no'} |")
+    a, b = r["pre"], r["post"]
+    return (f"| `{key(r)}` | {a['n']} | "
+            f"{ci(a['rate'], a['rate_lo'], a['rate_hi'])}"
+            f" | {ci(a['mean'], a['mean_lo'], a['mean_hi'])} | {b['n']} | "
+            f"{ci(b['rate'], b['rate_lo'], b['rate_hi'])} | "
+            f"{ci(b['mean'], b['mean_lo'], b['mean_hi'])} | "
+            f"{ci(r['ratio'], r['ratio_lo'], r['ratio_hi'])} | "
+            f"{r['verdict']} |")
+
+
+SKIP = ("## Setup", "## Sample and masking", "## Words per text type",
+        "## Sanity measures")
+
+
+def report_rows(path):
+    lines = open(path, encoding="utf-8").read().splitlines()
+    out, skip = [], False
+    for i, line in enumerate(lines):
+        if line.startswith("## "):
+            skip = line.startswith(SKIP)
+        if skip or not line.startswith("|") or line.startswith("|---"):
+            continue
+        if i + 1 < len(lines) and lines[i + 1].startswith("|---"):
+            continue            # header row
+        out.append(line)
+    return out
+
+
+def walk(x):
+    """Exit if a numeric field holds a string other than "inf"."""
+    if isinstance(x, dict):
+        for k, v in x.items():
+            if (k in ("n", "papers", "rate", "ratio", "mean")
+                    and isinstance(v, str) and v != "inf"):
+                sys.exit(f"string number {k}={v}")
+            walk(v)
+    elif isinstance(x, list):
+        for v in x:
+            walk(v)
+
+
+def main():
+    if len(sys.argv) != 3:
+        sys.exit(__doc__.split("\n\n")[1])
+    j = json.load(open(sys.argv[1], encoding="utf-8"))
+    R = Counter(render(j["kind"], r) for r in j["rows"])
+    T = Counter(report_rows(sys.argv[2]))
+    print(f"{sys.argv[1]}: {sum(R.values())} JSON rows, "
+          f"{sum(T.values())} report rows")
+    miss, extra = T - R, R - T
+    for line in list(miss)[:5]:
+        print("  in report only:", line)
+    for line in list(extra)[:5]:
+        print("  in JSON only:  ", line)
+    walk(j)
+    print("  MATCH" if not miss and not extra else "  DIFFER")
+    sys.exit(0 if not miss and not extra else 1)
+
+
+if __name__ == "__main__":
+    main()
