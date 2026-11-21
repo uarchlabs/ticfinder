@@ -1661,7 +1661,10 @@ add `mean`, `mean_lo`, `mean_hi`), then `ratio`, `ratio_lo`,
 check row has `tf004`, `sample_ratio` and the two `inside` flags. A
 harvest row has `construction`, `pattern`, optionally `subtype`, the
 four label counts and `prec`. Counts are integers and rates are floats
-at full precision. An undefined value (`prec*` with no rewritten or
+at full precision, except in `arxiv_bodies.py` JSON written after
+TF-008 phase 3. That rounds every float to 4 significant digits, with
+more digits where 4 would change the value's 1- or 2-decimal form in
+the report. An undefined value (`prec*` with no rewritten or
 accepted label, a nan rate) is `null`, and an infinite one is the
 string `"inf"`. Ratios are post rate over pre rate across two periods.
 They are not likelihood ratios.
@@ -1723,7 +1726,12 @@ they were not counted.
 651302d (sha256 81ade1e30516) with no uncommitted changes. It wrote
 `eval/arxiv-bodies-full-2026-11-19.md` and
 `eval/arxiv-bodies-full-2026-11-19.json`. 1,556 papers took 6,561 s. The
-JSON's 1,003 rows render to the report's table rows exactly. The new
+JSON's 1,003 rows render to the report's table rows exactly. A pinned
+rebuild then rewrote the JSON with the rounding above, which took it
+from 858 KB to 685 KB. Its rows still render to the report's rows
+exactly, no nonzero value became zero, and 186 of the 14,162 floats
+needed a fifth digit or more. The committed pilot JSON keeps full
+precision, so a pinned rebuild of it now differs in the digits. The new
 per-paper tables replaced the pilot's in `private/arxiv/bodies/`; the
 pilot's are in `private/arxiv/bodies-tf005/`. For the full layout the
 default report name is `arxiv-bodies-full-<date>.md`, and the script

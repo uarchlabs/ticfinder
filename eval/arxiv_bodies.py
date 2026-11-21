@@ -1450,6 +1450,28 @@ def ci_txt(x, ci):
     return f"{AR.fmt(x)} ({AR.fmt(ci[0])} to {AR.fmt(ci[1])})"
 
 
+def sig4(x):
+    """Round every float in x to 4 significant digits, for the JSON.
+
+    Significant digits rather than decimal places, so small rates and
+    interval ends stay nonzero. A value gets more digits when 4 would
+    change its 1- or 2-decimal form in the report (1.42484 to 1.425
+    prints 1.43), so the JSON still renders to the report's rows."""
+    if isinstance(x, float):
+        if not math.isfinite(x):
+            return x
+        for d in range(4, 18):
+            r = float(f"{x:.{d}g}")
+            if f"{r:.2f}" == f"{x:.2f}" and f"{r:.1f}" == f"{x:.1f}":
+                return r
+        return x
+    if isinstance(x, dict):
+        return {k: sig4(v) for k, v in x.items()}
+    if isinstance(x, list):
+        return [sig4(v) for v in x]
+    return x
+
+
 def median(v):
     v = sorted(v)
     n = len(v)
@@ -1906,7 +1928,7 @@ def write_body_report(args):
                 "words": {t: int(B.W[(w, t)].sum()) for t in TYPES},
                 "papers_with_text": {t: int((B.W[(w, t)] > 0).sum())
                                      for t in TYPES}}
-        AR.write_json(args.json, "arxiv-bodies", ver, {
+        AR.write_json(args.json, "arxiv-bodies", ver, sig4({
             "report": out_path.name, "layout": args.layout,
             "sample_want": sample["want"],
             "bootstrap": {"draws": draws, "seed": seed,
@@ -1915,7 +1937,7 @@ def write_body_report(args):
                                       "shared by every text type"},
             "min_n": MIN_N, "sample": smp,
             "note": "ratios are post rate over pre rate, two periods; "
-                    "they are not likelihood ratios"}, J)
+                    "they are not likelihood ratios"}), sig4(J))
 
     # console summary
     print(f"\nwords: " + ", ".join(
