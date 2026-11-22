@@ -1,6 +1,6 @@
 # ticfinder construction rates in arXiv cs.AR paper bodies, full run
 
-Generated 2026-11-19 by `eval/arxiv_bodies.py` (TF-008). Aggregates only: no paper text, titles or ids. Ratios are rates over two periods (post over pre), not likelihood ratios.
+Generated 2026-11-21 by `eval/arxiv_bodies.py` (TF-008). Aggregates only: no paper text, titles or ids. Ratios are rates over two periods (post over pre), not likelihood ratios.
 
 ## Setup
 
@@ -268,11 +268,11 @@ The sample's abstract ratio against the TF-004 interval for the full abstract se
 | `TRICOLON` | 1.44 (1.32 to 1.56) | 626 / 909 | 1.44 (1.29 to 1.61) | yes | yes |
 | `VAGUE_QUANTIFIER` | 0.85 (0.70 to 1.03) | 135 / 113 | 0.83 (0.65 to 1.05) | yes | yes |
 | `ALTERNATIVE_FRAMING / af_less_than` | 0.90 (0.72 to 1.17) | 85 / 82 | 0.96 (0.70 to 1.32) | yes | yes |
-| `ALTERNATIVE_FRAMING / af_rather_instead` | 2.15 (1.56 to 3.29) | 0 / 0 | - (- to -) | no | no |
+| `ALTERNATIVE_FRAMING / af_rather_instead` | 2.15 (1.56 to 3.29) | 32 / 56 | 1.74 (1.14 to 2.77) | yes | yes |
 | `CORRECTIVE_CONTRAST / cc_coordinated` | 1.00 (0.69 to 1.57) | 29 / 22 | 0.75 (0.42 to 1.32) | yes | yes |
 | `TRICOLON / tricolon` | 1.44 (1.32 to 1.56) | 626 / 909 | 1.44 (1.29 to 1.61) | yes | yes |
 
-15 of 17 sample abstract ratios lie inside the TF-004 interval; the TF-004 ratio lies inside the sample interval for 15 of 17. TF-004 ran an earlier ticfinder (69e1743), so rows whose code changed in TF-006 and TF-007 can differ for that reason as well as from sampling and from keeping only papers with usable LaTeX.
+16 of 17 sample abstract ratios lie inside the TF-004 interval; the TF-004 ratio lies inside the sample interval for 16 of 17. TF-004 ran an earlier ticfinder (69e1743), so rows whose code changed in TF-006 and TF-007 can differ for that reason as well as from sampling and from keeping only papers with usable LaTeX.
 
 ## Rates per text type
 

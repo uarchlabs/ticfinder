@@ -3,7 +3,7 @@
  "kind": "arxiv-bodies",
  "tf_commit": "651302d",
  "tf_sha256": "81ade1e30516",
- "generated": "2026-11-19",
+ "generated": "2026-11-21",
  "report": "arxiv-bodies-full-2026-11-19.md",
  "layout": "full",
  "sample_want": "all",
@@ -4090,15 +4090,15 @@
     "lo": 1.56,
     "hi": 3.29
    },
-   "n_pre": 0,
-   "n_post": 0,
+   "n_pre": 32,
+   "n_post": 56,
    "sample_ratio": {
-    "value": null,
-    "lo": null,
-    "hi": null
+    "value": 1.737,
+    "lo": 1.138,
+    "hi": 2.769
    },
-   "sample_inside_tf004": false,
-   "tf004_inside_sample": false
+   "sample_inside_tf004": true,
+   "tf004_inside_sample": true
   },
   {
    "table": "Check against TF-004",

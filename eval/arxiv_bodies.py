@@ -940,7 +940,23 @@ def cmd_selftest(args):
     if not ok:
         print(f"     want {want}\n     got  {cls}")
         fails += 1
-    n = len(MASK_ROWS) + len(SECTION_ROWS) + len(PLACEHOLDER_ROWS) + 1
+    # TF-004 check: an old pattern name counts its renamed patterns
+    rows = {w: [{"words": {t: 1000 for t in TYPES},
+                 "counts": {t: {"pattern": {
+                     "ALTERNATIVE_FRAMING|af_rather_than": 2,
+                     "ALTERNATIVE_FRAMING|af_instead_of": 1,
+                     "ALTERNATIVE_FRAMING|af_less_than": 5}} for t in TYPES}}
+                for _ in range(3)] for w in ("pre", "post")}
+    got = tf004_stat(Boot(rows, 10, 1), "abstract", "pattern",
+                     "ALTERNATIVE_FRAMING|af_rather_instead")["o"]["pre"]["n"]
+    ok = got == 9
+    if not ok or args.verbose:
+        print(f"{'ok ' if ok else 'FAIL'} tf004: renamed pattern sums its "
+              "successors")
+    if not ok:
+        print(f"     want 9\n     got  {got}")
+        fails += 1
+    n = len(MASK_ROWS) + len(SECTION_ROWS) + len(PLACEHOLDER_ROWS) + 2
     print(f"selftest: {n - fails}/{n} rows pass")
     return 1 if fails else 0
 
@@ -1339,7 +1355,10 @@ class Boot:
         self.cache = {}
 
     def counts(self, w, t, lvl, key):
-        return self.np.array([r["counts"][t].get(lvl, {}).get(key, 0)
+        """Per-paper counts of key; a tuple of keys gives their sum."""
+        keys = key if isinstance(key, tuple) else (key,)
+        return self.np.array([sum(r["counts"][t].get(lvl, {}).get(k, 0)
+                                  for k in keys)
                               for r in self.rows[w]], dtype=float)
 
     def stat(self, t, lvl, key):
@@ -1410,6 +1429,40 @@ def tf004_intervals():
                  for x in m.group(4, 5, 6)]
             out[sect][key] = (int(m.group(2)) + int(m.group(3)), *f)
     return out
+
+
+def renamed_patterns():
+    """RENAMED_PATTERNS from tools/ticfinder.py as {old: [new, ...]}, read
+    without importing ticfinder (and spaCy)."""
+    import ast
+    tree = ast.parse(AR.TF_PATH.read_text(encoding="utf-8"))
+    for node in tree.body:
+        if isinstance(node, ast.Assign) and any(
+                getattr(t, "id", None) == "RENAMED_PATTERNS"
+                for t in node.targets):
+            out = defaultdict(list)
+            for new, old in ast.literal_eval(node.value).items():
+                out[old].append(new)
+            return {k: sorted(v) for k, v in out.items()}
+    return {}
+
+
+def tf004_keys(lvl, k):
+    """The table keys that make up TF-004 row k. A pattern TF-007 renamed
+    counts its old name and every new name, so a table written before or
+    after the rename gives the same total."""
+    if lvl != "pattern":
+        return k
+    cid, pat = k.split("|", 1)
+    news = renamed_patterns().get(pat)
+    if not news:
+        return k
+    return (k,) + tuple(f"{cid}|{n}" for n in news)
+
+
+def tf004_stat(B, t, lvl, k):
+    """B.stat for a TF-004 check row, with renamed patterns merged."""
+    return B.stat(t, lvl, tf004_keys(lvl, k))
 
 
 def cmd_analyse(args):
@@ -1784,7 +1837,7 @@ def write_body_report(args):
         for k, (n, r4, lo4, hi4) in sorted(ref[lvl].items()):
             if n < MIN_N or (lvl == "pattern" and single_pattern(B, k)):
                 continue
-            s = B.stat("abstract", lvl, k)
+            s = tf004_stat(B, "abstract", lvl, k)
             ins = lo4 <= s["ratio"] <= hi4
             nchk += 1
             rev = s["ratio_ci"][0] <= r4 <= s["ratio_ci"][1]
