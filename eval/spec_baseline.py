@@ -1153,6 +1153,562 @@ def cmd_mask_report(args):
         print()
 
 
+# ------------------------------------------------------------- analyse
+
+BOOT_SEED = 9009            # bootstrap seed, new for TF-009
+MIN_N = AB.MIN_N
+LEVELS = AB.LEVELS
+AUTHOR_TABLE = SPECS / "author.jsonl"   # per-file counts, no text
+TMP = SPECS / "tmp"
+ARXIV_PIN = "81ade1e30516"  # the TF-008 full tables (ticfinder 651302d)
+AUTHOR_LEVELS = ("construction", "pattern")
+NAMES = {"peps": "PEPs", "ietf": "IETF RFCs", "rust": "Rust RFCs",
+         "riscv": "RISC-V", "opentitan": "OpenTitan"}
+POOL = "equal"              # the pooled rate requirements 13 to 15 use
+
+
+def sha16(s):
+    return hashlib.sha256(s.encode("utf-8")).hexdigest()[:16]
+
+
+def phrase_setup(tf):
+    extra = []
+    for f in tf.discover_phrase_files(None):
+        extra.extend(tf.load_phrase_file(f))
+    return extra, {e["id"] for e in extra} | set(tf.PHRASE_PATTERNS)
+
+
+def finding_rec(f, **kw):
+    return {**kw, "construction": f.construction,
+            "pattern": f.pattern or "-", "label": f.label, "text": f.text,
+            "context": f.context}
+
+
+def run_spec_analysis(tf, nlp, extra, phrase_ids, ver):
+    """ticfinder over the kept text of every sampled document. A document
+    whose kept text and ticfinder are unchanged keeps its stored row."""
+    _, docs = load_docs()
+    done, old_f = {}, defaultdict(list)
+    if TABLE.exists():
+        for line in TABLE.read_text(encoding="utf-8").splitlines():
+            r = json.loads(line)
+            done[r["id"]] = r
+    if FINDINGS.exists():
+        for line in FINDINGS.read_text(encoding="utf-8").splitlines():
+            f = json.loads(line)
+            old_f[f["id"]].append(f)
+    todo = [r for src in SOURCES for r in docs[src]]
+    TMP.mkdir(parents=True, exist_ok=True)
+    rows, allf = [], []
+    t0, n_new, w_new = time.monotonic(), 0, 0
+    for i, rec in enumerate(todo, 1):
+        _, kept, _, _, _ = kept_text(rec)
+        key = (ver["sha256"], sha16(kept))
+        r = done.get(rec["id"])
+        if r and (r["tf_sha256"], r["mask_sha"]) == key:
+            rows.append(r)
+            allf.extend(old_f[rec["id"]])
+            continue
+        tmp = TMP / (rec["id"] + SUFFIX[rec["source"]])
+        tmp.write_text(kept, encoding="utf-8")
+        try:
+            fs, st = tf.analyse(str(tmp), nlp, None, extra, set())
+        finally:
+            tmp.unlink()
+        rows.append({"id": rec["id"], "source": rec["source"],
+                     "tf_sha256": ver["sha256"], "mask_sha": key[1],
+                     "words": st["words"], "tf_masked_pct": st["masked_pct"],
+                     "counts": AB.counts_of(fs, phrase_ids)})
+        allf.extend(finding_rec(f, id=rec["id"], source=rec["source"])
+                    for f in fs)
+        n_new += 1
+        w_new += st["words"]
+        if n_new % 25 == 0:
+            el = time.monotonic() - t0
+            print(f"  {i}/{len(todo)} documents, {w_new:,} words, {el:.0f}s "
+                  f"({w_new / max(el, 1):.0f} words/s)", file=sys.stderr,
+                  flush=True)
+    TABLE.write_text("".join(json.dumps(r) + "\n" for r in rows),
+                     encoding="utf-8")
+    FINDINGS.write_text("".join(json.dumps(f) + "\n" for f in allf),
+                        encoding="utf-8")
+    try:
+        TMP.rmdir()
+    except OSError:
+        pass
+    print(f"analysed {n_new} documents ({len(rows) - n_new} up to date), "
+          f"{time.monotonic() - t0:.0f}s", file=sys.stderr)
+
+
+def author_files():
+    import os
+    ws = os.environ.get("WRITING_SAMPLES")
+    if not ws or not Path(ws).is_dir():
+        sys.exit("WRITING_SAMPLES is not set; source tools/setup.sh")
+    return Path(ws), sorted(p for p in Path(ws).rglob("*") if p.is_file()
+                            and p.suffix.lower() != ".docx")
+
+
+def run_author(tf, nlp, extra, phrase_ids, ver):
+    """ticfinder on the author's spec files, read in place as TF-003 did.
+    Stores per-file word counts and construction and pattern counts only,
+    keyed by a hash of the path: no text, names or findings."""
+    root, files = author_files()
+    rows = []
+    for p in files:
+        fs, st = tf.analyse(str(p), nlp, None, extra, set())
+        m = {}
+        masked = tf.mask_markdown(p.read_text(encoding="utf-8"), m,
+                                  tf.CODE_MASK,
+                                  markdown=tf.is_markdown_path(p))
+        c = AB.counts_of(fs, phrase_ids)
+        rows.append({"id": sha16(str(p.relative_to(root))),
+                     "tf_sha256": ver["sha256"], "words": st["words"],
+                     "words_ascii": len(re.findall(r"[A-Za-z]+", masked)),
+                     "counts": {lvl: c[lvl] for lvl in AUTHOR_LEVELS}})
+    AUTHOR_TABLE.write_text("".join(json.dumps(r) + "\n" for r in rows),
+                            encoding="utf-8")
+    print(f"author: {len(rows)} files", file=sys.stderr)
+
+
+def run_analysis():
+    ver = AR.tf_version()
+    tf = AR.load_tf()
+    nlp = tf.load_model("en_core_web_md")
+    nlp.max_length = 5_000_000
+    extra, phrase_ids = phrase_setup(tf)
+    run_spec_analysis(tf, nlp, extra, phrase_ids, ver)
+    run_author(tf, nlp, extra, phrase_ids, ver)
+
+
+def load_tables(pin=None):
+    """Spec rows per source, author rows and arXiv pre-window rows (all
+    sections, the TF-008 full tables, read only)."""
+    ver = AR.tf_version(pin)
+    sample, docs = load_docs()
+    want = {r["id"] for src in SOURCES for r in docs[src]}
+    by = defaultdict(list)
+    for line in TABLE.read_text(encoding="utf-8").splitlines():
+        r = json.loads(line)
+        if r["id"] in want and r["tf_sha256"] == ver["sha256"]:
+            by[r["source"]].append(r)
+    for src in SOURCES:
+        if len(by[src]) != len(docs[src]):
+            sys.exit(f"{src}: table has {len(by[src])} of {len(docs[src])} "
+                     "documents for this ticfinder version; run analyse")
+        by[src].sort(key=lambda r: r["id"])
+    author = [r for r in (json.loads(x) for x in AUTHOR_TABLE.read_text(
+        encoding="utf-8").splitlines()) if r["tf_sha256"] == ver["sha256"]]
+    if not author:
+        sys.exit("no author rows for this ticfinder version; run analyse")
+    author.sort(key=lambda r: r["id"])
+    AB.use_paths(None, "full")
+    _, arows, _ = AB.load_body_table(ARXIV_PIN)
+    arxiv = [{"id": r["id"], "words": r["words"]["all"],
+              "counts": r["counts"]["all"]} for r in arows["pre"]]
+    return ver, sample, docs, by, author, arxiv
+
+
+class MBoot:
+    """Bootstrap over documents: one index matrix per group (each source,
+    the arXiv pre bodies, the author's files), drawn in that order from one
+    seed. A pooled draw combines the source draws of the same row of the
+    matrices."""
+
+    def __init__(self, groups, draws, seed):
+        import numpy as np
+        self.np = np
+        self.rows = groups
+        rng = np.random.default_rng(seed)
+        self.idx = {g: rng.integers(0, len(v), size=(draws, len(v)))
+                    for g, v in groups.items()}
+        self.W = {g: np.array([r["words"] for r in v], dtype=float)
+                  for g, v in groups.items()}
+        self.Wd = {g: self.W[g][self.idx[g]].sum(axis=1) for g in groups}
+        self.cache = {}
+
+    def group(self, g, lvl, key):
+        np = self.np
+        c = np.array([r["counts"].get(lvl, {}).get(key, 0)
+                      for r in self.rows[g]], dtype=float)
+        cd = c[self.idx[g]].sum(axis=1)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            d = cd / self.Wd[g] * 1000
+        return {"n": int(c.sum()), "docs": int((c > 0).sum()),
+                "rate": c.sum() / self.W[g].sum() * 1000, "ci": AB.pct(d),
+                "draws": d, "cd": cd}
+
+    def stat(self, lvl, key):
+        ck = (lvl, key)
+        if ck in self.cache:
+            return self.cache[ck]
+        np = self.np
+        s = {g: self.group(g, lvl, key) for g in self.rows}
+        src = [s[g] for g in SOURCES]
+        ww_d = sum(x["cd"] for x in src) / sum(self.Wd[g] for g in SOURCES) \
+            * 1000
+        ew_d = np.mean([x["draws"] for x in src], axis=0)
+        pool = {
+            "n": sum(x["n"] for x in src), "docs": sum(x["docs"] for x in src),
+            "words": {"rate": sum(x["n"] for x in src)
+                      / sum(self.W[g].sum() for g in SOURCES) * 1000,
+                      "ci": AB.pct(ww_d), "draws": ww_d},
+            "equal": {"rate": float(np.mean([x["rate"] for x in src])),
+                      "ci": AB.pct(ew_d), "draws": ew_d}}
+        res = {"g": s, "pool": pool}
+        self.cache[ck] = res
+        return res
+
+
+def ratio(a, b, ad, bd):
+    import numpy as np
+    with np.errstate(divide="ignore", invalid="ignore"):
+        r = a / b if b else (math.inf if a else math.nan)
+        rd = ad / bd
+    return r, AB.pct(rd, nearest=True)
+
+
+def side(lo, hi):
+    if lo > 1:
+        return "above 1"
+    if hi < 1:
+        return "below 1"
+    return "spans 1"
+
+
+def ci_txt(x, ci):
+    return AB.ci_txt(x, ci)
+
+
+def jrate(rate, ci, **kw):
+    return {**kw, "rate": AR.jnum(rate), "rate_lo": AR.jnum(ci[0]),
+            "rate_hi": AR.jnum(ci[1])}
+
+
+def cmd_analyse(args):
+    if args.sample:
+        return show_sample(args.sample, args.n)
+    if not args.report_only:
+        run_analysis()
+    write_report(args)
+
+
+def show_sample(key, n):
+    """Console only: n random findings per source for a construction, a
+    CID|pattern or a CID|phrase key. Writes nothing."""
+    pool = defaultdict(list)
+    for line in FINDINGS.read_text(encoding="utf-8").splitlines():
+        f = json.loads(line)
+        k = (f["construction"], f"{f['construction']}|{f['pattern']}",
+             f"{f['construction']}|{' '.join(f['text'].lower().split())}")
+        if key in k:
+            pool[f["source"]].append(f)
+    for src in SOURCES:
+        rng = random.Random(f"{SAMPLE_SEED}-check-{key}-{src}")
+        pick = rng.sample(pool[src], min(n, len(pool[src])))
+        print(f"\n=== {key} {src}: {len(pick)} of {len(pool[src])}")
+        for i, f in enumerate(pick, 1):
+            print(f"\n[{src} {i}] {f['label']}\n  MATCH: {f['text']}\n  "
+                  f"SENT:  {' '.join(f['context'].split())[:400]}")
+
+
+def write_report(args):
+    import numpy as np
+    ver, sample, docs, by, author, arxiv = load_tables(args.table_sha)
+    groups = {**{s: by[s] for s in SOURCES}, "arxiv": arxiv,
+              "author": author}
+    draws, seed = args.draws, args.seed
+    B = MBoot(groups, draws, seed)
+    keys = {lvl: sorted({k for s in SOURCES for r in by[s]
+                         for k in r["counts"].get(lvl, {})})
+            for lvl in LEVELS}
+    akeys = {lvl: sorted({k for r in arxiv for k in r["counts"].get(lvl, {})})
+             for lvl in LEVELS}
+    ukeys = {lvl: sorted({k for r in author for k in r["counts"].get(lvl, {})})
+             for lvl in AUTHOR_LEVELS}
+    pat_of = defaultdict(set)
+    for g in groups.values():
+        for r in g:
+            for k in r["counts"].get("pattern", {}):
+                pat_of[k.split("|")[0]].add(k)
+
+    def single(lvl, k):
+        return lvl == "pattern" and pat_of[k.split("|")[0]] == {k}
+
+    today = __import__("datetime").date.today().isoformat()
+    out_path = Path(args.report or AR.HERE / f"spec-baseline-{today}.md")
+    L, J = [], []
+    p = L.append
+    tf = AR.load_tf()
+    summ = mask_summary(tf)
+    W = {s: int(B.W[s].sum()) for s in groups}
+    Wsrc = sum(W[s] for s in SOURCES)
+
+    p("# ticfinder construction rates in public pre-2022 design and "
+      "specification documents")
+    p("")
+    p(f"Generated {today} by `eval/spec_baseline.py` (TF-009). Aggregates "
+      "only: no document text, titles, file names or document numbers, and "
+      "for the author's specifications no per-file figures. Ratios here "
+      "compare two corpora (or one source with the pool). They are not "
+      "likelihood ratios; those are step 8.")
+    p("")
+    p("## Setup")
+    p("")
+    p("| item | value |")
+    p("|---|---|")
+    p("| sources | Python PEPs, IETF RFCs, Rust RFCs, the RISC-V ISA manuals "
+      "and the OpenTitan hardware docs, each as of its last commit (or "
+      "index entry) before 2022-01-01, with documents dated 2018 to 2021 "
+      "(the TF-004 pre window) |")
+    p(f"| sample | every dated document, except a source over "
+      f"{SOURCE_CAP:,} raw words, which is shuffled with seed "
+      f"`{SAMPLE_SEED}-<source>` and walked until the cap |")
+    p("| exclusions | per source, in place (`selftest` holds the rows): "
+      "boilerplate, front matter, references, acknowledgements, headings, "
+      "page furniture, figures, tables, code, markup and generated "
+      "regions; then ticfinder's own masking |")
+    p(f"| ticfinder | `tools/ticfinder.py` at {ver['commit']} (sha256 "
+      f"{ver['sha256']}); defaults: `en_core_web_md`, code masker on, "
+      "`ticfinder-phrases.json`; Rust and OpenTitan kept text analysed as "
+      "`.md`, the others as `.txt` |")
+    p(f"| arXiv side | TF-008 full-run per-paper tables, pre window, all "
+      f"sections, {len(arxiv)} papers, written at sha256 {ARXIV_PIN} |")
+    p(f"| author side | the author's specification files in "
+      f"`$WRITING_SAMPLES`, read in place as in TF-003 (the `.docx` "
+      f"skipped), {len(author)} files; construction and pattern counts only |")
+    p(f"| bootstrap | {draws} draws over documents, seed {seed}; one index "
+      "matrix per source, for the arXiv papers and for the author's files; "
+      "percentile 95% intervals, nearest rank for ratios |")
+    p("| rates | findings per 1,000 words. Words are ticfinder's count "
+      "(alphabetic spaCy tokens of the masked text). Pooled by words: total "
+      "findings over total words of the five sources. Equal-weight: the "
+      "mean of the five source rates |")
+    p(f"| rows | at least {MIN_N} findings in the pool; comparisons need at "
+      f"least {MIN_N} findings on both sides |")
+    p("")
+
+    p("## Sample and masking")
+    p("")
+    p("| source | documents | raw words | kept words (ticfinder) | median "
+      "masked share | documents over 40% masked |")
+    p("|---|---|---|---|---|---|")
+    smp = {}
+    for s in SOURCES:
+        rows = summ[s]
+        pc = [x["pct"] for x in rows]
+        raw = sum(x["raw_words"] for x in rows)
+        smp[s] = {"documents": len(rows), "raw_words": raw, "words": W[s],
+                  "masked_share_median": median(pc),
+                  "masked_share_over_40": sum(x > 40 for x in pc)}
+        p(f"| {NAMES[s]} | {len(rows)} | {raw:,} | {W[s]:,} | "
+          f"{median(pc):.1f}% | {sum(x > 40 for x in pc)} |")
+    p(f"| pool | {sum(len(summ[s]) for s in SOURCES)} | "
+      f"{sum(smp[s]['raw_words'] for s in SOURCES):,} | {Wsrc:,} | | |")
+    p("")
+    aw_ascii = sum(r["words_ascii"] for r in author)
+    p(f"Comparison corpora: arXiv pre-window bodies {W['arxiv']:,} words in "
+      f"{len(arxiv)} papers; the author's specifications {W['author']:,} "
+      f"words by ticfinder's count in {len(author)} files ({aw_ascii:,} by "
+      "the TF-003 measure, runs of ASCII letters after code masking).")
+    p("")
+
+    p("## Which pooled rate")
+    p("")
+    p(f"IETF RFCs hold {100 * W['ietf'] / Wsrc:.0f}% of the pool's words, so "
+      "the rate pooled by words mostly measures one source's house style. "
+      "Requirements 13 to 15 use the equal-weight pool, which counts each "
+      "source as one sample of the register. Both are in the rate tables. "
+      "The intervals resample documents within each source, so they cover "
+      "the choice of documents and not the choice of sources.")
+    p("")
+
+    def pool_of(s):
+        return s["pool"][POOL]
+
+    # rate tables
+    p("## Rates")
+    p("")
+    p(f"Rows with at least {MIN_N} findings in the pool, sorted by the "
+      "equal-weight rate. Source cells are findings, then rate (95% CI). "
+      "Phrase rows are phrase-list constructions keyed by the matched text, "
+      "lowercased.")
+    p("")
+    for lvl in LEVELS:
+        p(f"### {lvl}")
+        p("")
+        p(f"| {lvl} | n | documents | pooled by words (95% CI) | equal-weight "
+          "(95% CI) | " + " | ".join(NAMES[s] for s in SOURCES) + " |")
+        p("|---|---|---|---|---|" + "---|" * len(SOURCES))
+        rs = [(k, B.stat(lvl, k)) for k in keys[lvl]]
+        rs = [(k, s) for k, s in rs if s["pool"]["n"] >= MIN_N]
+        rs.sort(key=lambda x: (-x[1]["pool"]["equal"]["rate"], x[0]))
+        for k, s in rs:
+            P = s["pool"]
+            cells = [f"{s['g'][g]['n']}, "
+                     f"{ci_txt(s['g'][g]['rate'], s['g'][g]['ci'])}"
+                     for g in SOURCES]
+            p(f"| `{k.replace('|', ' / ')}` | {P['n']} | {P['docs']} | "
+              f"{ci_txt(P['words']['rate'], P['words']['ci'])} | "
+              f"{ci_txt(P['equal']['rate'], P['equal']['ci'])} | "
+              + " | ".join(cells) + " |")
+            J.append({"table": f"Rates: {lvl}", "level": lvl, "key": k,
+                      **AR.split_key(lvl, k), "n": P["n"],
+                      "documents": P["docs"],
+                      "pool_words": jrate(P["words"]["rate"],
+                                          P["words"]["ci"]),
+                      "pool_equal": jrate(P["equal"]["rate"],
+                                          P["equal"]["ci"]),
+                      "sources": {g: jrate(s["g"][g]["rate"], s["g"][g]["ci"],
+                                           n=s["g"][g]["n"],
+                                           documents=s["g"][g]["docs"])
+                                  for g in SOURCES}})
+        p("")
+
+    # two-corpus comparisons
+    def compare(title, other, other_name, first_is_pool, kset, note):
+        p(f"## {title}")
+        p("")
+        p(note)
+        p("")
+        a_name, b_name = (("pool", other_name) if first_is_pool
+                          else (other_name, "pool"))
+        p(f"| row | {a_name} n | {a_name} rate (95% CI) | {b_name} n | "
+          f"{b_name} rate (95% CI) | {a_name} over {b_name} (95% CI) | "
+          "interval |")
+        p("|---|---|---|---|---|---|---|")
+        out = []
+        for lvl in ("construction", "pattern"):
+            ks = sorted(set(keys[lvl]) & set(kset[lvl]))
+            rs = []
+            for k in ks:
+                if single(lvl, k):
+                    continue
+                s = B.stat(lvl, k)
+                P, O = pool_of(s), s["g"][other]
+                if s["pool"]["n"] < MIN_N or O["n"] < MIN_N:
+                    continue
+                A = (s["pool"]["n"], P["rate"], P["ci"], P["draws"])
+                Bo = (O["n"], O["rate"], O["ci"], O["draws"])
+                a, b = (A, Bo) if first_is_pool else (Bo, A)
+                r, rci = ratio(a[1], b[1], a[3], b[3])
+                rs.append((lvl, k, a, b, r, rci))
+            rs.sort(key=lambda x: (-x[4], x[1]))
+            for lvl_, k, a, b, r, rci in rs:
+                v = side(*rci)
+                p(f"| `{k.replace('|', ' / ')}` | {a[0]} | {ci_txt(a[1], a[2])}"
+                  f" | {b[0]} | {ci_txt(b[1], b[2])} | {ci_txt(r, rci)} | "
+                  f"{v} |")
+                J.append({"table": title, "level": lvl_, "key": k,
+                          **AR.split_key(lvl_, k),
+                          "first": jrate(a[1], a[2], name=a_name, n=a[0]),
+                          "second": jrate(b[1], b[2], name=b_name, n=b[0]),
+                          "ratio": {"value": AR.jnum(r), "lo": AR.jnum(rci[0]),
+                                    "hi": AR.jnum(rci[1])},
+                          "interval": v})
+                out.append((lvl_, k, r, rci, v))
+        p("")
+        return out
+
+    h2 = compare("Pool against arXiv pre-window bodies (H2)", "arxiv",
+                 "arXiv", True, akeys,
+                 f"Construction and pattern rows with at least {MIN_N} "
+                 "findings in the pool and in the arXiv pre-window bodies "
+                 "(all sections). A pattern that is its construction's only "
+                 "pattern is left out (same counts as the construction row). "
+                 "The ratio is the equal-weight pool rate over the arXiv rate.")
+    h2x = [x for x in h2 if x[4] != "spans 1"]
+    p(f"{len(h2x)} of {len(h2)} rows have a pool over arXiv interval that "
+      f"excludes 1 ({sum(x[4] == 'above 1' for x in h2x)} above, "
+      f"{sum(x[4] == 'below 1' for x in h2x)} below). H2 needs at least a "
+      f"quarter: {'holds' if h2 and len(h2x) >= len(h2) / 4 else 'fails'}.")
+    p("")
+    h3 = compare("Author against pool (H3)", "author", "author", False, ukeys,
+                 f"Construction and pattern rows with at least {MIN_N} "
+                 "findings in the author's specifications and in the pool. "
+                 "The ratio is the author's rate over the equal-weight pool "
+                 "rate; the author side resamples the author's files.")
+    a20 = sum(B.stat(lvl, k)["g"]["author"]["n"] >= MIN_N
+              for lvl in AUTHOR_LEVELS for k in ukeys[lvl]
+              if not single(lvl, k))
+    h3in = sum(x[4] == "spans 1" for x in h3)
+    p(f"{a20} construction and pattern rows reach {MIN_N} findings in the "
+      f"author's specifications; {len(h3)} of them also reach {MIN_N} in the "
+      f"pool. {h3in} of {len(h3)} author over pool intervals contain 1. H3 "
+      "needs at least three quarters: "
+      f"{'holds' if h3 and h3in >= 0.75 * len(h3) else 'fails'}.")
+    p("")
+
+    # H4
+    title = "Sources against the pool (H4)"
+    p(f"## {title}")
+    p("")
+    p(f"Constructions with at least {MIN_N} findings in every source. Each "
+      "source cell is rate (95% CI); the last column names the sources whose "
+      "interval excludes the equal-weight pooled rate.")
+    p("")
+    p("| construction | equal-weight pool (95% CI) | "
+      + " | ".join(NAMES[s] for s in SOURCES) + " | outside |")
+    p("|---|---|" + "---|" * len(SOURCES) + "---|")
+    h4 = []
+    for k in keys["construction"]:
+        s = B.stat("construction", k)
+        if min(s["g"][g]["n"] for g in SOURCES) < MIN_N:
+            continue
+        P = s["pool"]["equal"]
+        outs = [g for g in SOURCES if not (s["g"][g]["ci"][0] <= P["rate"]
+                                           <= s["g"][g]["ci"][1])]
+        h4.append((k, outs))
+        p(f"| `{k}` | {ci_txt(P['rate'], P['ci'])} | "
+          + " | ".join(ci_txt(s["g"][g]["rate"], s["g"][g]["ci"])
+                       for g in SOURCES)
+          + f" | {', '.join(NAMES[g] for g in outs) or 'none'} |")
+        J.append({"table": title, "level": "construction", "key": k,
+                  "construction": k, "pool_equal": jrate(P["rate"], P["ci"]),
+                  "sources": {g: jrate(s["g"][g]["rate"], s["g"][g]["ci"],
+                                       n=s["g"][g]["n"]) for g in SOURCES},
+                  "outside": outs})
+    p("")
+    h4x = sum(1 for _, o in h4 if o)
+    p(f"{h4x} of {len(h4)} constructions have at least one source outside "
+      "the pooled rate. H4 needs at least half: "
+      f"{'holds' if h4 and h4x >= len(h4) / 2 else 'fails'}.")
+    p("")
+    out_path.write_text("\n".join(L), encoding="utf-8")
+    print(f"wrote {out_path}", file=sys.stderr)
+    if args.json:
+        AR.write_json(args.json, "spec-baseline", ver, AB.sig4({
+            "report": out_path.name, "min_n": MIN_N, "pool_used": POOL,
+            "bootstrap": {"draws": draws, "seed": seed,
+                          "interval": "percentile 95%, nearest rank for "
+                                      "ratios; one index matrix per source, "
+                                      "for arXiv and for the author"},
+            "sample": smp,
+            "arxiv": {"papers": len(arxiv), "words": W["arxiv"],
+                      "table_sha256": ARXIV_PIN},
+            "author": {"files": len(author), "words": W["author"],
+                       "words_ascii": aw_ascii, "rows_reaching_min_n": a20},
+            "note": "ratios compare two corpora; they are not likelihood "
+                    "ratios"}), AB.sig4(J))
+
+    # console summary
+    print(f"\nwords: " + ", ".join(f"{g} {W[g]:,}" for g in groups))
+    print(f"H2: {len(h2x)} of {len(h2)} exclude 1: "
+          + ", ".join(f"{k} {r:.2f} {v}" for _, k, r, _, v in h2x))
+    print(f"H3: {h3in} of {len(h3)} contain 1; author rows >= {MIN_N}: {a20}; "
+          "outside: " + ", ".join(f"{k} {r:.2f}" for _, k, r, _, v in h3
+                                  if v != "spans 1"))
+    print(f"H4: {h4x} of {len(h4)}: "
+          + "; ".join(f"{k} {o}" for k, o in h4))
+    top = sorted(((B.stat("construction", k)["pool"]["equal"]["rate"], k)
+                  for k in keys["construction"]), reverse=True)[:3]
+    print("top pooled constructions: " + ", ".join(f"{k} {r:.2f}"
+                                                   for r, k in top))
+    if h2:
+        big = max(h2, key=lambda x: x[2])
+        print(f"largest pool over arXiv: {big[1]} {big[2]:.2f}")
+
+
 # ---------------------------------------------------------------- main
 
 def main():
@@ -1169,12 +1725,37 @@ def main():
                    help="sentences per source (default 40)")
     m.add_argument("-q", "--quiet", action="store_true",
                    help="figures only, no sentences")
+    a = sub.add_parser("analyse", help="run ticfinder on the kept text and "
+                       "the author's specs, and write the report")
+    a.add_argument("--draws", type=int, default=2000)
+    a.add_argument("--seed", type=int, default=BOOT_SEED,
+                   help=f"bootstrap seed (default {BOOT_SEED})")
+    a.add_argument("--report", help="output path (default "
+                   "eval/spec-baseline-<today>.md)")
+    a.add_argument("--report-only", action="store_true",
+                   help="recompute the report from the stored tables")
+    a.add_argument("--table-sha", metavar="SHA",
+                   help="with --report-only: the ticfinder sha256 prefix the "
+                        "stored tables were written with (pinned rebuild)")
+    a.add_argument("--json", metavar="PATH",
+                   help="also write every report row as JSON")
+    a.add_argument("--sample", metavar="KEY",
+                   help="print random findings per source for a "
+                        "construction, CID|pattern or CID|phrase; console "
+                        "only, writes nothing")
+    a.add_argument("-n", type=int, default=20)
     args = ap.parse_args()
+    if args.cmd == "analyse":
+        if args.draws < 1000:
+            sys.exit("--draws must be at least 1000")
+        if args.table_sha and not args.report_only:
+            sys.exit("--table-sha needs --report-only")
     if args.cmd != "selftest" and \
             not (AR.ROOT / ".gitignore").read_text().count("private/"):
         sys.exit("private/ is not in .gitignore; refusing to cache there")
     rc = {"fetch": cmd_fetch, "selftest": cmd_selftest,
-          "mask-report": cmd_mask_report}[args.cmd](args)
+          "mask-report": cmd_mask_report, "analyse": cmd_analyse}[args.cmd](
+        args)
     sys.exit(rc or 0)
 
 

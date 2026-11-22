@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check an arXiv JSON summary against its text report.
+"""Check a JSON summary against its text report.
 
 Usage: python3 eval/jsoncheck.py SUMMARY.json REPORT.md
 
@@ -10,8 +10,8 @@ skipped. Also checks that no numeric field holds a string other than
 "inf". Prints MATCH and exits 0 when the two agree, or prints up to 5
 rows from each side and exits 1.
 
-Handles the "arxiv-rates" (TF-004) and "arxiv-bodies" (TF-005 pilot and
-TF-008 full run) kinds. The harvest summary has a different row shape and
+Handles the "arxiv-rates" (TF-004), "arxiv-bodies" (TF-005 pilot and
+TF-008 full run) and "spec-baseline" (TF-009) kinds. The harvest summary has a different row shape and
 is not covered.
 """
 import json
@@ -39,8 +39,38 @@ def key(r):
     return r["key"].replace("|", " / ")
 
 
+SPEC_SOURCES = (("peps", "PEPs"), ("ietf", "IETF RFCs"),
+                ("rust", "Rust RFCs"), ("riscv", "RISC-V"),
+                ("opentitan", "OpenTitan"))
+
+
+def rr(d):
+    return ci(d["rate"], d["rate_lo"], d["rate_hi"])
+
+
+def render_spec(r):
+    """Rows of the "spec-baseline" kind (TF-009)."""
+    t = r["table"]
+    if t.startswith("Rates: "):
+        cells = " | ".join(f"{r['sources'][s]['n']}, {rr(r['sources'][s])}"
+                           for s, _ in SPEC_SOURCES)
+        return (f"| `{key(r)}` | {r['n']} | {r['documents']} | "
+                f"{rr(r['pool_words'])} | {rr(r['pool_equal'])} | {cells} |")
+    if "first" in r:
+        a, b = r["first"], r["second"]
+        return (f"| `{key(r)}` | {a['n']} | {rr(a)} | {b['n']} | {rr(b)} | "
+                f"{c(r['ratio'])} | {r['interval']} |")
+    names = dict(SPEC_SOURCES)
+    outs = ", ".join(names[s] for s in r["outside"]) or "none"
+    return (f"| `{key(r)}` | {rr(r['pool_equal'])} | "
+            + " | ".join(rr(r["sources"][s]) for s, _ in SPEC_SOURCES)
+            + f" | {outs} |")
+
+
 def render(kind, r):
     t = r["table"]
+    if kind == "spec-baseline":
+        return render_spec(r)
     if kind == "arxiv-rates":
         a, b = r["pre"], r["post"]
         return (f"| `{key(r)}` | {a['n']} | {a['papers']} | "

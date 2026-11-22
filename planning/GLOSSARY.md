@@ -2,7 +2,7 @@
 
 Terms used in the ticfinder roadmap, task files and notes, grouped by
 where they come from. Table 1 holds standard terms. Table 2 holds
-ticfinder's own terms, often an ordinary word with a stretched meaning. Table 3 holds terms coined in TF-003 to TF-008, which have no
+ticfinder's own terms, often an ordinary word with a stretched meaning. Table 3 holds terms coined in TF-003 to TF-009, which have no
 meaning outside this project.
 
 ## Table 1. Standard terms, used in their usual sense
@@ -58,7 +58,7 @@ meaning outside this project.
 | waiver, stale waiver | a fingerprint the editor marked as acceptable; stale when no current finding matches it | a detector fix can make a waiver stale without invalidating it; `--prune-stale` removes it |
 | all sections, body sections | in TF-005, all four section types together, against the `body` section type alone | the TF-005 `HOLLOW_BOOSTER` ratio 3.31 is body sections; all sections give 2.98 |
 
-## Table 3. Terms from TF-003 to TF-008 with no outside standing
+## Table 3. Terms from TF-003 to TF-009 with no outside standing
 
 | term | meaning | where |
 |---|---|---|
@@ -104,3 +104,10 @@ meaning outside this project.
 | width ratio | a ratio interval's width over another's, both on the log scale; sampling 3.9 times the papers predicts about 0.51 | TF-008 phase 3 |
 | pinned rebuild | rewriting a report from a stored table written by an earlier ticfinder, named by its sha256 prefix with `--table-sha` | TF-008 phase 1 |
 | JSON summary | the numbers of a report or of the harvest summary as one JSON object, schema 1, for step 8 to read (`--json`) | TF-008 phase 1 |
+| public baseline | the pre-2022 design and spec corpus of TF-009: PEPs, IETF RFCs, Rust RFCs, the RISC-V manuals and the OpenTitan hardware docs, dated 2018 to 2021 | roadmap section 16, TF-009 |
+| source | one of the five public baseline collections; each has its own exclusions and its own index matrix in the bootstrap | TF-009 |
+| pool | the five sources together; a pooled rate by words is total findings over total words | TF-009 |
+| equal-weight pool | the mean of the five source rates, so each source counts once whatever its size; the rate TF-009 compares against | TF-009 |
+| exclusion | a per-source masking rule that blanks non-prose text in place before ticfinder's own masking, such as RFC page furniture or PEP literal blocks | TF-009 phase 2 |
+| table file | a RISC-V chapter whose markup is over 80% table, figure or verbatim environments, blanked whole | TF-009 phase 2 |
+| residue | markup or code left in kept text after masking, counted in a spot-check of 40 random sentences per source | TF-005, TF-009 |

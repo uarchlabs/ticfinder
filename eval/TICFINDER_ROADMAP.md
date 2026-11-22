@@ -391,7 +391,7 @@ Tidied after TF-004. Step numbers are kept stable because task files
 cite them, so they do not give the order of work. The order is listed
 after the steps.
 
-Done: steps 1 to 6, 9 to 11 and 14. Planned: steps 7, 8, 12 and 13. The
+Done: steps 1 to 7, 9 to 11 and 14. Planned: steps 8, 12 and 13. The
 list stays in step order, so the numbers render as written.
 
 1. Drop `harvest.py` into `ticfinder/eval/`, run it, and confirm the
@@ -415,9 +415,21 @@ list stays in step order, so the numbers render as written.
    `BORROWED_RIGOUR` and `more/less ... than` were flat. `EM_DASH` could
    not be measured. Results in section 11. `harvest.py` gained
    `--by-subtype` and `--summary-only`.
-7. **Collect the public design and spec baseline** (5.3, section 6):
-   pre-2022 PEPs, IETF and Rust RFCs, RISC-V manuals and open hardware
-   design docs. Check per-file masked percentages before trusting counts.
+7. **Collect the public design and spec baseline** (TF-009, 5.3,
+   section 6). Done: 602 documents dated 2018 to 2021 from five
+   sources (PEPs, IETF RFCs capped at 1.5M raw words, Rust RFCs, the
+   RISC-V manuals and the OpenTitan hardware docs), 1.82M words after
+   per-source exclusions in `eval/spec_baseline.py` and ticfinder's own
+   masking. Every source has a median masked share of 28 to 34% and at
+   most 1 of 40 spot-checked sentences with residue. Against the arXiv
+   pre-window bodies, 21 of 26 rows differ (H2 holds), so register
+   matters. The author's specs agree with the pool on 5 of 9 rows (H3
+   fails), and 5 of 6 constructions have a source outside the pool (H4
+   holds). The sanity reading found that `CORRECTIVE_CONTRAST`,
+   `NEG_ESCALATION` and the `af_less_than` pattern of
+   `ALTERNATIVE_FRAMING` fire on ordinary normative spec language, so
+   some of the register difference is detector noise. Results in
+   section 16.
 8. **Per-pattern LRs** for the design and spec registers: the public
    baseline and the author's specs against the `pacino` LLM specs, with
    the arXiv change as a prior.
@@ -1916,3 +1928,202 @@ sampling predicts. The TF-007 levels stand. Step 8 can use the full
 body ratios as its prior, with `increasingly` as the one new candidate
 for `med` and `GAPPED_ANTITHESIS` and `NEG_ESCALATION` as precision
 problems that show up in papers.
+
+
+## 16. TF-009 results (2026-11-22)
+
+TF-009 built the public pre-2022 design and spec baseline (step 7) in
+`eval/spec_baseline.py`. Reports: `eval/spec-baseline-2026-11-22.md`
+and its JSON (155 rows). Document text, titles, file names and
+document numbers stay in `private/specs/`. Ratios in this section
+compare two corpora; they are not likelihood ratios.
+
+### Phase 1: preconditions, the TF-004 check fix and the fetch
+
+**TF-004 check fix.** The check table in `arxiv_bodies.py` now maps old
+pattern names through `RENAMED_PATTERNS`, so a renamed row sums its
+successors. A selftest row covers it. The pinned rebuild of the full
+report gives `af_rather_instead` 1.74 (1.14 to 2.77), inside TF-004's
+interval both ways, and the summary now reads 16 of 17. The pilot
+rebuild is byte-identical apart from the `Generated` line.
+
+**Harvest.** 141 accepted, 54 rewritten, 302 deleted and 3 open, with
+`labels.jsonl` byte-identical to the committed file. TF-009's task file
+listed the first three counts in the wrong order.
+
+**Survey.** Every source was taken as of its last commit, or index
+entry, before 2022-01-01, and kept when dated 2018 to 2021.
+
+| source | origin | dated by | documents at cutoff | in window | raw words in window | sampled | sampled raw words |
+|---|---|---|---|---|---|---|---|
+| PEPs | git | `Created` header | 576 | 123 | 360,029 | 123 | 360,029 |
+| IETF RFCs | RFC Editor rsync | publication date | 837 | 837 | 6,420,145 | 177 | 1,511,288 |
+| Rust RFCs | git | first-parent commit adding the file | 512 | 153 | 352,699 | 153 | 352,699 |
+| RISC-V manuals | git | last commit changing the file | 47 | 44 | 141,171 | 44 | 141,171 |
+| OpenTitan hw docs | git (sparse) | commit adding the file | 105 | 105 | 232,486 | 105 | 232,486 |
+
+The RFC Editor tarball URLs return 404, so the RFCs came from the
+official rsync module. IETF is capped at 1.5M raw words by a seeded
+shuffle (`20261121-ietf`). RISC-V chapters are dated by their last
+change, on the user's decision: most chapters were added before 2018
+and edited later. Licenses allow counting; the corpora are not
+committed.
+
+### Phase 2: exclusions and masking
+
+Each source has its own exclusion masker, which blanks in place. The
+`selftest` subcommand holds 58 rows, a positive and a negative per
+rule, and checks that lengths and offsets are unchanged. ticfinder's
+own masking runs after it, as `.md` for Rust and OpenTitan and `.txt`
+for the rest.
+
+- RFCs: front matter, the status, copyright and contents sections,
+  references, acknowledgements, contributors, authors' addresses and
+  the index, page furniture, ASCII figures and tables, `<CODE BEGINS>`
+  blocks, captions, headings, the BCP 14 key-words paragraph and
+  bar-quoted blocks. A page break inside a paragraph is blanked with its
+  newlines, so the sentence reads on.
+- PEPs: the header block, references, footnotes, copyright and
+  acknowledgements, headings, literal blocks, directives, comments,
+  targets and tables. Role and literal markup is blanked and its text
+  kept. Admonition bodies are kept.
+- Rust: the metadata header and link definitions.
+- RISC-V: `mask_tex` from `arxiv_bodies.py`, `verbbox` code and TeX
+  quotes. A file that is over 80% table, figure or verbatim environments
+  is blanked whole (7 files).
+- OpenTitan: front matter, Hugo shortcodes (register and instruction
+  references keep their name), `wavejson` blocks and generated regions.
+- Markdown: headings, tables without outer pipes and link markup.
+
+| source | documents | raw words | kept words | median masked | over 40% | under 100 kept words | residue in 40 |
+|---|---|---|---|---|---|---|---|
+| PEPs | 123 | 360,029 | 297,722 | 28.4% | 28 | 1 | 1 |
+| IETF RFCs | 177 | 1,511,288 | 1,081,754 | 33.4% | 59 | 0 | 1 |
+| Rust RFCs | 153 | 352,699 | 264,662 | 31.8% | 37 | 0 | 1 |
+| RISC-V | 44 | 141,171 | 100,612 | 31.7% | 14 | 11 | 1 |
+| OpenTitan | 105 | 232,486 | 177,472 | 31.5% | 32 | 16 | 0 |
+
+Kept words here are runs of ASCII letters. The rate tables use
+ticfinder's count (alphabetic spaCy tokens), which is 3 to 8% lower.
+The RISC-V and OpenTitan documents under 100 words are table files and
+generated register pages, which have little prose to keep.
+
+The first spot-check failed for OpenTitan (about 18 of 40) and Rust
+(11 of 40), from markdown headings and link brackets. PEPs had 2.
+IETF reached 2 of 40 on the second draw, from quoted blocks. Each fix
+came with a test row first. The final draws hold at most 1 of 40 per
+source. **H1 holds.**
+
+Inline-code text, list bullets and emphasis are kept, as ticfinder
+keeps them; they are not counted as residue. The 15 most word-like
+RFC blocks blanked as figures were all YANG trees, XML schema or
+tables, so no prose was found lost there. The user kept the
+exclusions beyond the task's list: acknowledgements and contributors,
+the key-words paragraph, and markdown headings. Step 8 should blank
+headings on the `pacino` side too, so both sides are masked alike.
+
+### Phase 3: analysis
+
+**Run.** `analyse` ran at 651302d (sha256 81ade1e30516) at nice 19 on
+one process: 602 documents in 1,145 s, then the author's 36 files. The
+JSON's 155 rows render to the report's rows exactly. A pinned rebuild
+(`--report-only --table-sha 81ade1e30516`) gives the same report and
+JSON. Bootstrap: 2,000 draws over documents, seed 9009, one index
+matrix per source, for the arXiv papers and for the author's files.
+
+**Words.** PEPs 285,161, IETF 1,017,707, Rust 253,255, RISC-V 97,174 and
+OpenTitan 163,521, so 1,816,818 in the pool. The arXiv pre-window bodies
+(TF-008 tables, read only) have 4,975,688. The author's specs have
+80,788 by ticfinder's count, or 89,371 by the TF-003 measure, which
+matches TF-003.
+
+**Which pool.** IETF holds 56% of the pool's words, so the rate pooled
+by words mostly measures the RFCs. Requirements 13 to 15 use the
+equal-weight pool, the mean of the five source rates. The intervals
+resample documents within each source, so they do not cover the choice
+of sources.
+
+**Rates.** The report lists 18 construction rows, 23 pattern rows, 51
+subtype rows and 22 phrase rows with at least 20 findings in the pool.
+The highest equal-weight rates per 1,000 words are `TRICOLON` 2.83,
+`ALTERNATIVE_FRAMING` 1.11, `CORRECTIVE_CONTRAST` 0.79,
+`PARTICIPIAL_TAIL` 0.71, `ABSTRACT_ADVERB` 0.63 and `LLM_DICTION` 0.62.
+`EM_DASH` is 0 in IETF and OpenTitan, whose files are ASCII.
+
+**H2, pool against arXiv.** 21 of 26 construction and pattern rows have
+an interval excluding 1, 12 above and 9 below. **H2 holds**, so the
+arXiv bodies are no stand-in for the spec register.
+
+- Above 1: `NEG_ESCALATION` 5.63, `HEDGE_STACK` 3.69,
+  `CORRECTIVE_CONTRAST` 2.78 (its `cc_negated_apposition`, `cc_cleft`,
+  `cc_parallel_sibling` and `cc_coordinated` patterns),
+  `EMPHATIC_REFLEXIVE` 2.66, `ABSTRACT_ADVERB` 1.18 and
+  `ALTERNATIVE_FRAMING` 1.12 (`af_rather_than` 3.17, `af_instead_of`
+  1.63).
+- Below 1: `CONSULTANT_REGISTER` 0.18, `VAGUE_QUANTIFIER` 0.25,
+  `LLM_DICTION` 0.42, `CLOSER` 0.45, `PARTICIPIAL_TAIL` 0.56,
+  `BORROWED_RIGOUR` 0.67, `af_less_than` 0.68 and `TRICOLON` 0.87 (with
+  its `tricolon` pattern).
+- Inside: `GAPPED_ANTITHESIS`, `EMPTY_FRAME`, `FRAME_MARKER`, `EM_DASH`
+  and `HOLLOW_BOOSTER`.
+
+**H3, the author's specs against the pool.** 9 construction and pattern
+rows reach 20 findings in the author's specs, and all 9 reach 20 in the
+pool. 5 of 9 intervals contain 1 (`TRICOLON` and its pattern,
+`PARTICIPIAL_TAIL`, `LLM_DICTION`, `cc_coordinated`). **H3 fails**
+(three quarters needed). `EM_DASH` is 12.9 times the pool, because the
+author's files use Unicode dashes and two of the five sources have
+none. `CORRECTIVE_CONTRAST` (0.66), `ABSTRACT_ADVERB` (0.65) and
+`ALTERNATIVE_FRAMING` (0.43) are lower in the author's specs. All 36
+files come from one writer, so their intervals are wide.
+
+**H4, sources against the pool.** Six constructions reach 20 findings
+in every source. Five have at least one source outside the pooled
+rate: `ALTERNATIVE_FRAMING` and `CORRECTIVE_CONTRAST` four sources each,
+`ABSTRACT_ADVERB` and `TRICOLON` three, `PARTICIPIAL_TAIL` one (IETF).
+`LLM_DICTION` has none. **H4 holds.** PEPs and Rust RFCs, which argue
+for a design, run high on the two contrast constructions; IETF and
+OpenTitan, which specify behaviour, run low. RISC-V is high on
+`TRICOLON` (4.20).
+
+**Sanity reading.** 20 random findings per source (all of them when
+fewer) for the three constructions with the highest pooled rate, and
+for `NEG_ESCALATION`, the row with the largest pool over arXiv ratio.
+Counts only.
+
+| construction | PEPs | IETF | Rust | RISC-V | OpenTitan |
+|---|---|---|---|---|---|
+| `TRICOLON` | 16 / 20 | 15 / 20 | 13 / 20 | 15 / 20 | 14 / 20 |
+| `ALTERNATIVE_FRAMING` | 17 / 20 | 12 / 20 | 16 / 20 | 15 / 20 | 4 / 20 |
+| `CORRECTIVE_CONTRAST` | 8 / 20 | 4 / 20 | 2 / 20 | 6 / 20 | 5 / 20 |
+| `NEG_ESCALATION` | 1 / 9 | 0 / 20 | 1 / 11 | 0 / 7 | 0 / 1 |
+
+- `TRICOLON` misses are two-part coordinations around a third clause
+  joined by `but`, spans across sentences, and parenthetical asides.
+  One OpenTitan miss is a citation line the masker left in.
+- `ALTERNATIVE_FRAMING` misses are nearly all the `af_less_than`
+  pattern on comparisons of counts, sizes and privilege levels.
+  OpenTitan's register text is mostly these. Findings of
+  `af_rather_than` and `af_instead_of` are real in every source.
+- `CORRECTIVE_CONTRAST` real instances reject one reading and assert
+  another in its place. The misses are restrictive pairs common in
+  normative text, where a negated second predicate limits the first,
+  additive pairs with `not only`, and concessive clauses.
+- `NEG_ESCALATION` has 2 real gapped escalations in 68 read. The rest
+  are paired normative negatives, such as two `MUST NOT` clauses, each
+  with its own predicate.
+
+**Verdict.** H1, H2 and H4 hold; H3 fails. The spec register differs
+from arXiv bodies on most rows, and the five sources differ from each
+other, so step 8 must choose its pooling with care. The equal-weight
+pool is the better default. Part of the register gap is detector
+precision: `CORRECTIVE_CONTRAST`, `NEG_ESCALATION` and `af_less_than`
+fire on normative spec phrasing, and their pool rates overstate real
+use, so step 8 should fix those detectors (test rows first) before
+using their LRs. No confidence level changed.
+
+**Step 8 needs next** the `pacino` LLM spec side, masked with these
+exclusions (headings included) and measured with this ticfinder
+version and document-level bootstrap. Its LRs then compare the LLM specs against
+this pool, with the author's specs as a check and the arXiv change as a
+prior.
