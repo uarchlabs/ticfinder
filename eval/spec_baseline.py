@@ -1163,7 +1163,8 @@ MIN_N = AB.MIN_N
 LEVELS = AB.LEVELS
 AUTHOR_TABLE = SPECS / "author.jsonl"   # per-file counts, no text
 TMP = SPECS / "tmp"
-ARXIV_PIN = "81ade1e30516"  # the TF-008 full tables (ticfinder 651302d)
+ARXIV_PIN = "f0fc55a44f37"  # the TF-010 full tables (ticfinder 494e4dd);
+#   TF-008/TF-009 used 81ade1e30516, now in private/arxiv/bodies-tf008/
 ARXIV_DIR = None            # None: private/arxiv/bodies/
 AUTHOR_LEVELS = ("construction", "pattern")
 NAMES = {"peps": "PEPs", "ietf": "IETF RFCs", "rust": "Rust RFCs",

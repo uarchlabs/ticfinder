@@ -2,7 +2,7 @@
 
 Terms used in the ticfinder roadmap, task files and notes, grouped by
 where they come from. Table 1 holds standard terms. Table 2 holds
-ticfinder's own terms, often an ordinary word with a stretched meaning. Table 3 holds terms coined in TF-003 to TF-009, which have no
+ticfinder's own terms, often an ordinary word with a stretched meaning. Table 3 holds terms coined in TF-003 to TF-010, which have no
 meaning outside this project.
 
 ## Table 1. Standard terms, used in their usual sense
@@ -111,3 +111,11 @@ meaning outside this project.
 | exclusion | a per-source masking rule that blanks non-prose text in place before ticfinder's own masking, such as RFC page furniture or PEP literal blocks | TF-009 phase 2 |
 | table file | a RISC-V chapter whose markup is over 80% table, figure or verbatim environments, blanked whole | TF-009 phase 2 |
 | residue | markup or code left in kept text after masking, counted in a spot-check of 40 random sentences per source | TF-005, TF-009 |
+| additive pattern | `cc_additive`, the `not only X but also Y` form of `CORRECTIVE_CONTRAST`, split from `cc_coordinated` so it is measured and muted on its own | TF-010 phase 2 |
+| pattern row | a `PATTERN_ROWS` entry in `tests.py` that tests whether one named pattern fires, so a sibling pattern cannot pass the row for it | TF-010 phase 1 |
+| pending row | a pattern row listed in `PENDING` because it fails until a planned fix lands; it prints as `xfail` and fails the suite once it passes | TF-010 phase 1 |
+| failure kind | a recurring way a detector misfires, named in words from a reading, such as "negation in the second conjunct"; each gets negative rows | TF-010 phase 1 |
+| concessive pair | a `but` coordination whose first conjunct is negated and whose second adds its own claim (`not set by default but can be enabled`); it concedes and corrects nothing | TF-010 |
+| gapped conjunct | a second conjunct that shares the first one's verb, as in `could not have` or `cannot, and should not, run`; `NEG_ESCALATION` needs one | TF-010 phase 2 |
+| moved | in a recheck by pattern, a reproduced finding the new code reports under another pattern of the same construction | TF-010 phase 2 |
+| cross parse | `arxiv_recheck.py --cross`: parsing the stored span text when the span runs past the stored sentence, so a cleft across sentences can reproduce | TF-010 phase 2 |

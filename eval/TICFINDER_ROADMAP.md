@@ -391,7 +391,7 @@ Tidied after TF-004. Step numbers are kept stable because task files
 cite them, so they do not give the order of work. The order is listed
 after the steps.
 
-Done: steps 1 to 7, 9 to 11 and 14. Planned: steps 8, 12, 13 and 15. The
+Done: steps 1 to 7, 9 to 11, 14 and 16. Planned: steps 8, 12, 13 and 15. The
 list stays in step order, so the numbers render as written.
 
 1. Drop `harvest.py` into `ticfinder/eval/`, run it, and confirm the
@@ -522,11 +522,27 @@ list stays in step order, so the numbers render as written.
     decision. Harvest can recover rewritten findings from old drafts,
     but only waivers mark findings as accepted, so blogs edited before
     this step lands give rewritten labels and no accepted ones.
+16. **Precision fixes for the spec register** (TF-010). Done.
+    `cc_coordinated` needs the negation in the first conjunct, and the
+    additive `not only X but also Y` is now its own pattern,
+    `cc_additive`. `cc_cleft` needs two main clauses that correct each
+    other. `af_less_than` fires only when one description is framed
+    against another. `neg_escalation` needs a gapped second conjunct.
+    Harvest went to 132 accepted, 52 rewritten and 292 deleted. The
+    spec baseline and the arXiv full run were rerun at the new version,
+    and the pool over arXiv ratio for `CORRECTIVE_CONTRAST` fell from
+    2.78 to 1.93. `NEG_ESCALATION` and `af_less_than` now have under 20
+    findings in the pool. A fresh reading finds 49% of the
+    `cc_coordinated` and `cc_cleft` findings real, under the 60% aimed
+    for; concessive pairs are the largest remaining failure kind.
+    Results in section 17.
 
 Order: 9 and 10 are done. 11 and 7 do not depend on each other and can
 run side by side. 14 goes after 11, so that one analysis measures the
 fixed and split patterns. 8 needs 7 and uses 14's body ratios as its
-prior (9's if 14 has not run). 12 needs new labels from blog editing, so
+prior (9's if 14 has not run). 16 goes after 7 and before 8, because
+TF-009 found three detectors firing on normative spec text; 8 reads the
+reports 16 reran, at one ticfinder version. 12 needs new labels from blog editing, so
 it goes when they exist. 13 comes after 8. 15 comes after 8, so its
 levels come from measured LRs. It can go before 13, or during 12's blog
 editing at `low` to collect accepted labels. Step 13's mining can also
@@ -2172,3 +2188,229 @@ exclusions (headings included) and measured with this ticfinder
 version and document-level bootstrap. Its LRs then compare the LLM specs against
 this pool, with the author's specs as a check and the arXiv change as a
 prior.
+
+## 17. TF-010 results (2026-11-25)
+
+Step 16: precision fixes for the four detectors that the TF-009 sanity
+reading found firing on normative spec text. ticfinder moved from
+651302d (sha256 81ade1e30516) to 494e4dd (sha256 f0fc55a44f37). Every
+sentence read in this task stays in `private/`; test rows are synthetic.
+Confidence levels did not change.
+
+### Phase 1: baselines and test rows
+
+**Preconditions.** `make regress` passed. Harvest on a migrated copy of
+`$PACINO/waivers` gave 141 accepted, 54 rewritten, 302 deleted and 3
+open, with `labels.jsonl` byte-identical. The pinned rebuild of the
+TF-009 report differed only in its `Generated` line.
+
+**Snapshots.** The TF-009 spec tables and findings are in
+`private/specs-tf009/` and the TF-008 full tables in
+`private/arxiv/bodies-tf008/`, each with a checksum file.
+`spec_baseline.py analyse --report-only` gained `--table-dir`,
+`--arxiv-table-dir` and `--arxiv-sha`. Both older reports rebuild from
+the snapshots, identical apart from the date.
+
+**Failure kinds.** 40 random TF-009 pool findings per pattern were read.
+
+| pattern | pool | real | failure kinds (count) |
+|---|---|---|---|
+| `cc_coordinated` | 904 | 8 | negation in the second conjunct (23); concessive pair, first conjunct negated and the second with its own predicate (6); additive `not only ... but also` (2); negation in a clause after `but` (1) |
+| `cc_cleft` | 227 | 3 | second copula starts a new statement (22); second copula in a relative or subordinate clause (10); concessive or causal link (5) |
+| `af_less_than` | 890 | 0 | comparison with a number or count (18); with a value or limit (10); comparative of degree (9); `more` or `less` with a noun (3) |
+| `neg_escalation` | 68 | 3 | descriptive paired negatives, each with its own verb (21); paired normative negatives, each with its own verb (15); gapped disjunction of modals (1) |
+
+`af_less_than` is read in its docstring's narrow sense: one description
+framed against another. TF-009 counted comparisons of two options as
+real.
+
+**Test rows.** `PATTERN_ROWS` in `tests.py` tests one pattern at a
+time, so a sibling pattern cannot hide a failure. Phase 1 added 70
+rows. 41 failed at 651302d and went into `PENDING`, which prints them
+as `xfail` so `make regress` passed before the commit. A pending row
+that passes fails the suite, so the fix had to empty the set. Nine new
+negative rows already passed.
+
+### Phase 2: detector changes
+
+**Changes.**
+
+- `cc_coordinated`: the negation must sit in the first conjunct, before
+  `but`. A second conjunct with `still` or its own modal concedes and
+  is dropped. The additive form moved to a new pattern, `cc_additive`:
+  `only` or `just` after the negation, or `also`, `as well` or `too` in
+  the second conjunct. `not merely X but Y` stays corrective.
+  `RENAMED_PATTERNS` maps `cc_additive` to `cc_coordinated`.
+- `cc_cleft`: both copulas head main clauses. A modal appears on both
+  or neither. The second copula has a predicate, and an extraposed
+  `it is ADJ to ...` or `it is uncertain whether ...` is out unless
+  the first copula has a parallel `to` clause. Across a sentence break the
+  second subject is `it`, and only `instead` or `rather` may come before
+  it.
+- `af_less_than`: `less` or `more` is followed by `about`, by `a`, `an`
+  or `of a`, or by a preposition that `than` repeats. `than` is in the
+  same sentence, and `more about X than it would` is out.
+- `neg_escalation`: the second conjunct is gapped. It repeats the verb
+  with at most a pronoun object, or it is a bare `have`, `be`, `do`,
+  `go` or modal, or the first conjunct is a bare auxiliary that shares
+  its verb (`cannot, and should not, run`). Disjunctions with `or`,
+  `nor` or `either` are out.
+
+Phase 2 added 18 rows while reading the recheck, each before its fix.
+`PENDING` is empty.
+
+**Harvest per step** (migrated copy; rewritten / deleted / accepted,
+prec*).
+
+| step | pattern | before | after | totals after (acc / rew / del / open) |
+|---|---|---|---|---|
+| 1 | `cc_coordinated` | 0/3/5, 0.00 | 0/0/1, 0.00 | 137 / 54 / 299 / 3 |
+| 2 | `cc_cleft` | 0/4/1, 0.00 | 0/4/1, 0.00 | 137 / 54 / 299 / 3 |
+| 3 | `af_less_than` | 2/7/5, 0.29 | 0/1/0, - | 132 / 52 / 293 / 3 |
+| 4 | `neg_escalation` | 0/1/0, - | 0/0/0, - | 132 / 52 / 292 / 3 |
+
+No other row changed. The one `cc_coordinated` label left is the real
+`not in the planning document but in execution`. The two rewritten
+`af_less_than` labels were spurious, a match across a sentence break
+and a quoted mention, and the user agreed to drop them. No blog
+finding for a changed pattern is `cc_additive`, so `--migrate-waivers`
+would move no waiver. Stale waivers rose from 2 to 6 in `waivers/` and
+from 1 to 10 in the migrated copy; the 9 new ones in the copy belong to
+the 9 accepted findings the fixes removed.
+
+**Recheck.** `eval/arxiv_recheck.py` gained `--pattern`, the `spec`
+source (the TF-009 snapshot) and the `full` source (the TF-008
+snapshot), and `--save`, which writes per-finding outcomes under
+`private/` only. A stored sentence is the one a span starts in, so
+`--cross` parses the span text when the span runs past it. That raised
+`cc_cleft` reproduction from about 35% to 94%, and `af_less_than` in
+the bodies from about 58% to 95%.
+
+| pattern | corpus | reproduced | kept | moved | dropped | real, dropped | real, kept |
+|---|---|---|---|---|---|---|---|
+| `cc_coordinated` | spec | 742 | 183 | 54 | 505 | 0 / 20 | 12 / 20 |
+| `cc_coordinated` | arXiv | 2,072 | 506 | 678 | 888 | 0 / 20 | 14 / 20 |
+| `cc_cleft` | spec | 208 | 22 | - | 186 | 0 / 20 | 11 / 20 |
+| `cc_cleft` | arXiv | 230 | 27 | - | 203 | 1 / 20 | 14 / 20 |
+| `af_less_than` | spec | 806 | 4 | - | 802 | 0 / 20 | 3 / 4 |
+| `af_less_than` | arXiv | 4,789 | 14 | - | 4,775 | 0 / 20 | 13 / 14 |
+| `neg_escalation` | spec | 57 | 5 | - | 52 | 1 / 20 | 4 / 5 |
+| `neg_escalation` | arXiv | 48 | 1 | - | 47 | 0 / 20 | 1 / 1 |
+
+Moved means the new code reports the span under `cc_additive`; 19 of 20
+moved findings read were additive. The additive form is a third of the
+reproduced `cc_coordinated` findings in the arXiv bodies and 7% in the
+specs. The real `cc_cleft` drop in the bodies is a `not X but Y`
+sentence, which `cc_coordinated` covers. The real `neg_escalation`
+drop came from the draw before the last fix and is now kept.
+
+**H2.** The TF-009 reading recorded counts only. Its seeded sample was
+regenerated from the snapshot and matched TF-009's counts per source;
+re-reading it found 22 real `CORRECTIVE_CONTRAST` findings against
+TF-009's 25, and the same 2 for `NEG_ESCALATION`. Of the 15 real
+findings for the changed patterns that the old code reproduces, the new
+code keeps 14 (93%). The lost one is a cleft whose second clause has a
+lexical verb, which the old code matched only through a copula in a
+relative clause. Counting the 4 borderline items as real gives 17 of
+19 (89%). Every positive row passes. **H2 holds**, except for the blog
+clause: the two rewritten `af_less_than` labels are gone, as agreed.
+
+**Spans.** No pattern emits an empty, inverted or zero-width span. No
+kept finding's span changed, so no kept fingerprint changed. Five
+`cc_coordinated` findings counted as kept are narrow spans inside a
+wider corrective span that both versions report.
+
+### Phase 3: reruns at the new version
+
+**Runs.** Both ran at 494e4dd (sha256 f0fc55a44f37) at nice 19 on one
+process. `spec_baseline.py analyse` took 1,380 s for the 602 documents
+(TF-009: 1,145 s), then read the author's 36 files. The arXiv full run
+(`analyse --sample-name full --seed 8008 --json`) took 8,811 s for
+1,556 papers (TF-008: 6,561 s); unrelated jobs at normal priority held
+most cores for its second half. Reports: `eval/spec-baseline-2026-11-25.md`
+(144 rows) and `eval/arxiv-bodies-full-2026-11-25.md` (964 rows), each
+with its JSON, and `jsoncheck.py` gives MATCH for both. Rows fell from
+155 and 1,003 because the narrowed patterns drop below 20 findings.
+`ARXIV_PIN` in `spec_baseline.py` now names the new tables. Rebuilt
+from the snapshots, the TF-009 and TF-008 reports are identical apart
+from the date, and every snapshot checksum still holds.
+
+**arXiv change, all sections** (post over pre, 95% interval, pre and post
+findings).
+
+| row | TF-008 at 651302d | TF-010 at 494e4dd |
+|---|---|---|
+| `CORRECTIVE_CONTRAST` | 1.45 (1.28 to 1.65), 1,408 / 1,576 | 1.81 (1.54 to 2.10), 749 / 1,042 |
+| `cc_coordinated` | 1.33 (1.18 to 1.49), 1,110 / 1,133 | 1.46 (1.19 to 1.80), 256 / 287 |
+| `cc_additive` | - | 1.28 (1.04 to 1.55), 363 / 357 |
+| `cc_cleft` | 0.49 (0.34 to 0.70), 176 / 67 | 3.25 (1.27 to 10.4), 8 / 20 |
+| `ALTERNATIVE_FRAMING` | 1.13 (1.05 to 1.23), 4,929 / 4,277 | 2.35 (2.11 to 2.64), 1,491 / 2,697 |
+| `af_less_than` | 0.60 (0.54 to 0.66), 3,444 / 1,590 | too few, 6 / 10 |
+| `NEG_ESCALATION` | 0.61 (0.30 to 1.13), 34 / 16 | too few, 1 / 0 |
+
+The noise these fixes removed did not rise, so the rows that keep their
+real instances rise more than before. `cc_cleft` turns from falling to
+rising on few findings. The TF-004 check went from 16 to 14 of 17
+inside: the TF-004 abstracts were counted with the old `af_less_than`,
+so `ALTERNATIVE_FRAMING` and `af_less_than` differ for code reasons.
+
+**H1, a fresh reading of the spec pool.** 20 random findings per source,
+all when fewer. Counts only.
+
+| group | PEPs | IETF | Rust | RISC-V | OpenTitan | total |
+|---|---|---|---|---|---|---|
+| `cc_coordinated` and `cc_cleft` | 13 / 20 | 7 / 20 | 8 / 20 | 5 / 10 | 7 / 12 | 40 / 82 (49%) |
+| `af_less_than` | 2 / 2 | 1 / 2 | 1 / 2 | - | - | 4 / 6 (67%) |
+| `NEG_ESCALATION` | 1 / 1 | 2 / 3 | 1 / 1 | - | - | 4 / 5 |
+
+The pool now holds 243 `cc_coordinated` and `cc_cleft` findings (1,131
+in TF-009), 6 `af_less_than` findings (890) and 5 `NEG_ESCALATION`
+findings (68). Most `cc_coordinated` misses are concessive pairs whose
+second conjunct has its own predicate, often with `does`:
+`does not attempt to X, but does intend to Y`,
+`is not fully general, but covers`. The phase 2 rule catches only the
+forms with `still` or a modal. The `af_less_than` misses are a
+quantity (`infer a lot more about X from A than from B`) and a degree
+(`less of a disruption than`). **H1 fails
+for `CORRECTIVE_CONTRAST`** (49% against 60%) and holds for
+`af_less_than` (67%, on 6 findings) and `NEG_ESCALATION` (4 of 5, and
+under 20 findings).
+
+**H3, pool over arXiv pre-window bodies** (equal-weight pool).
+
+| row | TF-009 | TF-010 |
+|---|---|---|
+| `CORRECTIVE_CONTRAST` | 2.78 (2.47 to 3.11) | 1.93 (1.65 to 2.25) |
+| `cc_coordinated` | 2.43 (2.15 to 2.75) | 2.60 (2.08 to 3.24) |
+| `cc_additive` | - | 0.52 (0.32 to 0.74) |
+| `cc_cleft` | 3.90 (2.95 to 5.14) | 23 / 8 findings, no row |
+| `cc_negated_apposition` | 4.94 (3.57 to 7.06) | unchanged |
+| `cc_parallel_sibling` | 3.35 (1.89 to 5.40) | unchanged |
+| `NEG_ESCALATION` | 5.63 (2.82 to 10.93) | 5 / 1 findings, no row |
+
+**H3 holds.** The `CORRECTIVE_CONTRAST` ratio is lower, and
+`NEG_ESCALATION` no longer reaches 20 findings on either side. The
+corrective patterns that remain still run two to five times higher in
+the specs than in papers, and the additive form runs at half the paper
+rate.
+
+**TF-009's hypotheses at the new version.**
+
+- H2 (pool against arXiv): 21 of 26 rows excluded 1, now 19 of 24, 10
+  above and 9 below. `NEG_ESCALATION`, `cc_cleft` and `af_less_than`
+  left the table; `cc_additive` joined it below 1.
+  `ALTERNATIVE_FRAMING` went from 1.12 to 2.16. Still holds.
+- H3 (the author's specs against the pool): 5 of 9 rows contained 1,
+  now 4 of 7. `CORRECTIVE_CONTRAST` and `cc_coordinated` fall under 20
+  findings in the author's specs. Still fails.
+- H4 (sources against the pool): 5 of 6 constructions, now 4 of 5.
+  `CORRECTIVE_CONTRAST` no longer reaches 20 findings in every source.
+  Still holds.
+
+**Verdict.** H1 holds for `af_less_than` and `NEG_ESCALATION` and fails
+for `CORRECTIVE_CONTRAST`. H2 holds at 93%, except that the two spurious
+rewritten `af_less_than` labels are gone. H3 holds. Step 8 can read the
+spec baseline and the arXiv full run at one ticfinder version. The
+follow-up for `cc_coordinated` is the concessive pair with its own
+predicate, rows first; it is the largest failure kind left. No
+confidence level changed.
