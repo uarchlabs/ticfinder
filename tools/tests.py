@@ -56,7 +56,7 @@ def check(section, name, ok, detail=""):
 # --------------------------------------------------------------- registry
 
 EXPECTED = {
-    "CORRECTIVE_CONTRAST": ["cc_coordinated", "cc_cleft",
+    "CORRECTIVE_CONTRAST": ["cc_coordinated", "cc_additive", "cc_cleft",
                             "cc_parallel_sibling", "cc_negated_apposition"],
     "ALTERNATIVE_FRAMING": ["af_rather_than", "af_instead_of",
                             "af_less_than"],
@@ -458,7 +458,25 @@ PATTERN_ROWS = [
     ("CORRECTIVE_CONTRAST", "cc_cleft", True,
      "Version 2 is NOT RECOMMENDED. Instead, it is RECOMMENDED to deploy "
      "version 3."),
+    ("CORRECTIVE_CONTRAST", "cc_cleft", True,
+     "Their predictor is not a general solution. It is a collection of "
+     "three heuristics."),
+    # parallel `to` clauses, and the same modal on both copulas
+    ("CORRECTIVE_CONTRAST", "cc_cleft", True,
+     "The goal of the flag is not to block the build; it is to warn the "
+     "author."),
+    ("CORRECTIVE_CONTRAST", "cc_cleft", True,
+     "That cache may not be the one that served the read. It may be "
+     "another cache on the same bus."),
+    # a line break between the two clauses is not a word
+    ("CORRECTIVE_CONTRAST", "cc_cleft", True,
+     "The pattern is not haste in execution;\nit is the absence of the "
+     "document at the moment of the choice."),
     # the second copula starts a new statement
+    ("CORRECTIVE_CONTRAST", "cc_cleft", False,
+     "The checker may not be strict. It would be slow on large inputs."),
+    ("CORRECTIVE_CONTRAST", "cc_cleft", False,
+     "The field is not optional. It is possible to omit the header."),
     ("CORRECTIVE_CONTRAST", "cc_cleft", False,
      "The field is not present in version 1. For example, it is possible "
      "to omit it entirely."),
@@ -471,6 +489,16 @@ PATTERN_ROWS = [
     ("CORRECTIVE_CONTRAST", "cc_cleft", False,
      "This may not be possible on every target. It is the job of the "
      "loader to check."),
+    ("CORRECTIVE_CONTRAST", "cc_cleft", False,
+     "The role of the flag is not clear. Specifically, it is unclear when "
+     "it is read."),
+    ("CORRECTIVE_CONTRAST", "cc_cleft", False,
+     "The role is not obvious. So, for example, this is the same type."),
+    ("CORRECTIVE_CONTRAST", "cc_cleft", False,
+     "The second pass is not cheap. This is mainly due to the extra copy."),
+    ("CORRECTIVE_CONTRAST", "cc_cleft", False,
+     "The value is not final. It is uncertain whether the vendor will "
+     "change it."),
     # a causal or concessive link
     ("CORRECTIVE_CONTRAST", "cc_cleft", False,
      "Although the header is not required, it is useful for debugging."),
@@ -503,6 +531,8 @@ PATTERN_ROWS = [
      "The review is more of a conversation than an audit."),
     ("ALTERNATIVE_FRAMING", "af_less_than", True,
      "The choice was less about cost than about risk."),
+    ("ALTERNATIVE_FRAMING", "af_less_than", True,
+     "The fault lies more in the review than in the code."),
     # comparison with a number or a count
     ("ALTERNATIVE_FRAMING", "af_less_than", False,
      "A request may carry more than one header."),
@@ -529,6 +559,9 @@ PATTERN_ROWS = [
      "A keyed hash is more secure than a checksum."),
     ("ALTERNATIVE_FRAMING", "af_less_than", False,
      "This form is more expressive than the old API."),
+    # `more about` compared with a clause: a quantity
+    ("ALTERNATIVE_FRAMING", "af_less_than", False,
+     "The tool learns more about the network than it would from a log."),
     # more or less with a noun
     ("ALTERNATIVE_FRAMING", "af_less_than", False,
      "The trait offers more features than a callback."),
@@ -545,6 +578,13 @@ PATTERN_ROWS = [
     ("NEG_ESCALATION", "neg_escalation", True,
      "These protocols cannot, and should not, run over the open "
      "Internet."),
+    ("NEG_ESCALATION", "neg_escalation", True,
+     "Default values do not work well (and may never)."),
+    ("NEG_ESCALATION", "neg_escalation", True,
+     "The test did not catch the bug, and could not have caught it."),
+    ("NEG_ESCALATION", "neg_escalation", True,
+     "The table need not be, and usually will not be, as large as the "
+     "cache."),
     # paired normative negatives with their own verbs
     ("NEG_ESCALATION", "neg_escalation", False,
      "The client MUST NOT add the entry and MUST NOT return an error."),
@@ -563,6 +603,13 @@ PATTERN_ROWS = [
     ("NEG_ESCALATION", "neg_escalation", False,
      "The router does not support the feature and will not take part in "
      "balancing."),
+    ("NEG_ESCALATION", "neg_escalation", False,
+     "The module does not compile and will not run."),
+    # the verb repeated with objects of its own
+    ("NEG_ESCALATION", "neg_escalation", False,
+     "The patch must not break the build, and must not break the tests."),
+    ("NEG_ESCALATION", "neg_escalation", False,
+     "The values are not generic and would not be a fair test."),
     # a gapped disjunction of modals
     ("NEG_ESCALATION", "neg_escalation", False,
      "The option either SHOULD NOT or MUST NOT be used."),
@@ -574,98 +621,7 @@ PATTERN_ROWS = [
 # (pattern, text). They print as xfail and do not fail the suite; an
 # entry that passes prints as xpass and fails it, so the set is emptied
 # with the fix.
-PENDING = {
-    ('cc_coordinated',
-     'The flag is optional but not deprecated.'),
-    ('cc_coordinated',
-     'The register is readable but not writable from user mode.'),
-    ('cc_coordinated',
-     'The parser accepts tabs but never emits them.'),
-    ('cc_coordinated',
-     'The handler retries the write but stops if the device does not '
-     'respond.'),
-    ('cc_coordinated',
-     'The tool caches the result but drops it when the key is not found.'),
-    ('cc_coordinated',
-     'The old flag is no longer documented but is still accepted.'),
-    ('cc_coordinated',
-     'The option is not set by default but can be enabled at build time.'),
-    ('cc_coordinated',
-     'Comments should not be generated but must be accepted.'),
-    ('cc_coordinated',
-     'The change affects not only the parser but also the code generator.'),
-    ('cc_coordinated',
-     'Errors are reported not just to the caller but also to the log.'),
-    ('cc_additive',
-     'The change affects not only the parser but also the code generator.'),
-    ('cc_additive',
-     'Errors are reported not just to the caller but also to the log.'),
-    ('cc_additive',
-     'Writes are visible not only to other cores but to devices as well.'),
-    ('cc_additive',
-     'This is not merely a style rule but also a correctness rule.'),
-    ('cc_cleft',
-     'The field is not present in version 1. For example, it is possible to '
-     'omit it entirely.'),
-    ('cc_cleft',
-     'The cookie is not valid on the second server. This is because each '
-     'server keeps its own table.'),
-    ('cc_cleft',
-     'This may not be possible on every target. It is the job of the loader '
-     'to check.'),
-    ('cc_cleft',
-     'Even if the cache is not warm, it is safe to read.'),
-    ('cc_cleft',
-     'The value is not a valid index, which is why the check fails.'),
-    ('cc_cleft',
-     'The tool is not strict here, and nobody knows whether it is correct.'),
-    ('af_less_than',
-     'A request may carry more than one header.'),
-    ('af_less_than',
-     'The field must not occur more than once.'),
-    ('af_less_than',
-     'The timeout is less than 8 seconds.'),
-    ('af_less_than',
-     'The method goes back more than sixty years.'),
-    ('af_less_than',
-     'The run produced one more finding. Running every target rather than '
-     'one took longer.'),
-    ('af_less_than',
-     'The length must be less than or equal to the buffer size.'),
-    ('af_less_than',
-     'The round trip may be less than the clock granularity.'),
-    ('af_less_than',
-     'Supervisor mode is less privileged than machine mode.'),
-    ('af_less_than',
-     'The new syntax is more readable than the old one.'),
-    ('af_less_than',
-     'A keyed hash is more secure than a checksum.'),
-    ('af_less_than',
-     'This form is more expressive than the old API.'),
-    ('af_less_than',
-     'The trait offers more features than a callback.'),
-    ('af_less_than',
-     'The motor drew more power than desired.'),
-    ('neg_escalation',
-     'The client MUST NOT add the entry and MUST NOT return an error.'),
-    ('neg_escalation',
-     'The instruction shall not read the register and shall not cause any '
-     'side effects.'),
-    ('neg_escalation',
-     'Applications SHOULD NOT use these types and SHOULD NOT declare support '
-     'for them.'),
-    ('neg_escalation',
-     'The server will not retry the request and will not log the failure.'),
-    ('neg_escalation',
-     'The upper layer cannot see the radio and cannot fix the problem.'),
-    ('neg_escalation',
-     'The router does not support the feature and will not take part in '
-     'balancing.'),
-    ('neg_escalation',
-     'The option either SHOULD NOT or MUST NOT be used.'),
-    ('neg_escalation',
-     'The flag need not, or must not, be set, depending on the mode.'),
-}
+PENDING = set()
 
 
 # Phrase-list confidence per matched text (TF-007 phase 3):

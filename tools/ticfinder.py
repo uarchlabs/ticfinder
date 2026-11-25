@@ -424,10 +424,12 @@ def legacy_fingerprint(f):
 # Pattern renames, new name to old name. A finding's id hashes its pattern
 # name, so a rename makes every waiver for that pattern look stale.
 # legacy_fingerprints() recomputes the id under the old name so
-# --migrate-waivers can rekey those waivers. TF-007 split af_rather_instead.
+# --migrate-waivers can rekey those waivers. TF-007 split af_rather_instead;
+# TF-010 split the additive 'not only X but also Y' out of cc_coordinated.
 RENAMED_PATTERNS = {
     "af_rather_than": "af_rather_instead",
     "af_instead_of": "af_rather_instead",
+    "cc_additive": "cc_coordinated",
 }
 
 
@@ -862,7 +864,36 @@ def cc_coordinated(doc, nlp):
 
     Anchor on the negation, not the verb: in 'optimised not for throughput
     but for predictability' the `not` attaches to the preposition.
+
+    TF-010: the negation must sit in the first conjunct, before `but`
+    ('optional but not deprecated' restricts, it does not correct). A
+    second conjunct with `still` or its own modal concedes ('no longer
+    documented but still accepted', 'not set by default but can be
+    enabled'). The additive 'not only X but also Y' is cc_additive.
     """
+    return [(span, "not X but Y")
+            for span, additive in _cc_pairs(doc) if not additive]
+
+
+@pattern("CORRECTIVE_CONTRAST")
+def cc_additive(doc, nlp):
+    """not only X but also Y -- additive, split from cc_coordinated in
+    TF-010 so it is measured and muted on its own. `only` or `just` after
+    the negation, or `also`, `as well` or `too` in the second conjunct;
+    'not merely X but Y' without `also` stays corrective."""
+    return [(span, "not only X but also Y")
+            for span, additive in _cc_pairs(doc) if additive]
+
+
+_CC_ADDITIVE_NEG = {"only", "just"}
+_CC_ADDITIVE_ALSO = {"also", "too"}
+_CC_CONCEDE = {"still", "nevertheless", "nonetheless"}
+_MODALS = {"could", "would", "should", "might", "can", "will", "must",
+           "may", "shall", "ca", "wo", "need"}
+
+
+def _cc_pairs(doc):
+    """(span, additive) for each 'not X but Y' coordination."""
     out, seen = [], set()
     for neg in doc:
         if neg.dep_ != "neg" and neg.lower_ not in ("not", "n't"):
@@ -875,20 +906,53 @@ def cc_coordinated(doc, nlp):
                     continue
                 ccs = [c for c in pred.children if c.dep_ == "cc"] + \
                       [c for j in conjs for c in j.children if c.dep_ == "cc"]
-                if not any(c.lemma_ in ("but", "rather") for c in ccs):
+                buts = [c for c in ccs if c.lemma_ in ("but", "rather")]
+                if not buts:
                     continue
                 if _independent(conjs):
+                    continue
+                # the negation belongs to the first conjunct
+                first_but = min(c.i for c in buts)
+                if neg.i > first_but or any(
+                        j.left_edge.i <= neg.i <= j.right_edge.i
+                        for j in conjs):
+                    continue
+                if any(_conceding(j) for j in conjs):
                     continue
                 lo = min(neg.i, pred.left_edge.i)
                 hi = max(j.right_edge.i for j in conjs)
                 if (lo, hi) in seen:
                     continue
                 seen.add((lo, hi))
-                out.append((doc[lo:hi + 1], "not X but Y"))
+                out.append((doc[lo:hi + 1], _cc_additive(doc, neg, conjs)))
             if node.head is node:
                 break
             node, hops = node.head, hops + 1
     return out
+
+
+def _conceding(j):
+    """The second conjunct concedes rather than replaces: it carries
+    `still` or a modal of its own."""
+    for c in j.children:
+        if c.dep_ == "advmod" and c.lower_ in _CC_CONCEDE:
+            return True
+        if c.dep_ == "aux" and c.lower_ in _MODALS:
+            return True
+    return False
+
+
+def _cc_additive(doc, neg, conjs):
+    nxt = doc[neg.i + 1] if neg.i + 1 < len(doc) else None
+    if nxt is not None and nxt.lower_ in _CC_ADDITIVE_NEG:
+        return True
+    for j in conjs:
+        words = [t.lower_ for t in doc[j.left_edge.i:j.right_edge.i + 1]]
+        if _CC_ADDITIVE_ALSO & set(words) or \
+                any(a == "as" and b == "well"
+                    for a, b in zip(words, words[1:])):
+            return True
+    return False
 
 
 def _independent(conjs):
@@ -912,12 +976,25 @@ def cc_cleft(doc, nlp):
     "...was not that it is slow. It is that it validates..." is the same
     construction; the period is a stylistic choice, so the window is
     token-based rather than sentence-scoped.
+
+    TF-010: the second copula must correct the first, not start a new
+    statement. Both copulas head main clauses (no `although`, `since`,
+    relative or `whether` clause), a modal appears on both or neither
+    ('may not be possible. It would be slow' is out), nothing but
+    `instead` or `rather` sits between the break and the second clause
+    ('For example, it is', ', so it is'), the second copula has a
+    predicate ('This is because') and is not an extraposed 'it is
+    possible to ...' unless the first has a `to` clause too, nor 'it is
+    uncertain whether ...'. Across a sentence break the second subject
+    is `it`.
     """
     out = []
     cops = [t for t in doc if t.lemma_ == "be" and t.pos_ in ("AUX", "VERB")]
     used = set()
     for i, c1 in enumerate(cops):
         if not any(ch.dep_ == "neg" for ch in c1.children) or c1.i in used:
+            continue
+        if not _cleft_main(c1):
             continue
         for c2 in cops[i + 1:]:
             if c2.i - c1.i > 22:
@@ -934,6 +1011,8 @@ def cc_cleft(doc, nlp):
             if subj[0].lower_ not in ("it", "that", "this", "the", "what") \
                     and subj[0].pos_ not in ("PRON", "DET"):
                 continue
+            if not _cleft_second(c2, subj[0], c1):
+                continue
             lo = min(c1.left_edge.i, c1.sent.start if c1.sent else c1.i)
             out.append((doc[lo:c2.right_edge.i + 1],
                         "cleft, across sentences" if "." in gap
@@ -941,6 +1020,75 @@ def cc_cleft(doc, nlp):
             used.update({c1.i, c2.i})
             break
     return out
+
+
+_SUBORDINATE = {"advcl", "relcl", "acl", "pcomp", "csubj", "xcomp"}
+_CLEFT_LINK = {"instead", "rather"}
+_CLEFT_PRED = {"attr", "acomp", "prep", "ccomp", "oprd"}
+
+
+def _clause(c):
+    """The head of the clause a copula belongs to."""
+    return c.head if c.dep_ in ("aux", "auxpass") else c
+
+
+def _modal(h):
+    """The clause's modal, lowercased, or None."""
+    for ch in h.children:
+        if ch.dep_ == "aux" and ch.lower_ in _MODALS:
+            return ch.lower_
+    return None
+
+
+def _cleft_main(c1):
+    """The negated copula heads a main clause."""
+    h = _clause(c1)
+    if h.dep_ in _SUBORDINATE:
+        return False
+    if any(ch.dep_ == "mark" for ch in h.children):
+        return False
+    return not (h.dep_ == "ccomp" and h.head.lemma_ != "be")
+
+
+def _cleft_second(c2, subj, c1):
+    """The second copula restates the first's slot in a main clause.
+    A modal is allowed only when both copulas carry the same one ('may
+    not be X. It may be Y'), and a `to` clause only when the first copula
+    has one too ('is not to X; it is to Y')."""
+    h, h1 = _clause(c2), _clause(c1)
+    if h.dep_ not in ("ROOT", "conj", "parataxis") or \
+            _modal(h) != _modal(h1):
+        return False
+    if any(ch.dep_ == "mark" for ch in h.children):
+        return False
+    if any(ch.dep_ == "xcomp" for ch in h.children) and \
+            not any(ch.dep_ == "xcomp" for ch in h1.children):
+        return False                  # extraposed 'it is possible to ...'
+    if c2.dep_ not in ("aux", "auxpass") and \
+            not any(ch.dep_ in _CLEFT_PRED for ch in h.children):
+        return False                  # 'This is because ...'
+    if subj.lower_ == "it" and any(
+            ch.dep_ == "ccomp" and any(m.dep_ == "mark" and m.lower_ in
+                                       ("if", "whether")
+                                       for m in ch.children)
+            for ch in h.children):
+        return False                  # 'It is uncertain whether ...'
+    doc = c2.doc
+    start = min(subj.left_edge.i, c2.i)
+    if c2.sent.start != c1.sent.start:
+        # Across a sentence break the correction restarts with `it` and
+        # no connective: 'It is a collection', 'Instead, it is'; not
+        # 'This is because', 'Specifically, it is'.
+        if subj.lower_ != "it":
+            return False
+        lo = c2.sent.start
+    else:
+        punct = [k for k in range(c1.i, start) if doc[k].is_punct]
+        if not punct:
+            return False
+        lo = punct[-1] + 1
+    between = [t for t in doc[lo:start] if not (t.is_punct or t.is_space)]
+    return all(t.lower_ in _CLEFT_LINK for t in between)
 
 
 @pattern("CORRECTIVE_CONTRAST")
@@ -1047,18 +1195,57 @@ def _af_phrase(doc, first, second):
 
 @pattern("ALTERNATIVE_FRAMING")
 def af_less_than(doc, nlp):
-    """less about X than about Y."""
+    """less about X than about Y.
+
+    TF-010: one description framed against another, not a comparison of
+    degree or quantity. `less` or `more` is followed by `about` ('less
+    about speed than about trust'), by a preposition that `than` repeats
+    ('more in the code than in the culture'), or by `a`/`an` or `of a`
+    ('less a bug than a feature', 'more of a convention than a rule').
+    'more than one', 'less than 8', 'more readable than' and 'more power
+    than' are out. `than` must be in the same sentence.
+    """
     out = []
     for tok in doc:
         if tok.lower_ not in ("less", "more"):
             continue
+        frame = _af_frame(doc, tok)
+        if frame is None:
+            continue
         for t in doc[tok.i + 1:min(tok.i + 14, len(doc))]:
             if t.lower_ == "than":
+                if t.sent.start != tok.sent.start or \
+                        not frame(doc[t.i + 1] if t.i + 1 < len(doc)
+                                  else None):
+                    break
                 out.append((doc[tok.head.left_edge.i:
                                 min(t.right_edge.i + 6, len(doc))],
                             f"{tok.lower_}...than"))
                 break
     return out
+
+
+_AF_PREPS = {"in", "on", "for", "with", "from", "to", "at", "by"}
+
+
+def _af_frame(doc, tok):
+    """A test for the word after `than`, or None when `less`/`more` does
+    not open a framing."""
+    nxt = doc[tok.i + 1] if tok.i + 1 < len(doc) else None
+    if nxt is None:
+        return None
+    w = nxt.lower_
+    if w == "about":
+        # 'more about X than it would' compares a quantity with a clause
+        return lambda after: after is not None and not (
+            after.pos_ == "PRON" and after.dep_ in ("nsubj", "nsubjpass"))
+    if w in ("a", "an") or (
+            w == "of" and tok.i + 2 < len(doc)
+            and doc[tok.i + 2].lower_ in ("a", "an")):
+        return lambda after: after is not None and not after.like_num
+    if w in _AF_PREPS:
+        return lambda after: after is not None and after.lower_ == w
+    return None
 
 
 @construction(
@@ -1075,6 +1262,16 @@ def neg_escalation(doc, nlp):
     Distinguished from ordinary and-coordination by the absence of a subject
     in the second conjunct: it is elliptical, sharing the first clause's
     subject and verb.
+
+    TF-010: the verb must be shared, not just the subject. The second
+    conjunct repeats the first verb or is a bare `have`, `be`, `do`, `go`
+    or modal ('could not have', 'never would be', 'never going to', '(and
+    may never)'), or the
+    first conjunct is a bare
+    auxiliary that shares its verb with the second ('cannot, and should
+    not, run'; 'is not (and cannot be) stored'). Paired negatives with
+    their own verbs ('MUST NOT add X and MUST NOT return Y') and
+    disjunctions ('either SHOULD NOT or MUST NOT be used') are out.
     """
     modals = {"could", "would", "should", "might", "can", "will", "must",
               "may", "shall"}
@@ -1096,10 +1293,54 @@ def neg_escalation(doc, nlp):
         modal = any(x.lower_ in modals for x in auxs)
         if not (modal or never):
             continue
+        if not _gapped(tok, head) or _disjunct(tok, head):
+            continue
         lo = min(head.left_edge.i, tok.left_edge.i)
         out.append((doc[lo:tok.right_edge.i + 1],
                     "modal" if modal else "never"))
     return out
+
+
+_NE_COMPLEMENT = {"dobj", "attr", "acomp", "prep", "ccomp", "xcomp",
+                  "dative", "oprd", "advcl", "pobj", "npadvmod", "agent",
+                  "acl"}
+_NE_AUX = {"be", "have", "do"}
+
+
+def _own_complement(tok, skip=None, pronoun_ok=False):
+    """tok has a complement of its own. A bare `to` ('never going to') is
+    the gap, not a complement; with pronoun_ok, so is a pronoun object
+    ('could not have caught it')."""
+    for c in tok.children:
+        if c is skip or c.dep_ not in _NE_COMPLEMENT:
+            continue
+        if c.dep_ == "xcomp" and c.lower_ == "to" and not list(c.children):
+            continue
+        if pronoun_ok and c.dep_ == "dobj" and c.pos_ == "PRON":
+            continue
+        return True
+    return False
+
+
+def _gapped(tok, head):
+    if tok.lemma_ == head.lemma_ and \
+            not _own_complement(tok, pronoun_ok=True):
+        # the verb repeated, but not with objects of its own ('MUST NOT
+        # support X and MUST NOT support Y')
+        return True
+    if (tok.lemma_ in _NE_AUX | {"go"} or tok.lower_ in _MODALS) and \
+            not _own_complement(tok):
+        return True                   # 'could not have', '(and may never)'
+    bare_aux = head.pos_ == "AUX" or head.lemma_ in _NE_AUX or \
+        head.lower_ in ("can", "could", "would", "should", "might", "will",
+                        "must", "may", "shall", "need")
+    return bare_aux and not _own_complement(head, skip=tok)
+
+
+def _disjunct(tok, head):
+    return any(c.dep_ in ("cc", "preconj") and
+               c.lower_ in ("or", "nor", "either", "neither")
+               for c in list(tok.children) + list(head.children))
 
 
 @construction(
