@@ -17,8 +17,11 @@ documents: the public baseline for roadmap step 7 (TF-009).
   analyse      ticfinder over the kept text of every sampled document, the
                per-document tables, and the report. --report-only
                --table-sha SHA rebuilds the report from a table written by
-               an earlier ticfinder (pinned rebuild). --json PATH also
-               writes every report row as JSON (schema: roadmap s.15).
+               an earlier ticfinder (pinned rebuild). --table-dir DIR,
+               --arxiv-table-dir DIR and --arxiv-sha SHA read snapshot
+               tables, so an older report can be rebuilt after a rerun.
+               --json PATH also writes every report row as JSON (schema:
+               roadmap s.15).
 
 Sources (roadmap section 6):
 
@@ -1161,6 +1164,7 @@ LEVELS = AB.LEVELS
 AUTHOR_TABLE = SPECS / "author.jsonl"   # per-file counts, no text
 TMP = SPECS / "tmp"
 ARXIV_PIN = "81ade1e30516"  # the TF-008 full tables (ticfinder 651302d)
+ARXIV_DIR = None            # None: private/arxiv/bodies/
 AUTHOR_LEVELS = ("construction", "pattern")
 NAMES = {"peps": "PEPs", "ietf": "IETF RFCs", "rust": "Rust RFCs",
          "riscv": "RISC-V", "opentitan": "OpenTitan"}
@@ -1169,6 +1173,21 @@ POOL = "equal"              # the pooled rate requirements 13 to 15 use
 
 def sha16(s):
     return hashlib.sha256(s.encode("utf-8")).hexdigest()[:16]
+
+
+def use_tables(table_dir=None, arxiv_dir=None, arxiv_sha=None):
+    """Read the spec and author tables from a snapshot directory, and the
+    arXiv tables from another directory or ticfinder version, so an older
+    report can be rebuilt after a rerun replaced the tables (TF-010)."""
+    global TABLE, FINDINGS, AUTHOR_TABLE, ARXIV_PIN, ARXIV_DIR
+    if table_dir:
+        d = Path(table_dir)
+        TABLE, FINDINGS = d / "per_doc.jsonl", d / "findings.jsonl"
+        AUTHOR_TABLE = d / "author.jsonl"
+    if arxiv_dir:
+        ARXIV_DIR = arxiv_dir
+    if arxiv_sha:
+        ARXIV_PIN = arxiv_sha
 
 
 def phrase_setup(tf):
@@ -1302,7 +1321,7 @@ def load_tables(pin=None):
     if not author:
         sys.exit("no author rows for this ticfinder version; run analyse")
     author.sort(key=lambda r: r["id"])
-    AB.use_paths(None, "full")
+    AB.use_paths(ARXIV_DIR, "full")
     _, arows, _ = AB.load_body_table(ARXIV_PIN)
     arxiv = [{"id": r["id"], "words": r["words"]["all"],
               "counts": r["counts"]["all"]} for r in arows["pre"]]
@@ -1737,6 +1756,15 @@ def main():
     a.add_argument("--table-sha", metavar="SHA",
                    help="with --report-only: the ticfinder sha256 prefix the "
                         "stored tables were written with (pinned rebuild)")
+    a.add_argument("--table-dir", metavar="DIR",
+                   help="with --report-only: read the spec and author "
+                        "tables from DIR (a snapshot)")
+    a.add_argument("--arxiv-table-dir", metavar="DIR",
+                   help="with --report-only: read the arXiv full tables "
+                        "from DIR (a snapshot)")
+    a.add_argument("--arxiv-sha", metavar="SHA",
+                   help=f"with --report-only: the ticfinder sha256 prefix of "
+                        f"the arXiv tables (default {ARXIV_PIN})")
     a.add_argument("--json", metavar="PATH",
                    help="also write every report row as JSON")
     a.add_argument("--sample", metavar="KEY",
@@ -1748,8 +1776,11 @@ def main():
     if args.cmd == "analyse":
         if args.draws < 1000:
             sys.exit("--draws must be at least 1000")
-        if args.table_sha and not args.report_only:
-            sys.exit("--table-sha needs --report-only")
+        if (args.table_sha or args.table_dir or args.arxiv_table_dir
+                or args.arxiv_sha) and not args.report_only:
+            sys.exit("--table-sha, --table-dir, --arxiv-table-dir and "
+                     "--arxiv-sha need --report-only")
+        use_tables(args.table_dir, args.arxiv_table_dir, args.arxiv_sha)
     if args.cmd != "selftest" and \
             not (AR.ROOT / ".gitignore").read_text().count("private/"):
         sys.exit("private/ is not in .gitignore; refusing to cache there")
