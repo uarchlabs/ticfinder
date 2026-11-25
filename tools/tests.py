@@ -425,6 +425,90 @@ PATTERN_ROWS = [
      "generator."),
     ("CORRECTIVE_CONTRAST", "cc_coordinated", False,
      "Errors are reported not just to the caller but also to the log."),
+    # TF-011: concessive pairs. The first conjunct concedes a limit and
+    # the second asserts something that does not take the negated
+    # element's place. Emphatic `do` in the second conjunct (C1)
+    ("CORRECTIVE_CONTRAST", "cc_coordinated", False,
+     "This proposal does not attempt to cover every case, but does aim to "
+     "settle the common ones."),
+    ("CORRECTIVE_CONTRAST", "cc_coordinated", False,
+     "The linter does not try to fix the layout, but does flag the worst "
+     "cases."),
+    ("CORRECTIVE_CONTRAST", "cc_coordinated", False,
+     "Most users never build from source, but do upgrade to each stable "
+     "release."),
+    # a different verb and no corrective marker (C2)
+    ("CORRECTIVE_CONTRAST", "cc_coordinated", False,
+     "The driver does not support hot plug, but handles a cold restart "
+     "cleanly."),
+    ("CORRECTIVE_CONTRAST", "cc_coordinated", False,
+     "The library does not ship a parser, but documents the grammar in "
+     "full."),
+    ("CORRECTIVE_CONTRAST", "cc_coordinated", False,
+     "This note does not settle the naming question, but tries to stay "
+     "compatible with either answer."),
+    # a negated predicate adjective or participle, then a lexical verb (C3)
+    ("CORRECTIVE_CONTRAST", "cc_coordinated", False,
+     "The listing is not runnable but shows the calling sequence."),
+    ("CORRECTIVE_CONTRAST", "cc_coordinated", False,
+     "The scheme is not fully general, but handles most real inputs."),
+    ("CORRECTIVE_CONTRAST", "cc_coordinated", False,
+     "The buffer is not visible to software but feeds the hash engine "
+     "directly."),
+    # the second conjunct carries its own negation (C4)
+    ("CORRECTIVE_CONTRAST", "cc_coordinated", False,
+     "The cache does not save much area, but does not slow the pipeline "
+     "either."),
+    ("CORRECTIVE_CONTRAST", "cc_coordinated", False,
+     "The scan did not find the bug, but never reported a false one."),
+    ("CORRECTIVE_CONTRAST", "cc_coordinated", False,
+     "The flag does not change the output, but is not free to compute."),
+    # the second conjunct is a clause whose subject is `there` or a
+    # clause (C5)
+    ("CORRECTIVE_CONTRAST", "cc_coordinated", False,
+     "The keyword is not in the language yet, but there is a proposal to "
+     "add it."),
+    ("CORRECTIVE_CONTRAST", "cc_coordinated", False,
+     "The draft does not commit to a schedule, but there is real value in "
+     "naming the targets."),
+    ("CORRECTIVE_CONTRAST", "cc_coordinated", False,
+     "That case does not matter here, but in general, knowing which is "
+     "which will be important."),
+    # TF-011: corrective forms a concessive cue could hit by mistake.
+    # A repeated verb
+    ("CORRECTIVE_CONTRAST", "cc_coordinated", True,
+     "Do not take the global lock, but take the per-queue lock."),
+    ("CORRECTIVE_CONTRAST", "cc_coordinated", True,
+     "The size does not include the header, but does include the "
+     "padding."),
+    ("CORRECTIVE_CONTRAST", "cc_coordinated", True,
+     "The reader does not parse the whole file but parses the index."),
+    # a different verb without a marker
+    ("CORRECTIVE_CONTRAST", "cc_coordinated", True,
+     "Proxies should not rewrite the header fields, but pass them along."),
+    ("CORRECTIVE_CONTRAST", "cc_coordinated", True,
+     "The loader does not copy the image into memory but maps it in "
+     "place."),
+    # a passive second conjunct
+    ("CORRECTIVE_CONTRAST", "cc_coordinated", True,
+     "The session key is not chosen by the client but is assigned by the "
+     "server."),
+    ("CORRECTIVE_CONTRAST", "cc_coordinated", True,
+     "These limits are not fixed by the standard but are left to each "
+     "vendor."),
+    ("CORRECTIVE_CONTRAST", "cc_coordinated", True,
+     "The address is not computed in hardware but is supplied by "
+     "firmware."),
+    # constituent negation
+    ("CORRECTIVE_CONTRAST", "cc_coordinated", True,
+     "The cost lies not in the decoder but in the register file."),
+    ("CORRECTIVE_CONTRAST", "cc_coordinated", True,
+     "The flag is read not at reset but at the first fetch."),
+    # a negated predicate adjective or noun, then a lexical verb
+    ("CORRECTIVE_CONTRAST", "cc_coordinated", True,
+     "Retention of the state is not optional but depends on the mode."),
+    ("CORRECTIVE_CONTRAST", "cc_coordinated", True,
+     "The two counters are not redundant but measure different events."),
     # -- cc_additive: not only X but also Y ------------------------------
     ("CORRECTIVE_CONTRAST", "cc_additive", True,
      "The change affects not only the parser but also the code "
@@ -617,11 +701,39 @@ PATTERN_ROWS = [
      "The flag need not, or must not, be set, depending on the mode."),
 ]
 
-# PATTERN_ROWS that fail before the TF-010 fixes land, keyed by
+# PATTERN_ROWS that fail before a fix lands (TF-010), keyed by
 # (pattern, text). They print as xfail and do not fail the suite; an
 # entry that passes prints as xpass and fails it, so the set is emptied
-# with the fix.
-PENDING = set()
+# with the fix. TF-011: the concessive rows, one group per cue.
+PENDING = {
+    ("cc_coordinated", t) for t in (
+        "This proposal does not attempt to cover every case, but does aim "
+        "to settle the common ones.",
+        "The linter does not try to fix the layout, but does flag the "
+        "worst cases.",
+        "Most users never build from source, but do upgrade to each "
+        "stable release.",
+        "The driver does not support hot plug, but handles a cold restart "
+        "cleanly.",
+        "The library does not ship a parser, but documents the grammar in "
+        "full.",
+        "This note does not settle the naming question, but tries to stay "
+        "compatible with either answer.",
+        "The listing is not runnable but shows the calling sequence.",
+        "The scheme is not fully general, but handles most real inputs.",
+        "The buffer is not visible to software but feeds the hash engine "
+        "directly.",
+        "The cache does not save much area, but does not slow the pipeline "
+        "either.",
+        "The scan did not find the bug, but never reported a false one.",
+        "The flag does not change the output, but is not free to compute.",
+        "The keyword is not in the language yet, but there is a proposal "
+        "to add it.",
+        "The draft does not commit to a schedule, but there is real value "
+        "in naming the targets.",
+        "That case does not matter here, but in general, knowing which is "
+        "which will be important.",
+    )}
 
 
 # Phrase-list confidence per matched text (TF-007 phase 3):
