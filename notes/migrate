@@ -1,0 +1,27 @@
+old - needs to be reviewed before used.
+
+ Copy to the new machine:
+  - private/arxiv/ (about 4.5 GB, git-ignored). TF-009 requirement 13 reads the TF-008
+    full-run tables in private/arxiv/bodies/. The pinned rebuild in requirement 2 also
+    needs them, plus the pilot snapshot in private/arxiv/bodies-tf005/. If you only
+    copy part of it, take bodies/ and bodies-tf005/. Without the source archives the
+    tables still work, but you couldn't re-analyse.
+  - $PACINO with its full git history, which harvest needs.
+  - $WRITING_SAMPLES, for H3 in TF-009.
+  - spaCy with en_core_web_md, then . tools/setup.sh.
+
+  One thing the next session needs to know: harvest gives the expected 141/54/302/3
+  only against a migrated copy of $PACINO/waivers. The real directory has never been
+  migrated, and in TF-008 you chose to migrate a scratch copy each time (TF-008
+  RESULTS, "Decisions"). TF-009 requirement 1 says to run harvest "as in TF-008", so
+  the next session should do the same, or ask you.
+
+  Lost when this session closes: the scratchpad scripts, including jsoncheck.py, the
+  JSON-against-report checker. TF-009 will need it again for its new JSON. It's about
+  80 lines and easy to rewrite. I can copy it into eval/ now if you want it kept,
+  though that would be another commit.
+
+  Optional: the new machine is unloaded, so TF-009's nice 19 / one-process rule is now
+  more caution than needed. It's harmless, but you can drop it from the constraints if
+  you want the analysis to run faster.
+

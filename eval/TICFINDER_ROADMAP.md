@@ -391,7 +391,7 @@ Tidied after TF-004. Step numbers are kept stable because task files
 cite them, so they do not give the order of work. The order is listed
 after the steps.
 
-Done: steps 1 to 7, 9 to 11 and 14. Planned: steps 8, 12 and 13. The
+Done: steps 1 to 7, 9 to 11 and 14. Planned: steps 8, 12, 13 and 15. The
 list stays in step order, so the numbers render as written.
 
 1. Drop `harvest.py` into `ticfinder/eval/`, run it, and confirm the
@@ -482,12 +482,57 @@ list stays in step order, so the numbers render as written.
     candidate for `med`. `GAPPED_ANTITHESIS` and `NEG_ESCALATION` read
     poorly in papers. The reports and their JSON summaries are inputs
     for step 8.
+15. **Object relatives and trailing verbs.** Planned. The design, the
+    vocabulary and the evidence are in `notes/ticfinder-orc-context.md`, with
+    a patch, `notes/adv1-object-relative.patch`, built against c0d95d4. The
+    target is a verb that ends its phrase after the clause's own
+    subject: "every variable the loops assign", "the array write the
+    last primitive made". Clark, Martin and Mahowald (2026,
+    arXiv:2610.29162) find that frontier models overuse reduced object
+    relatives and underuse ones with "that". The patch adds
+    `TRAILING_LIGHT_VERB` and `OBJECT_RELATIVE`, with the patterns
+    `zero_object_relative` and `that_object_relative`, and matches POS
+    sequences because spaCy misparses these sentences. Work, in order:
+    1. Regenerate the patch against current `adv1` and run
+       `make regress`. Check `eval/jsoncheck.py` against the new
+       `suggestion` field in `--json`.
+    2. Start both constructions at `low`. The patch's `med` levels were
+       set by judgement, so step 8's LRs set them instead.
+    3. Run harvest on the pacino blogs and report `prec*` for each
+       pattern and each load level. The design's precision check counted
+       real object relatives in this repo's prose, which bears on the
+       human rate, and gave no precision.
+    4. One combined corpus pass at a pinned version: arXiv bodies, the
+       spec baseline and the `pacino` specs. It reports rates and LRs
+       for the three patterns and the zero:that ratio, which needs a row
+       type the analysis scripts lack today.
+    5. Parse agreement on the new test rows with `en_core_web_trf`
+       (5.6). If `trf` parses them correctly, a dependency path may
+       raise precision.
+    6. The design's known gaps, each with test rows first: verbs after
+       an auxiliary ("a pop the p3 type does not have") and
+       as-parentheticals ("as the planning documents use").
+
+    Three items in the design stay out of this step: the surprisal
+    prototype (minicons and a GPT-2 class model, too heavy for
+    `ticfinder.py`, so it would live in `eval/`), a checker for comments
+    in source code, and new entries in the CLAUDE.md used for
+    generation. Whether rewrite suggestions (`try: ...`) and the
+    optional `lemminflect` dependency belong in the tool is the user's
+    decision. Harvest can recover rewritten findings from old drafts,
+    but only waivers mark findings as accepted, so blogs edited before
+    this step lands give rewritten labels and no accepted ones.
 
 Order: 9 and 10 are done. 11 and 7 do not depend on each other and can
 run side by side. 14 goes after 11, so that one analysis measures the
 fixed and split patterns. 8 needs 7 and uses 14's body ratios as its
 prior (9's if 14 has not run). 12 needs new labels from blog editing, so
-it goes when they exist. 13 comes last.
+it goes when they exist. 13 comes after 8. 15 comes after 8, so its
+levels come from measured LRs. It can go before 13, or during 12's blog
+editing at `low` to collect accepted labels. Step 13's mining can also
+check whether it finds reduced object relatives without being told, since its
+corpora do not depend on the detector, as long as the miner is not tuned
+toward them.
 
 ## 8. TF-001 results (2026-11-17)
 

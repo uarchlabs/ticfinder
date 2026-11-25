@@ -1,0 +1,462 @@
+diff --git a/README.md b/README.md
+index 9756ff0..c84fd9c 100644
+--- a/README.md
++++ b/README.md
+@@ -12,8 +12,14 @@ generated prose, and the clustering is what breaks reader flow.
+ ```bash
+ pip install spacy
+ python3 -m spacy download en_core_web_md
++pip install lemminflect      # optional: rewrite suggestions
+ ```
+ 
++With `lemminflect` installed, `OBJECT_RELATIVE` findings carry a suggested
++rewrite as a reduced passive (`try: every variable assigned by the loops`),
++shown under the finding, on its HTML card and as `suggestion` in `--json`.
++The suggestion is not part of the fingerprint, so waivers are unaffected.
++
+ Use `md`, not `sm`. On `a bug wrapped in an excuse trenchcoat`, the small model
+ attaches `trenchcoat` as `advmod` of `excuse`; `md` gets the compound right.
+ Parse quality is upstream of every structural detector. `en_core_web_trf` is
+@@ -55,6 +61,8 @@ Structural (dependency parse):
+ | `PARTICIPIAL_TAIL` | `, making it easier to…` tacked on the end |
+ | `TRICOLON` | coordination of three or more |
+ | `DISGUISE_METAPHOR` | X wrapped in / wearing / masquerading as Y |
++| `TRAILING_LIGHT_VERB` | the array write the last primitive made |
++| `OBJECT_RELATIVE` | every variable (that) the loops assign |
+ 
+ Phrasal (token patterns, built in):
+ 
+diff --git a/tools/tests.py b/tools/tests.py
+index 1503fd9..01203c0 100755
+--- a/tools/tests.py
++++ b/tools/tests.py
+@@ -67,6 +67,8 @@ EXPECTED = {
+     "PARTICIPIAL_TAIL": ["participial_tail"],
+     "TRICOLON": ["tricolon", "tricolon_parataxis"],
+     "DISGUISE_METAPHOR": ["disguise_metaphor"],
++    "TRAILING_LIGHT_VERB": ["trailing_light_verb"],
++    "OBJECT_RELATIVE": ["zero_object_relative", "that_object_relative"],
+ }
+ 
+ EXPECTED_PHRASE = ["FRAME_MARKER", "HOLLOW_BOOSTER", "CLOSER", "HEDGE_STACK"]
+@@ -236,6 +238,75 @@ CASES = [
+     # is not supported.
+     ("DISGUISE_METAPHOR", False, "The test is passing for all seeds."),
+ 
++    # -- trailing light verb ---------------------------------------------
++    ("TRAILING_LIGHT_VERB", True,
++     "Note the count of the array write the last primitive made."),
++    ("TRAILING_LIGHT_VERB", True,
++     "Log the call the handler did before exiting."),
++    ("TRAILING_LIGHT_VERB", True, "Check the update the worker performed."),
++    ("TRAILING_LIGHT_VERB", True, "Return the request the client issued."),
++    ("TRAILING_LIGHT_VERB", True,
++     "Retry the fetch the scheduler made on startup."),
++    ("TRAILING_LIGHT_VERB", True, "Undo the write we did."),
++    ("TRAILING_LIGHT_VERB", False, "Open the file you sent."),
++    ("TRAILING_LIGHT_VERB", False, "Fix the bug we found yesterday."),
++    ("TRAILING_LIGHT_VERB", False,
++     "Note how many elements the last primitive wrote."),
++    ("TRAILING_LIGHT_VERB", False, "This change made the test fail."),
++    ("TRAILING_LIGHT_VERB", False, "We made a copy."),
++    ("TRAILING_LIGHT_VERB", False,
++     "Whatever the parser did, the output is wrong."),
++    ("TRAILING_LIGHT_VERB", False, "The test made sure the write landed."),
++    ("TRAILING_LIGHT_VERB", False,
++     "After the meeting the team made progress."),
++
++    # -- object relative -------------------------------------------------
++    ("OBJECT_RELATIVE", True,
++     "Set defaults for every variable the loops assign."),
++    ("OBJECT_RELATIVE", True,
++     "Defaults for every variable the loops assign are zero."),
++    ("OBJECT_RELATIVE", True,
++     "Check every register the decode stage writes."),
++    ("OBJECT_RELATIVE", True,
++     "The names the planning documents use are stable."),
++    ("OBJECT_RELATIVE", True,
++     "Note the count of the array write the last primitive triggered."),
++    ("OBJECT_RELATIVE", True, "Flush the buffer the worker thread fills."),
++    ("OBJECT_RELATIVE", True,
++     "We reviewed the code the intern wrote yesterday."),
++    # pronoun subjects are the easy, common case and are not reported
++    ("OBJECT_RELATIVE", False, "Open the file you sent."),
++    ("OBJECT_RELATIVE", False, "The bug we found yesterday is fixed."),
++    # light verbs belong to TRAILING_LIGHT_VERB
++    ("OBJECT_RELATIVE", False,
++     "Note the count of the array write the last primitive made."),
++    # with a relativiser
++    ("OBJECT_RELATIVE", True,
++     "Set defaults for every variable that the loops assign."),
++    ("OBJECT_RELATIVE", True,
++     "Use the names which the planning documents use."),
++    # the rewrite, and subject relatives and complement clauses with 'that'
++    ("OBJECT_RELATIVE", False,
++     "Set defaults for every variable assigned by the loops."),
++    ("OBJECT_RELATIVE", False, "The dog that bit the man ran."),
++    ("OBJECT_RELATIVE", False, "The value that we computed is wrong."),
++    ("OBJECT_RELATIVE", False, "The tool reports that the build passed."),
++    ("OBJECT_RELATIVE", False, "It is clear that the design works."),
++    # same tags, not a relative clause
++    ("OBJECT_RELATIVE", False, "In the end the team decided."),
++    ("OBJECT_RELATIVE", False, "When the build finishes the tests run."),
++    ("OBJECT_RELATIVE", False, "This is the way the cache works."),
++    ("OBJECT_RELATIVE", False, "The day the build broke was Friday."),
++    ("OBJECT_RELATIVE", False,
++     "Every cycle the predictor updates the table."),
++    ("OBJECT_RELATIVE", False,
++     "The 155 JSON rows match the report rows exactly."),
++    ("OBJECT_RELATIVE", False,
++     "A normal run counts the waivers held in the file."),
++    ("OBJECT_RELATIVE", False,
++     "Flag a finding whose content words recur."),
++    ("OBJECT_RELATIVE", False, "The value was triggered by the timer."),
++
+     # -- hollow booster (phrase pattern, runs through analyse) ------------
+     # `significantly,` is a booster only at the start of a sentence;
+     # mid-sentence it is a manner adverb (TF-006).
+@@ -373,6 +444,27 @@ PATTERN_CASES = [
+                          "saturating counter.", {"participial_tail": "med"}),
+     ("PARTICIPIAL_TAIL", "The cache warms on startup, making subsequent "
+                          "requests faster.", {"participial_tail": "high"}),
++    # Object relatives: the zero form is graded by load, the 'that' form
++    # always reports low.
++    ("OBJECT_RELATIVE", "Check every register the decode stage writes.",
++     {"zero_object_relative": "med"}),
++    ("OBJECT_RELATIVE", "We reviewed the code the intern wrote yesterday.",
++     {"zero_object_relative": "low"}),
++    ("OBJECT_RELATIVE", "Check every register that the decode stage writes.",
++     {"that_object_relative": "low"}),
++]
++
++# Rewrite suggestions (OBJECT_RELATIVE). Need lemminflect; skipped without.
++SUGGESTION_CASES = [
++    ("Set defaults for every variable the loops assign.",
++     "every variable assigned by the loops"),
++    ("Check every register that the decode stage writes.",
++     "every register written by the decode stage"),
++    ("Flush the buffer the worker thread fills.",
++     "the buffer filled by the worker thread"),
++    # no suggestion: stranded preposition, and a verb with no passive
++    ("Close the file the logger writes to.", ""),
++    ("Count the bits the status field has.", ""),
+ ]
+ 
+ 
+@@ -471,6 +563,15 @@ def test_detectors(nlp):
+         check("detectors", f"{cid} patterns {sorted(want)}: {text[:30]}",
+               got == want, f"want={want} got={got}: {text[:70]}")
+ 
++    if tf.getInflection is None:
++        print("  skip suggestions (lemminflect not installed)")
++    else:
++        for text, want in SUGGESTION_CASES:
++            hits = tf.run_construction("OBJECT_RELATIVE", nlp(text), nlp)
++            got = [h[0]._.tf_suggestion for h in hits]
++            check("detectors", f"suggestion: {text[:40]}",
++                  got == [want], f"want {want!r} got {got}")
++
+     count_cases = [
+         (3, "Three of the specification errors were found by the assistant "
+             "reporting a discrepancy: the allocation write-data field order, "
+diff --git a/tools/ticfinder.py b/tools/ticfinder.py
+index e33030d..18e597b 100755
+--- a/tools/ticfinder.py
++++ b/tools/ticfinder.py
+@@ -27,6 +27,17 @@ from pathlib import Path
+ 
+ import spacy
+ from spacy.matcher import Matcher, DependencyMatcher
++from spacy.tokens import Span
++
++try:                    # optional: rewrite suggestions for OBJECT_RELATIVE
++    from lemminflect import getInflection
++except ImportError:     # findings still report without it
++    getInflection = None
++
++# A pattern may set span._.tf_suggestion on a span it returns; analyse()
++# copies it to Finding.suggestion. Kept out of the fingerprint.
++if not Span.has_extension("tf_suggestion"):
++    Span.set_extension("tf_suggestion", default="")
+ 
+ MODEL = "en_core_web_md"
+ 
+@@ -388,6 +399,7 @@ class Finding:
+     confidence: str = "med"
+     pattern: str = ""
+     fp: str = ""
++    suggestion: str = ""
+ 
+ 
+ # ------------------------------------------------------------------ waivers
+@@ -1467,6 +1479,240 @@ def disguise_metaphor(doc, nlp):
+     return out
+ 
+ 
++@construction(
++    "TRAILING_LIGHT_VERB", "Nominalised action closed by a light verb",
++    "'the array write the last primitive made'. The action is a noun and an "
++    "empty verb at the end of the clause points back at it, so the reader "
++    "holds the noun until the verb arrives. Use the action as the verb: "
++    "'the elements the last primitive wrote'.",
++    "med")
++def trailing_light_verb(doc, nlp):
++    """A nominalised action picked up again by an empty verb at clause end.
++
++    'Note the count of the array write the last primitive made.'
++
++    The real action ('write') has been turned into a noun, and a light verb
++    ('made') ending an object relative clause points back at it.
++
++    The dependency parse is not used. On exactly these sentences the parser
++    garden-paths the way a reader does -- `md` tags 'write' as a verb and
++    attaches 'primitive' as its object -- so `relcl` is rarely there to find.
++    The test is on the surface instead, using only POS tags:
++
++        DET NOMINAL  [DET ADJ* NOUN | PRON]  LIGHT_VERB  (no object follows)
++
++    i.e. a noun phrase, then a second noun phrase with no relativiser
++    between them, then a light verb with nothing left to be its object.
++
++    Known false positive: 'make' meaning 'create' has the same shape ('the
++    tests the team made'). Waive those.
++    """
++    LIGHT = {"make", "do", "perform", "execute", "issue", "conduct"}
++    SUBJ_PRON = {"i", "we", "you", "they", "he", "she", "it"}
++    # Anything that could start the light verb's own object.
++    OBJ_START = {"DET", "NOUN", "PROPN", "PRON", "ADJ", "NUM", "PART"}
++    # 'the decision the team made', 'the progress we made': the nominal is
++    # the established way to say it, so these report at low confidence.
++    COLLOCATE = {"decision", "choice", "mistake", "error", "progress",
++                 "change", "assumption", "point", "effort", "work", "job",
++                 "promise", "offer", "deal", "difference", "sense"}
++    out = []
++    for tok in doc:
++        if tok.lemma_.lower() not in LIGHT or tok.tag_ not in ("VBD", "VBN"):
++            continue
++        if tok.dep_ in ("aux", "auxpass"):
++            continue
++        nxt = doc[tok.i + 1] if tok.i + 1 < len(doc) else None
++        if nxt is not None and (nxt.pos_ in OBJ_START or nxt.lower_ == "so"):
++            continue                    # 'made the test fail', 'made sure'
++        # Walk left over the relative clause's subject.
++        j = tok.i - 1
++        if j >= 0 and doc[j].lower_ in SUBJ_PRON:
++            j -= 1
++        else:
++            while j >= 0 and doc[j].pos_ in ("NOUN", "PROPN", "ADJ", "NUM"):
++                j -= 1
++            if j < 0 or doc[j].pos_ != "DET" or j == tok.i - 1:
++                continue
++            j -= 1
++        if j < 0:
++            continue
++        nominal = doc[j]
++        # A noun, or a verb-form the tagger misread ('write', 'call',
++        # 'fetch'). It must follow a determiner, which a main verb would not.
++        if nominal.pos_ not in ("NOUN", "VERB"):
++            continue
++        k = j
++        while k > 0 and doc[k - 1].pos_ in ("NOUN", "PROPN", "ADJ", "NUM"):
++            k -= 1
++        if k == 0 or doc[k - 1].pos_ != "DET":
++            continue
++        conf = "low" if nominal.lemma_.lower() in COLLOCATE else None
++        out.append((doc[k - 1:tok.i + 1], tok.lemma_.lower(), conf))
++    return out
++
++
++# Verbs with no natural passive: 'the bits had by the field'.
++_NO_PASSIVE = {"have", "lack", "cost", "resemble", "weigh", "equal", "fit",
++               "suit", "mean", "get", "become", "seem", "contain", "need",
++               "want", "like", "know", "say", "think", "see", "take", "give"}
++
++
++def _passive_rewrite(doc, np_start, rel_end, subj_start, v):
++    """'every variable the loops assign' -> 'every variable assigned by the
++    loops'. Returns "" where the rewrite would read worse or is unknown."""
++    if getInflection is None or v.lemma_.lower() in _NO_PASSIVE:
++        return ""
++    nxt = doc[v.i + 1] if v.i + 1 < len(doc) else None
++    if nxt is not None and nxt.pos_ == "ADP":
++        return ""                       # stranded: 'the file the log writes to'
++    if v.i - subj_start > 5:
++        return ""                       # a long 'by' phrase reads worse
++    forms = getInflection(v.lemma_, tag="VBN")
++    if not forms:
++        return ""
++    head = doc[np_start:rel_end].text
++    agent = doc[subj_start:v.i].text
++    return f"{head} {forms[0]} by {agent}"
++
++
++def _object_relatives(doc, with_relativiser):
++    """Shared core for both OBJECT_RELATIVE patterns.
++
++    The check is on POS tags, not the dependency parse. On the dense cases
++    the parser misreads the clause's subject as an object, or its verb as a
++    new main clause, and it labels 'that' variously `mark` or `dobj`:
++
++        DET [ADJ|NOUN]* HEAD [that|which]  DET [ADJ|NOUN]* NOUN  VERB  (no object)
++
++    Pronoun subjects ('the file you sent') are not reported: they are the
++    common, easy case. Light verbs are left to TRAILING_LIGHT_VERB.
++    """
++    LIGHT = {"make", "do", "perform", "execute", "issue", "conduct"}
++    RELATIVISER = {"that", "which", "whom"}
++    OBJ_START = {"DET", "NOUN", "PROPN", "PRON", "ADJ", "NUM", "PART"}
++    NP_MOD = {"ADJ", "NOUN", "PROPN", "NUM"}
++    # Heads that take a relative adverb, not an object gap: 'the way the
++    # cache works', 'the day the build broke'.
++    ADVERBIAL_HEAD = {"way", "time", "times", "day", "moment", "reason",
++                      "place", "year", "point", "extent", "case", "cycle",
++                      "instant", "manner", "degree", "order"}
++    # Bare-noun time adverbs, which follow the verb but are not its object.
++    TEMPORAL = {"yesterday", "today", "tomorrow", "now", "earlier",
++                "later", "first", "last", "once", "twice", "again"}
++    SUBORD = {"when", "if", "while", "because", "after", "before", "once",
++              "until", "since", "as", "unless", "whenever", "where",
++              "although", "though"}
++    out = []
++    for sent in doc.sents:
++        verbs = [t for t in sent if t.pos_ in ("VERB", "AUX")]
++        for v in sent:
++            if v.pos_ != "VERB" or v.tag_ not in ("VBD", "VBP", "VBZ", "VBN"):
++                continue
++            if v.lemma_.lower() in LIGHT:
++                continue
++            nxt = doc[v.i + 1] if v.i + 1 < sent.end else None
++            # The tagger reads a past tense after a noun as a participle
++            # ('the primitive triggered'). A real one takes 'by' or an aux.
++            if v.tag_ == "VBN" and (
++                    (nxt is not None and nxt.lower_ == "by")
++                    or doc[v.i - 1].pos_ == "AUX"):
++                continue
++            if nxt is not None and nxt.lower_ not in TEMPORAL and (
++                    nxt.pos_ in OBJ_START or nxt.lower_ == "so"):
++                continue
++            # The clause subject: DET [mods]* NOUN, ending just before v.
++            j = v.i - 1
++            if j < sent.start or doc[j].pos_ not in NP_MOD:
++                continue
++            while j >= sent.start and doc[j].pos_ in NP_MOD:
++                j -= 1
++            if j < sent.start or doc[j].pos_ != "DET":
++                continue
++            if doc[j].lower_ in ("whose", "which", "what", "whichever"):
++                continue                # a relativiser, not a subject
++            subj_start = j
++            # The relativiser, if this pattern wants one.
++            h = subj_start - 1
++            if with_relativiser:
++                if h < sent.start or doc[h].lower_ not in RELATIVISER:
++                    continue
++                rel_end = h             # head NP ends before 'that'
++                h -= 1
++            else:
++                rel_end = subj_start
++            # The head: a noun, or a nominalised verb the tagger misread.
++            if h < sent.start or doc[h].pos_ not in ("NOUN", "PROPN", "VERB"):
++                continue
++            head = doc[h]
++            # A verb-tagged head counts only in its base form ('the array
++            # write'); 'run counts' is a subject and its main verb.
++            if head.pos_ == "VERB" and head.tag_ not in ("VB", "VBP"):
++                continue
++            # After a noun it also needs a past-tense clause verb: 'the JSON
++            # rows match the report rows' has the same tags as 'the array
++            # write the primitive made', with 'rows' read as a verb.
++            if head.pos_ == "VERB" and doc[h - 1].pos_ in NP_MOD \
++                    and v.tag_ not in ("VBD", "VBN"):
++                continue
++            if head.lemma_.lower() in ADVERBIAL_HEAD:
++                continue
++            k = h
++            while k > sent.start and doc[k - 1].pos_ in NP_MOD:
++                k -= 1
++            if k == sent.start or doc[k - 1].pos_ not in ("DET", "PRON"):
++                continue
++            np_start = k - 1
++            # A subordinate clause with no comma looks the same:
++            # 'When the build finishes the tests run.'
++            before = doc[sent.start:np_start]
++            subs = [t.i for t in before if t.lower_ in SUBORD]
++            if subs and not any(t.pos_ in ("VERB", "AUX") for t in before
++                                if t.i > max(subs)):
++                continue
++            # A relative clause needs a main verb elsewhere; without one
++            # this is just a fronted phrase: 'In the end the team decided.'
++            if not any(t.i < np_start or t.i > v.i for t in verbs):
++                continue
++            prev = doc[np_start - 1] if np_start > sent.start else None
++            nested = prev is not None and prev.pos_ == "ADP"
++            stacked = (h - 1 >= k and doc[h - 1].pos_ in ("NOUN", "PROPN")) \
++                or head.pos_ == "VERB"
++            long_subj = v.i - subj_start >= 3
++            final = nxt is None or nxt.text in (".", ";", ":", "!", "?",
++                                                ")", ",")
++            load = sum((nested, stacked, long_subj, final))
++            conf = "med" if load >= 2 else "low"
++            span = doc[np_start:v.i + 1]
++            span._.tf_suggestion = _passive_rewrite(doc, np_start, rel_end,
++                                                    subj_start, v)
++            out.append((span, f"load {load}", conf))
++    return out
++
++
++@construction(
++    "OBJECT_RELATIVE", "Object relative clause, verb last",
++    "'every variable the loops assign'. The noun is the object of the "
++    "clause's verb, so the verb comes after the clause's own subject and "
++    "the reader holds the noun until it arrives. Usually fine when short; "
++    "graded by load. Rewrite as a reduced passive, which makes it a subject "
++    "relative: 'every variable assigned by the loops'.",
++    "low")
++def zero_object_relative(doc, nlp):
++    """Object relative with no relativiser: 'every variable the loops
++    assign'. The form frontier models overuse (Clark et al. 2026)."""
++    return _object_relatives(doc, with_relativiser=False)
++
++
++@pattern("OBJECT_RELATIVE")
++def that_object_relative(doc, nlp):
++    """Object relative with 'that' or 'which': 'every variable that the
++    loops assign'. Easier to read than the zero form, so its findings
++    always report at low confidence."""
++    return [(s, sub, "low") for s, sub, conf in
++            _object_relatives(doc, with_relativiser=True)]
++
++
+ # ------------------------------------------------- lexical / phrasal layer
+ 
+ PHRASE_PATTERNS = {
+@@ -1717,7 +1963,9 @@ def build_html(path, raw, findings, stats):
+         f'<span class="ln">{html.escape(f.fp)} &middot; L{f.line}</span>'
+         f'<span class="cid" style="color:{CONF_COLOR[f.confidence]}">'
+         f'{f.construction}</span>'
+-        f'<div class="tx">{html.escape(f.text[:110])}</div></div>'
++        f'<div class="tx">{html.escape(f.text[:110])}</div>'
++        + (f'<div class="tx">try: {html.escape(f.suggestion)}</div>'
++           if f.suggestion else '') + '</div>'
+         for i, f in enumerate(findings))
+ 
+     hidden = len(findings) - len(kept)
+@@ -1829,7 +2077,8 @@ def analyse(path, nlp, only=None, extra=(), disabled=(), code_mask=None):
+             context=span.sent.text.strip().replace("\n", " "),
+             line=line_of(raw, span.start_char),
+             start=span.start_char, end=span.end_char,
+-            note=note, confidence=conf, pattern=pname))
++            note=note, confidence=conf, pattern=pname,
++            suggestion=getattr(span._, "tf_suggestion", "")))
+ 
+     # structural
+     for cid, meta in CONSTRUCTIONS.items():
+@@ -2109,6 +2358,8 @@ def report(path, findings, stats, plain=False, show_stats=False,
+         head = f"  {c['d']}{f.fp}{c['0']} {col}L{f.line:<5}{c['0']} {tag}"
+         room = W - (2 + 7 + 7 + (len(sub) + 3 if sub else 0))
+         print(a(head + txt[:room]))
++        if f.suggestion:
++            print(a(f"{c['d']}         try: {f.suggestion}{c['0']}"))
+         if show_context and f.context:
+             ctx = window(f.context, f.text, W - 15)
+             print(a(f"{c['d']}         {ctx}{c['0']}"))
