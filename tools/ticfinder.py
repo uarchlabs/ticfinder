@@ -1218,8 +1218,10 @@ def af_less_than(doc, nlp):
                         not frame(doc[t.i + 1] if t.i + 1 < len(doc)
                                   else None):
                     break
+                # TF-014: the six tokens after `than` stop at the end of
+                # its sentence; they ran into the next one (roadmap s.21)
                 out.append((doc[tok.head.left_edge.i:
-                                min(t.right_edge.i + 6, len(doc))],
+                                min(t.right_edge.i + 6, t.sent.end)],
                             f"{tok.lower_}...than"))
                 break
     return out
@@ -1458,11 +1460,19 @@ def abstract_adverb(doc, nlp):
     "have earned. Check that the contrast is real.",
     "low")   # TF-013: med to low, LR 0.87 (0.60 to 1.18), roadmap s.19
 def emphatic_reflexive(doc, nlp):
+    """The reflexive and up to three words before it.
+
+    TF-014: the look-back stops at the start of the reflexive's own
+    sentence. Near a sentence start it reached the previous sentence,
+    which analyse() then took as the context, so the context lacked the
+    match (roadmap s.19, s.21).
+    """
     out = []
     for tok in doc:
         if tok.lower_.endswith(("itself", "themselves", "himself",
                                 "herself")) and tok.dep_ != "dobj":
-            out.append((doc[max(tok.i - 3, 0):tok.i + 1], tok.lower_))
+            lo = max(tok.i - 3, tok.sent.start)
+            out.append((doc[lo:tok.i + 1], tok.lower_))
     return out
 
 

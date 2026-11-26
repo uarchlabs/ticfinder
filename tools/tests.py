@@ -386,6 +386,36 @@ PATTERN_CASES = [
 ]
 
 
+# Span bounds (TF-014): (construction, pattern, text, first word of the
+# span, whether the matched text lies inside its context sentence). Run
+# through analyse(), which sets the context from the span's first token.
+# A span that reaches into the previous sentence takes that sentence as
+# its context, and the context then lacks the match.
+SPAN_CASES = [
+    # emphatic_reflexive looks back three tokens; near a sentence start
+    # that reached the previous sentence's full stop ...
+    ("EMPHATIC_REFLEXIVE", "emphatic_reflexive",
+     "The run passed. The tool itself is fast.", "The", True),
+    # ... its last words ...
+    ("EMPHATIC_REFLEXIVE", "emphatic_reflexive",
+     "Run it. By itself, the flag does nothing.", "By", True),
+    # ... or, across a paragraph break, the break itself
+    ("EMPHATIC_REFLEXIVE", "emphatic_reflexive",
+     "The run passed.\n\nThe tool itself is fast.", "The", True),
+    # far from the sentence start the look-back is unchanged
+    ("EMPHATIC_REFLEXIVE", "emphatic_reflexive",
+     "We read the rule document itself.", "the", True),
+    # af_less_than takes six tokens past `than`, which ran into the next
+    # sentence: the start and context were right, the text was not
+    ("ALTERNATIVE_FRAMING", "af_less_than",
+     "The fix is more about trust than speed. It also helps the build.",
+     "The", True),
+    # guard: the cross-sentence cleft spans two sentences on purpose
+    ("CORRECTIVE_CONTRAST", "cc_cleft",
+     "The cache is not a buffer. It is a queue.", "The", False),
+]
+
+
 # Whether one pattern fires: (construction, pattern, want, text). A
 # construction row can pass because a sibling pattern fires; these rows
 # test the pattern itself. TF-010: failure kinds from a reading of the
@@ -858,6 +888,20 @@ def test_detectors(nlp):
             got[pname] = conf
         check("detectors", f"{cid} patterns {sorted(want)}: {text[:30]}",
               got == want, f"want={want} got={got}: {text[:70]}")
+
+    def norm(x):
+        return " ".join(x.split()).lower()
+    for cid, pname, text, first, inside in SPAN_CASES:
+        with tempfile.TemporaryDirectory() as d:
+            pth = Path(d) / "c.md"
+            pth.write_text(text + "\n", encoding="utf-8")
+            found, _ = tf.analyse(str(pth), nlp, only={cid})
+        hits = [x for x in found if x.pattern == pname]
+        got = [(x.text.split()[0], norm(x.text) in norm(x.context))
+               for x in hits]
+        check("detectors", f"{pname} span starts at {first!r}: {text[:30]}",
+              got == [(first, inside)],
+              f"want={[(first, inside)]} got={got}: {text[:70]!r}")
 
     count_cases = [
         (3, "Three of the specification errors were found by the assistant "

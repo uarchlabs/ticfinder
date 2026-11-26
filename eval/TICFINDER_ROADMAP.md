@@ -2852,3 +2852,89 @@ since `TRICOLON` no longer reports `figure` above `enumeration`. `make`
 shows the same 22 README findings as before, with the same
 fingerprints. The glossary gained set C, label LR and recorded
 exception.
+
+## 21. TF-014 results (2026-11-26)
+
+Step 15, items 1 to 3, after a fix for the span bug that TF-012's
+sanity reading found (section 19). ticfinder started at a2d0a89
+(sha256 5dc04c31b06b). Every sentence read stays in `private/` and on
+the console.
+
+### Phase 1: the span fix and the harvest files
+
+**Preconditions.** `make regress` passed and ticfinder matched its pin.
+Harvest ran on a copy of `$PACINO/waivers` in the scratchpad, migrated
+with `--migrate-waivers` (19 waivers rekeyed). `$PACINO/waivers` itself
+was not migrated and still holds 19 old-style ids. The copy gave 132
+accepted, 52 rewritten, 292 deleted and 3 open, the TF-010 totals.
+
+**The bug, measured.** A finding takes its context from the sentence
+that holds the span's first token. Findings whose matched text is not
+in their context, and, for the before set, spans whose first and last
+tokens lie in different sentences:
+
+| findings | `emphatic_reflexive` | `af_less_than` | `cc_cleft` across sentences |
+|---|---|---|---|
+| TF-010 pool (11,014) | 23 of 576 | 3 of 6 | 11 of 23 |
+| TF-010 arXiv full run (110,962) | 69 of 1,155 | 8 of 17 | 9 of 28 |
+| TF-012 LLM corpus (1,411) | 5 of 39 | 0 | 4 of 10 |
+| before set: README, notes, blogs (1,200) | 1 of 38 | 0 | 4 of 8 |
+
+No other pattern has a mismatch, `TRICOLON` included. Section 19's
+count of 22 was rough; it is 23 `EMPHATIC_REFLEXIVE` findings in the
+pool and none for `TRICOLON`. Every `cc_cleft` mismatch is the
+"across sentences" form, which spans two sentences on purpose. A
+reading of the cases on the console found two causes:
+
+- `emphatic_reflexive` takes the reflexive and the three tokens before
+  it. When the reflexive is one of the first three words of its
+  sentence, the span starts in the previous sentence: at its full
+  stop, its last words, or the blank line between paragraphs. The
+  context is then the previous sentence. This is the bug H1 describes.
+- `af_less_than` takes six tokens past `than`, which can run into the
+  next sentence. The start and the context are right, but the text
+  ends in the next sentence. The task asked only about spans that start
+  early; the user chose to fix this one too.
+
+**Test rows.** Six `SPAN_CASES` rows in `tests.py` check, through
+`analyse()`, the span's first word and whether the text lies in its
+context. Three `EMPHATIC_REFLEXIVE` rows (full stop, last words,
+paragraph break) and the `af_less_than` row failed before the fix. A
+reflexive far from its sentence start, and a cross-sentence `cc_cleft`
+row kept as a guard, passed before and after.
+
+**The fix.** `emphatic_reflexive` starts its span no earlier than the
+reflexive's sentence, and `af_less_than` ends its span no later than
+the sentence holding `than`. What either pattern matches is unchanged.
+`make regress` passed.
+
+**H1 holds.** ticfinder ran before and after with `--json` and waived
+findings shown. README (22 findings) and `notes/*.md` (43) are
+identical. In the 33 blogs, 1 of 1,135 findings changed: an
+`EMPHATIC_REFLEXIVE` span that started at the previous sentence's last
+word, whose fingerprint changed from 7e53fb to 3e8fcd. Every other
+finding has the same span, fingerprint, label, confidence and context.
+No finding that stayed inside one sentence changed. After the fix the
+only spans that cross a sentence boundary are the 4 cross-sentence
+clefts.
+
+**Waivers.** No waiver in `waivers/` or in the migrated copy goes
+stale. The changed finding was not waived. The 3 stale entries in
+`waivers/` and the 10 in the migrated copy are the same ids before and
+after the fix.
+
+**Harvest.** The labels after the fix equal the labels before, row for
+row and fingerprint for fingerprint (479 rows), since the changed
+finding is in a blog outside the seven harvested ones: 132 accepted,
+52 rewritten, 292 deleted, 3 open. The per-pattern and per-subtype
+rows are equal, and so is prec* at each level: high 0.290 (9
+rewritten / 22 accepted, 74 findings), med 0.283 (39 / 99, 368), low
+0.267 (4 / 11, 37), med or above 0.284 (48 / 121, 442).
+
+**Harvest files regenerated.** `eval/labels.jsonl` and
+`eval/harvest-summary.json` were written from this harvest, on the
+migrated copy of `$PACINO/waivers`; `$PACINO/waivers` was not
+migrated. They held the totals from before TF-010 (141, 54, 302) and
+now hold 132, 52, 292 and 3. The summary records ticfinder sha256
+9a03a6bfeeb4, the phase 1 version, with `tf_commit` 28642ea "with
+uncommitted changes", since it was written before the phase 1 commit.
