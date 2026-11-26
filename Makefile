@@ -28,3 +28,5 @@ notes:
 
 regress:
 	./tools/tests.py
+	python3 eval/spec_baseline.py selftest
+	python3 eval/llm_specs.py selftest
