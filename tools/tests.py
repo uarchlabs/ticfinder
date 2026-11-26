@@ -704,7 +704,9 @@ PATTERN_ROWS = [
 # PATTERN_ROWS that fail before a fix lands (TF-010), keyed by
 # (pattern, text). They print as xfail and do not fail the suite; an
 # entry that passes prints as xpass and fails it, so the set is emptied
-# with the fix. TF-011: the concessive rows, one group per cue.
+# with the fix. TF-011: the concessive rows, one group per cue. No cue
+# passed both its held-out test and the arXiv recheck, so none was
+# merged and the rows stay pending (roadmap section 18).
 PENDING = {
     ("cc_coordinated", t) for t in (
         "This proposal does not attempt to cover every case, but does aim "

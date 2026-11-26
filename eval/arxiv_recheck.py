@@ -33,7 +33,9 @@ the new code reports under another pattern of the construction counts as
 moved, such as cc_additive split from cc_coordinated). It also added two
 sources: `spec`, the TF-009 spec findings (groups are the five sources),
 and `full`, the TF-008 full bodies, all sections. Both read the private
-snapshots that TF-010 took before its reruns. A stored sentence is the
+snapshots that TF-010 took before its reruns. TF-011 added `spec10` and
+`full10`, the TF-010 spec findings and full bodies, from the snapshots
+TF-011 took before its reruns. A stored sentence is the
 one the span starts in, so a cleft across sentences cannot reproduce
 from it; --cross parses the stored span text instead when the span runs
 past its sentence.
@@ -69,17 +71,24 @@ SOURCES = [
      "findings.jsonl", PRIVATE / "bodies-tf008" / "per_paper.jsonl"),
     ("spec", "TF-009 spec baseline", ROOT / "private" / "specs-tf009" /
      "findings.jsonl", ROOT / "private" / "specs-tf009" / "per_doc.jsonl"),
+    ("full10", "TF-010 full bodies, all sections", PRIVATE /
+     "bodies-tf010" / "findings.jsonl", PRIVATE / "bodies-tf010" /
+     "per_paper.jsonl"),
+    ("spec10", "TF-010 spec baseline", ROOT / "private" / "specs-tf010" /
+     "findings.jsonl", ROOT / "private" / "specs-tf010" / "per_doc.jsonl"),
 ]
+SPEC_KEYS = ("spec", "spec10")
+FULL_KEYS = ("body", "full", "full10")
 WINDOWS = ["pre", "post"]
 SPEC_SOURCES = ["peps", "ietf", "rust", "riscv", "opentitan"]
 
 
 def groups(key):
-    return SPEC_SOURCES if key == "spec" else WINDOWS
+    return SPEC_SOURCES if key in SPEC_KEYS else WINDOWS
 
 
 def group_of(key, r):
-    return r["source"] if key == "spec" else r["window"]
+    return r["source"] if key in SPEC_KEYS else r["window"]
 
 
 def load_module(name, path):
@@ -130,7 +139,7 @@ def stored(cid, key, path, sub=None, pat=None):
         if pat is not None and r.get("pattern") != pat:
             continue
         t = r.get("type")
-        if key in ("body", "full") and t not in SECTION_TYPES:
+        if key in FULL_KEYS and t not in SECTION_TYPES:
             continue
         if key == "babs" and t != "abstract":
             continue
@@ -146,7 +155,7 @@ def words(key, path):
         r = json.loads(line)
         x = r["words"]
         if isinstance(x, dict):
-            x = (sum(x[t] for t in SECTION_TYPES) if key in ("body", "full")
+            x = (sum(x[t] for t in SECTION_TYPES) if key in FULL_KEYS
                  else x["body"] if key == "bsec" else x["abstract"])
         w[group_of(key, r)] += x
     return w
@@ -166,7 +175,8 @@ def main():
     ap.add_argument("--show", type=int, default=0)
     ap.add_argument("--seed", default="tf006")
     ap.add_argument("--sources", default="abs,body",
-                    help="comma list of abs, body, bsec, babs")
+                    help="comma list of abs, body, bsec, babs, full, spec, "
+                         "full10, spec10")
     ap.add_argument("--subtype", default=None,
                     help="only stored findings with this subtype")
     ap.add_argument("--pattern", default=None,
@@ -245,7 +255,7 @@ def main():
             rates[win] = (len(rows) / kw, n_new / kw, scaled / kw)
             table.append((label, win, len(rows), n_old, n_new, n_moved,
                           n_new_only, w[win], *rates[win]))
-        if key != "spec":
+        if key not in SPEC_KEYS:
             table.append((label, "post/pre", None, None, None, None, None,
                           None, *(ratio(rates["post"][i], rates["pre"][i])
                                   for i in range(3))))
