@@ -2,7 +2,7 @@
 
 Terms used in the ticfinder roadmap, task files and notes, grouped by
 where they come from. Table 1 holds standard terms. Table 2 holds
-ticfinder's own terms, often an ordinary word with a stretched meaning. Table 3 holds terms coined in TF-003 to TF-010, which have no
+ticfinder's own terms, often an ordinary word with a stretched meaning. Table 3 holds terms coined in TF-003 to TF-011, which have no
 meaning outside this project.
 
 ## Table 1. Standard terms, used in their usual sense
@@ -58,7 +58,7 @@ meaning outside this project.
 | waiver, stale waiver | a fingerprint the editor marked as acceptable; stale when no current finding matches it | a detector fix can make a waiver stale without invalidating it; `--prune-stale` removes it |
 | all sections, body sections | in TF-005, all four section types together, against the `body` section type alone | the TF-005 `HOLLOW_BOOSTER` ratio 3.31 is body sections; all sections give 2.98 |
 
-## Table 3. Terms from TF-003 to TF-009 with no outside standing
+## Table 3. Terms from TF-003 to TF-011 with no outside standing
 
 | term | meaning | where |
 |---|---|---|
@@ -119,3 +119,7 @@ meaning outside this project.
 | gapped conjunct | a second conjunct that shares the first one's verb, as in `could not have` or `cannot, and should not, run`; `NEG_ESCALATION` needs one | TF-010 phase 2 |
 | moved | in a recheck by pattern, a reproduced finding the new code reports under another pattern of the same construction | TF-010 phase 2 |
 | cross parse | `arxiv_recheck.py --cross`: parsing the stored span text when the span runs past the stored sentence, so a cleft across sentences can reproduce | TF-010 phase 2 |
+| development set | the labelled findings a cue is designed and tuned on; in TF-011 the TF-010 H1 reading plus 40 more pool findings | TF-011 phase 1 |
+| held-out reading | a seeded, labelled reading kept apart from the development set and labelled before any cue is written; a cue is judged on it | TF-011 phase 1 |
+| corrective marker | a word in the second conjunct that signals replacement: `instead`, `rather`, `merely`, `only`, `simply`, `just` | TF-011 phase 2 |
+| corrective pair | a `but` coordination whose second conjunct fills the negated element's slot (`does not use X, but a tracing collector`); the opposite of a concessive pair | TF-011 |

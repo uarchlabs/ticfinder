@@ -391,7 +391,7 @@ Tidied after TF-004. Step numbers are kept stable because task files
 cite them, so they do not give the order of work. The order is listed
 after the steps.
 
-Done: steps 1 to 7, 9 to 11, 14 and 16. Planned: steps 8, 12, 13 and 15. The
+Done: steps 1 to 7, 9 to 11, 14, 16 and 17. Planned: steps 8, 12, 13 and 15. The
 list stays in step order, so the numbers render as written.
 
 1. Drop `harvest.py` into `ticfinder/eval/`, run it, and confirm the
@@ -536,13 +536,28 @@ list stays in step order, so the numbers render as written.
     `cc_coordinated` and `cc_cleft` findings real, under the 60% aimed
     for; concessive pairs are the largest remaining failure kind.
     Results in section 17.
+17. **Concessive pairs in `cc_coordinated`** (TF-011). Done, a null
+    result. Five cues and one variant were tested one at a time on a
+    development set and scored on a held-out reading of 60 findings.
+    Emphatic `do`, a negated second conjunct, and a `there` or clausal
+    subject in the second conjunct dropped no held-out finding read as
+    not real. A different verb with no corrective marker, and a negated
+    adjective followed by a lexical verb, kept 82% of the real
+    findings, under the 90% bar. A variant of the first that keeps
+    passive second conjuncts passed the held-out rule at 94%, but it was
+    designed after the held-out result was read, and 8 of 20 arXiv
+    findings it dropped were real, where H3 allowed 2. It was reverted.
+    `ticfinder.py` is unchanged from 494e4dd, so the spec baseline and
+    the arXiv full run were not rerun, and the concessive test rows stay
+    pending. Results in section 18.
 
 Order: 9 and 10 are done. 11 and 7 do not depend on each other and can
 run side by side. 14 goes after 11, so that one analysis measures the
 fixed and split patterns. 8 needs 7 and uses 14's body ratios as its
 prior (9's if 14 has not run). 16 goes after 7 and before 8, because
 TF-009 found three detectors firing on normative spec text; 8 reads the
-reports 16 reran, at one ticfinder version. 12 needs new labels from blog editing, so
+reports 16 reran, at one ticfinder version. 17 goes after 16 and before 8; it
+changed no code, so 8 reads the TF-010 reports. 12 needs new labels from blog editing, so
 it goes when they exist. 13 comes after 8. 15 comes after 8, so its
 levels come from measured LRs. It can go before 13, or during 12's blog
 editing at `low` to collect accepted labels. Step 13's mining can also
@@ -2414,3 +2429,121 @@ spec baseline and the arXiv full run at one ticfinder version. The
 follow-up for `cc_coordinated` is the concessive pair with its own
 predicate, rows first; it is the largest failure kind left. No
 confidence level changed.
+
+## 18. TF-011 results (2026-11-25)
+
+Step 17: cues for the concessive pairs that TF-010 left in
+`cc_coordinated`. No cue was merged. ticfinder stays at 494e4dd (sha256
+f0fc55a44f37), and no confidence level, pattern name or fingerprint
+changed. Every sentence read in this task stays in `private/`; test rows
+are synthetic.
+
+### Phase 1: baselines and test rows
+
+**Preconditions.** `make regress` passed. Harvest on a migrated copy of
+`$PACINO/waivers` gave 132 accepted, 52 rewritten, 292 deleted and 3
+open, with `cc_coordinated` at 0 rewritten and 1 accepted. Harvest wrote
+its labels to the scratchpad, so `eval/labels.jsonl` is unchanged. The
+pinned rebuild of `eval/spec-baseline-2026-11-25.md` was identical.
+
+**Snapshots.** The TF-010 spec tables and findings are in
+`private/specs-tf010/` and the TF-010 full tables in
+`private/arxiv/bodies-tf010/`, each with a checksum file. The spec report
+rebuilds from them unchanged.
+
+**Failure kinds.** The development set is the 42 findings the TF-010 H1
+reading found not real, plus a new reading of 40 random pool findings
+outside it (22 real). Its 60 not-real findings fall into these kinds:
+
+| failure kind | count | cue |
+|---|---|---|
+| the second conjunct has its own negation (`not`, `never`, `no`) | 11 | C4 |
+| a different verb in the second conjunct and no corrective marker | 11 | C2 |
+| the second conjunct is a clause whose subject the subject test misses (`there`, a clause, inversion) | 9 | C5 |
+| a negated predicate adjective or participle, then a lexical or passive verb | 8 | C3 |
+| the negation sits in another clause or disjunct | 4 | none |
+| the second conjunct opens with `if`, `since` or `when` | 3 | none |
+| `cc_cleft`, out of scope | 3 | none |
+| emphatic `do` in the second conjunct | 2 | C1 |
+| the coordination sits inside the negated scope (`after X but before Y`) | 2 | none |
+| temporal concession (`not yet`) | 2 | none |
+| other single cases (`but will`, `also` outside the conjunct, `but see`, two more) | 5 | none |
+
+C4 and C5 were named from this reading. The named cues cover 41 of the
+60.
+
+**Held-out set.** 60 `cc_coordinated` findings, 30 from the spec pool
+and 30 from the arXiv bodies, outside the development set, drawn with a
+fixed seed and labelled before any cue was written: 37 real (13 of 30
+spec, 24 of 30 arXiv).
+
+**Test rows.** 15 negative rows, three per cue, all fail at 494e4dd and
+went into `PENDING`. 12 positive rows cover the corrective forms a cue
+could hit: a repeated verb (with and without `does`), a different verb
+without a marker, a passive second conjunct, constituent negation, and a
+negated adjective or noun followed by a lexical verb. All 12 pass.
+
+### Phase 2: the cues
+
+Scores count only findings that 494e4dd reproduces on the isolated
+sentence, about 85% of each set. C3 to C5 were measured on top of C2b,
+so their rows give the increment.
+
+| cue | dev, not real dropped | dev, real kept | held-out, not real dropped | held-out, real kept | result |
+|---|---|---|---|---|---|
+| C1 emphatic `do`, verb differs from the first | 2 / 50 | 48 / 48 | 0 / 17 | 33 / 33 | null |
+| C2 different verb, no marker | 28 / 50 | 40 / 48 | 8 / 17 | 27 / 33 (82%) | fails |
+| C2b as C2, a passive or participial second conjunct stays | 21 / 50 | 43 / 48 | 6 / 17 | 31 / 33 (94%) | passes; reverted (H3) |
+| C3 adjective or participle, then a passive verb (on C2b) | +4 / 29 | 41 / 43 | +2 / 11 | 27 / 31 | fails |
+| C4 negated second conjunct (on C2b) | +7 / 29 | 43 / 43 | 0 / 11 | 31 / 31 | null |
+| C5 `there` or clausal subject (on C2b) | +2 / 29 | 43 / 43 | 0 / 11 | 31 / 31 | null |
+
+C2b was designed after C2's held-out result was read, so its held-out
+score is not blind. Its development losses were mostly passive second
+conjuncts, which is the case it adds. Harvest was identical for every
+cue: `cc_coordinated` stayed at 0 rewritten and 1 accepted, and the
+totals at 132 / 52 / 292 / 3. C2b also failed four positive rows: an
+active corrective with a new verb and no marker, such as
+`should not rewrite the fields, but pass them along` and
+`does not copy the image but maps it`, and a negated adjective or noun
+followed by a lexical verb.
+
+**Recheck of C2b.** `eval/arxiv_recheck.py` gained the `spec10` and
+`full10` sources, which read the TF-010 snapshots. C2b against 494e4dd,
+`--pattern cc_coordinated --cross`:
+
+| corpus | reproduced | kept | moved | dropped | real, dropped | real, kept |
+|---|---|---|---|---|---|---|
+| spec | 181 | 131 | 0 | 50 | 5 / 20 | 12 / 20 |
+| arXiv | 503 | 407 | 0 | 96 | 8 / 20 | 15 / 20 |
+
+The real findings C2b dropped are mostly active correctives with a new
+verb and no marker, such as `do not enter X but go directly to Y` and
+`does not result in X but leads to Y`. The rest have a marker in the
+first conjunct, as in `does not simply X, but Y`, or are misparses. The kept spec findings read real as
+often as TF-010's (12 of 20). No pattern emitted an empty, inverted or
+zero-width span, and no kept span changed. Three stored findings counted
+as "new only" are spans both versions report as `cc_additive` on the
+isolated parse.
+
+**Decision.** The user chose to revert C2b. The concessive rows stay in
+`PENDING`, and the 12 positive rows stay as guards.
+
+### Phase 3: records only
+
+With no cue merged, the detector code is the TF-010 code, so the spec
+baseline and arXiv full reruns (requirements 11 and 12) would reproduce
+the TF-010 reports. At the user's direction they were skipped, along
+with the fresh H2 reading and the ratios (13 and 14). The TF-010
+reports, `ARXIV_PIN` and its ratios stand for step 8.
+
+**Verdict.** H1 fails: no cue set reaches 70% of the not-real findings
+dropped with 90% of the real ones kept; the best, C2b, dropped 6 of 17.
+H2 was not tested, since no cue was merged; TF-010's 49% stands. H3
+fails for C2b: 15 of 20 kept arXiv findings are real, and 8 of 20
+dropped ones are real against a limit of 2. Concessive and corrective
+pairs with a verb in each conjunct share their syntax, and the
+difference lies in whether the second predicate fills the negated
+slot. A parse-level cue does not see that. Two leads remain untested: a
+corrective marker in the first conjunct (`not simply`, `not merely`),
+and parse agreement with `en_core_web_trf` (5.6) for the misparses.
