@@ -169,8 +169,10 @@ looks:
 
 The label comes from item count, determiners on the items, premodifiers, a cue
 word in the lead-in (`conditions`, `formats`, `include`, `such as`), and
-whether the members are short and of similar length. `figure` is reported at
-medium confidence and the other two at low. The label is a hint, not a verdict.
+whether the members are short and of similar length. All three labels are
+reported at medium confidence: in design and spec documents, each runs about
+twice as often in LLM text as in human text (roadmap section 19). The label is
+a hint, not a verdict.
 
 Structural isomorphism was tried as a signal and removed. The classical
 definition of isocolon is members of equal length and identical shape, and
@@ -484,10 +486,12 @@ def my_tic(doc, nlp):
 ```
 
 A third element sets the confidence for that finding alone, overriding the
-construction's. This is how `TRICOLON` reports `figure` above `enumeration`:
+construction's. This is how `PARTICIPIAL_TAIL` reports a tail whose verb is
+`use` at `med`, one level under its own `high`. A lemma missing from the table
+gives `None`, which keeps the construction's level:
 
 ```python
-    out.append((span, "figure", "med"))
+    out.append((span, tok.lemma_, PT_LEMMA_CONFIDENCE.get(tok.lemma_)))
 ```
 
 Phrasal ones are entries in `PHRASE_PATTERNS` using spaCy `Matcher` syntax,

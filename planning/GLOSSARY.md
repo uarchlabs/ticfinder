@@ -134,3 +134,6 @@ meaning outside this project.
 | steered corpus | LLM text written under instructions that ban some constructions (pacino bans em dashes and decorative phrasing), so its LRs measure that model output, not unsteered LLM text | TF-012 phase 2 |
 | vocabulary row | an LR row whose LLM findings are mostly literal domain terms (`idempotent`, `harness`, `mutually exclusive`), flagged and not banded | TF-012 phase 2 |
 | band, cut set | a level (low, med, high) given by LR cut points; a cut set is one choice of the med and high cuts | TF-012 phase 3 |
+| set C | the cut set the user chose after TF-012: `med` when the LR interval's lower end is above 1, `high` when it is 3 or more, `low` otherwise | TF-012 phase 3, TF-013 |
+| label LR | the LR of one `tricolon` label (`enumeration`, `list-like`, `figure`) from the stored subtype counts, with the joint bootstrap; there is none against the author's specs, because the TF-010 author table has no subtype counts | TF-013 phase 1 |
+| recorded exception | a level the user kept against its band, with the reason written in the roadmap and not in code; `PARTICIPIAL_TAIL` stays at `high` | TF-013 |

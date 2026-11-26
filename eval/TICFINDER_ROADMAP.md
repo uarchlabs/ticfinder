@@ -391,7 +391,7 @@ Tidied after TF-004. Step numbers are kept stable because task files
 cite them, so they do not give the order of work. The order is listed
 after the steps.
 
-Done: steps 1 to 7, 9 to 11, 14, 16 and 17, and part 1 of step 8. Planned: part 2 of step 8, and steps 12, 13 and 15. The
+Done: steps 1 to 11, 14, 16 and 17. Planned: steps 12, 13 and 15. The
 list stays in step order, so the numbers render as written.
 
 1. Drop `harvest.py` into `ticfinder/eval/`, run it, and confirm the
@@ -445,13 +445,20 @@ list stays in step order, so the numbers render as written.
    weak (tau2 1.11), so shrinkage moves rows little. Three rows count
    domain vocabulary more than the construction. H2 and H3 hold and H4
    fails. Three candidate cut sets are proposed and no level changed.
-   Part 2, still open: apply the levels. The user chose set C (med when
-   the LR interval's lower end is above 1, high when it is 3 or more):
-   `TRICOLON` and `tricolon` go from low to med and `EMPHATIC_REFLEXIVE`
-   from med to low. `PARTICIPIAL_TAIL` stays at high, an exception,
-   because the steered corpus runs low on it while arXiv shows a 3.5
-   times rise. The flagged rows keep their levels. Results in section
-   19.
+   Results in section 19.
+   Part 2 done (TF-013): the levels of set C (med when the LR
+   interval's lower end is above 1, high when it is 3 or more).
+   `TRICOLON` went from low to med and `EMPHATIC_REFLEXIVE` from med to
+   low. Each `tricolon` label has an LR interval above 1 (`enumeration`
+   1.98, `list-like` 1.93, `figure` 2.63), and the user chose med for all
+   three; `tricolon_parataxis` stays at med. `PARTICIPIAL_TAIL` stays at
+   high, a recorded exception: the steered corpus runs low on it while
+   arXiv shows a 3.5 times rise. The flagged rows keep their levels.
+   Every finding, span and fingerprint is unchanged, and so are the
+   harvest labels. Harvest prec* at med or above fell from 0.40 to 0.28,
+   because the editor kept most blog `TRICOLON` findings: the spec LR and
+   the blog labels disagree for this construction. Results in section
+   20.
 9. **arXiv paper bodies, a pilot** (TF-005). Done: 200 papers per
    window from the TF-004 set, measured from v1 LaTeX source with a new
    masker in `eval/arxiv_bodies.py`. For 5 of the 7 constructions with
@@ -574,9 +581,8 @@ fixed and split patterns. 8 needs 7 and uses 14's body ratios as its
 prior (9's if 14 has not run). 16 goes after 7 and before 8, because
 TF-009 found three detectors firing on normative spec text; 8 reads the
 reports 16 reran, at one ticfinder version. 17 goes after 16 and before 8; it
-changed no code, so 8 reads the TF-010 reports. Part 1 of 8 is done;
-part 2, the level changes, needs the user's choice of cut points, and 15
-waits for those levels. 12 needs new labels from blog editing, so
+changed no code, so 8 reads the TF-010 reports. Both parts of 8 are done,
+so 15 can start at levels set from measured LRs. 12 needs new labels from blog editing, so
 it goes when they exist. 13 comes after 8. 15 comes after 8, so its
 levels come from measured LRs. It can go before 13, or during 12's blog
 editing at `low` to collect accepted labels. Step 13's mining can also
@@ -2723,3 +2729,126 @@ rise. For the participial tail, abstract adverbs and LLM diction it
 does not, through steering and domain vocabulary. Part 2 of step 8 is
 the user's choice of cut points, then the level changes with test rows
 and harvest measured before and after.
+
+## 20. TF-013 results (2026-11-26)
+
+Step 8, part 2: the levels of set C, which the user chose after TF-012.
+ticfinder started at 494e4dd (sha256 f0fc55a44f37) and is now at 28642ea
+(sha256 5dc04c31b06b). Only confidence levels and their comments changed:
+no detector logic, phrase list entry, pattern name or fingerprint. The
+TF-012 LR tables stand and the LR report was not rerun.
+
+### Phase 1: measure first
+
+**Preconditions.** `make regress` passed and ticfinder matched its pin.
+Harvest on a migrated copy of `$PACINO/waivers` in the scratchpad (19
+waivers rekeyed) gave 132 accepted, 52 rewritten, 292 deleted and 3
+open, the TF-010 totals. The committed `eval/labels.jsonl` and
+`eval/harvest-summary.json` still hold the earlier totals (141, 54, 302)
+and were left unchanged.
+
+**LR by label.** `eval/llm_specs.py analyse --labels` computes the
+`TRICOLON` LR for each label of the `tricolon` pattern from the stored
+subtype counts, with the TF-012 joint bootstrap (LLM seed 12012, pool
+seed 9009, arXiv seed 8008, 2,000 draws). It prints to the console and
+writes nothing. The label counts sum to the pattern counts, and the
+pattern row equals the TF-012 JSON.
+
+| row | findings LLM / pool | LR (95% interval) | set C | arXiv post over pre, all sections |
+|---|---|---|---|---|
+| `tricolon` | 805 / 4,569 | 2.02 (1.83 to 2.24) | med | 1.42 (1.34 to 1.50) |
+| `enumeration` | 214 / 1,366 | 1.98 (1.62 to 2.37) | med | 1.48 (1.37 to 1.60) |
+| `list-like` | 478 / 2,722 | 1.93 (1.72 to 2.16) | med | 1.43 (1.35 to 1.51) |
+| `figure` | 113 / 481 | 2.63 (1.91 to 3.54) | med | 1.22 (1.10 to 1.35) |
+
+**H1 holds.** Every label's interval has its lower end above 1, so set
+C gives each label med. `figure` has the highest LR, but its lower end
+is under 3, so it does not reach high. In the abstract section of the
+same arXiv tables, `enumeration` and `list-like` rose (1.58 and 1.54)
+and `figure` was flat (0.94, 0.71 to 1.25), as in TF-004.
+
+The LR against the author's specs has no label rows. The TF-010 author
+table stores construction and pattern counts only. The user chose to
+record the gap and not rerun; the pattern LR against the author (1.70)
+stands.
+
+**The choice.** Options (a), every label at med, and (c), the set C
+band of each label, give the same levels. Option (b) would have put
+`figure` at high and lowered harvest prec* at high from 0.29 to 0.24,
+because blog `figure` findings are 1 rewritten against 9 accepted. The
+user chose med for all three labels and kept `tricolon_parataxis` at
+med. That pattern has 1 finding in the LLM corpus and 6 in the pool, so
+it has no LR. Its override now equals the construction's level.
+
+### Phase 2: the change
+
+**Test rows.** Four `PATTERN_CASES` rows fix the level of one
+`tricolon` finding per label (med) and one `EMPHATIC_REFLEXIVE` finding
+(low). Three failed before the change, on the level alone; the `figure`
+row already passed, since `figure` was med. The `PARTICIPIAL_TAIL` rows
+at high and for `use` at med stay as guards.
+
+**Levels.** `TRICOLON` went from low to med, with its `enumeration` and
+`list-like` labels; `figure` and `tricolon_parataxis` stay at med.
+`EMPHATIC_REFLEXIVE` went from med to low. `make regress` passed.
+
+**H2 holds.** ticfinder ran before and after with `--json` and waived
+findings shown.
+
+| input | files | findings | other than confidence | `TRICOLON` low to med | `EMPHATIC_REFLEXIVE` med to low |
+|---|---|---|---|---|---|
+| `README.md` | 1 | 22 | 0 differ | 11 | 1 |
+| `notes/*.md` | 4 | 43 | 0 differ | 24 | 3 |
+| pacino blogs | 33 | 1,135 | 0 differ | 515 | 34 |
+
+Spans, fingerprints, labels and stats are identical. The waived,
+disabled and stale counts are the same, and `waivers/` is byte for
+byte unchanged.
+
+**H3 holds.** Harvest after gives the same labels, totals and pattern
+and subtype rows; 221 `TRICOLON` rows moved to med and 12
+`EMPHATIC_REFLEXIVE` rows to low.
+
+| prec* | before | after |
+|---|---|---|
+| at high | 0.290 (9 / 22, 74 findings) | 0.290 (9 / 22, 74) |
+| at med | 0.469 (23 / 26, 159) | 0.283 (39 / 99, 368) |
+| at low | 0.192 (20 / 84, 246) | 0.267 (4 / 11, 37) |
+| at med or above | 0.400 (32 / 48, 233) | 0.284 (48 / 121, 442) |
+
+Prec* at med or above falls by 0.116, and the findings reported at med
+or above nearly double. In the blogs the labels have prec* of 0.12
+(`enumeration`), 0.22 (`list-like`) and 0.10 (`figure`).
+
+### What the disagreement means
+
+Section 5.3 asks for two measurements before a confident finding: an
+LR, and whether the construction intrudes, from the editor's labels.
+For `TRICOLON` they disagree. In the spec register the LLM writes about
+twice as many series of three or more as human authors do. In the blog
+register the editor kept most of them. The med level follows the LR, as
+set C prescribes. The blog labels say that a `TRICOLON` finding at med
+is usually one the editor keeps. Two readings remain open: the blog
+labels may reflect a register where lists are expected, or an editor
+who tolerates them. Step 12's fresh labels for the clause and noun
+split can test the first.
+
+### The `PARTICIPIAL_TAIL` exception
+
+Set C would take `PARTICIPIAL_TAIL` from high to low (LR 0.54, 0.36 to
+0.74). The user kept it at high, and its `use` lemma at med. The LLM
+corpus is steered: pacino's instructions discourage decorative
+phrasing, and the tail runs low there. In arXiv bodies the tail rose
+3.5 times after LLMs, and 19 of 20 LLM-corpus findings read real
+(section 19). A low LR from a corpus written to avoid the construction
+does not show that LLMs avoid it. The exception is recorded here and
+not in code.
+
+### Phase 3: README and records
+
+The README now says all three labels report at medium, and its
+per-finding confidence example uses the `PARTICIPIAL_TAIL` `use` lemma,
+since `TRICOLON` no longer reports `figure` above `enumeration`. `make`
+shows the same 22 README findings as before, with the same
+fingerprints. The glossary gained set C, label LR and recorded
+exception.
