@@ -11,7 +11,7 @@ skipped. Also checks that no numeric field holds a string other than
 rows from each side and exits 1.
 
 Handles the "arxiv-rates" (TF-004), "arxiv-bodies" (TF-005 pilot and
-TF-008 full run) and "spec-baseline" (TF-009) kinds. The harvest summary has a different row shape and
+TF-008 full run), "spec-baseline" (TF-009) and "llm-lr" (TF-012) kinds. The harvest summary has a different row shape and
 is not covered.
 """
 import json
@@ -67,8 +67,38 @@ def render_spec(r):
             + f" | {outs} |")
 
 
-def render(kind, r):
+def ci3(d, k):
+    if d.get(k) is None:
+        return "-"
+    return ci(d[k], d[k + "_lo"], d[k + "_hi"])
+
+
+def render_llm(r, bands):
+    """Rows of the "llm-lr" kind (TF-012)."""
+    t, k = r["table"], key(r)
+    if t == "Sanity reading":
+        return f"| `{k}` | {f(r['lr'])} | {r['real']} / {r['read']} |"
+    if t == "Proposed bands":
+        cur = r["current"] + (f" ({r['current_note']})"
+                              if r["current_note"] else "")
+        return (f"| `{k}` | {cur} | {ci3(r, 'lr')} | "
+                + " | ".join(r["bands"][b["set"]] for b in bands)
+                + f" | {r['flag'] or '-'} |")
+    a = r["arxiv"]
+    ax = "-" if a["ratio"] is None else ci(a["ratio"], a["lo"], a["hi"])
+    head = (f"| `{k}` | {r['llm']['n']} | {rr(r['llm'])} | "
+            f"{r['pool']['n']} | {rr(r['pool'])} | ")
+    if t == "Rows without an LR":
+        return head + f"{ax} |"
+    return (head + f"{ci3(r, 'lr')} | {r['interval']} | {ax} | "
+            f"{f(r['lr_shrunk'])} | {f(r['w'])} | {r['author']['n']} | "
+            f"{ci3(r, 'lr_author')} | {r['flag'] or '-'} |")
+
+
+def render(kind, r, j=None):
     t = r["table"]
+    if kind == "llm-lr":
+        return render_llm(r, j["bands"])
     if kind == "spec-baseline":
         return render_spec(r)
     if kind == "arxiv-rates":
@@ -133,7 +163,8 @@ def walk(x):
     """Exit if a numeric field holds a string other than "inf"."""
     if isinstance(x, dict):
         for k, v in x.items():
-            if (k in ("n", "papers", "rate", "ratio", "mean")
+            if (k in ("n", "papers", "rate", "ratio", "mean", "lr",
+                      "lr_shrunk", "lr_author")
                     and isinstance(v, str) and v != "inf"):
                 sys.exit(f"string number {k}={v}")
             walk(v)
@@ -146,7 +177,7 @@ def main():
     if len(sys.argv) != 3:
         sys.exit(__doc__.split("\n\n")[1])
     j = json.load(open(sys.argv[1], encoding="utf-8"))
-    R = Counter(render(j["kind"], r) for r in j["rows"])
+    R = Counter(render(j["kind"], r, j) for r in j["rows"])
     T = Counter(report_rows(sys.argv[2]))
     print(f"{sys.argv[1]}: {sum(R.values())} JSON rows, "
           f"{sum(T.values())} report rows")

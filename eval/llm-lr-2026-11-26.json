@@ -1,0 +1,1342 @@
+{
+ "schema": 1,
+ "kind": "llm-lr",
+ "tf_commit": "494e4dd",
+ "tf_sha256": "f0fc55a44f37",
+ "generated": "2026-11-26",
+ "report": "llm-lr-2026-11-26.md",
+ "min_n": 20,
+ "pool_used": "equal",
+ "corpus_pin": "f88a61bd8062c1bde7bd9b6d3c4d51fec42f531a",
+ "analysed_as": ".txt",
+ "bootstrap": {
+  "draws": 2000,
+  "seed": 12012,
+  "pool_seed": 9009,
+  "arxiv_seed": 8008,
+  "interval": "percentile 95%, nearest rank for ratios; LR draws pair the LLM and pool draws by index"
+ },
+ "sample": {
+  "files": 70,
+  "words": 140849,
+  "raw_words": 234602,
+  "masked_share_median": 27.4,
+  "masked_share_over_40": 26
+ },
+ "prior": {
+  "rows": 12,
+  "tau2": 1.111,
+  "mean_offset": -0.05974
+ },
+ "pin_checks": [
+  "pool equal-weight rows equal to TF-010 JSON: 39 of 39",
+  "arXiv all-section ratio rows equal to TF-010 JSON: 42 of 42"
+ ],
+ "bands": [
+  {
+   "set": "A",
+   "statistic": "lr",
+   "med": 1.5,
+   "high": 3.0
+  },
+  {
+   "set": "B",
+   "statistic": "lr",
+   "med": 1.25,
+   "high": 2.0
+  },
+  {
+   "set": "C",
+   "statistic": "lo",
+   "med": 1.0,
+   "high": 3.0
+  }
+ ],
+ "note": "LR = LLM rate over the equal-weight pool rate",
+ "rows": [
+  {
+   "table": "LRs: construction",
+   "level": "construction",
+   "key": "CORRECTIVE_CONTRAST",
+   "construction": "CORRECTIVE_CONTRAST",
+   "llm": {
+    "n": 270,
+    "documents": 53,
+    "rate": 1.917,
+    "rate_lo": 1.586,
+    "rate_hi": 2.284
+   },
+   "pool": {
+    "n": 473,
+    "rate": 0.2912,
+    "rate_lo": 0.2568,
+    "rate_hi": 0.33
+   },
+   "lr": 6.584,
+   "lr_lo": 5.242,
+   "lr_hi": 8.202,
+   "interval": "above 1",
+   "arxiv": {
+    "pre_n": 749,
+    "post_n": 1042,
+    "ratio": 1.808,
+    "lo": 1.544,
+    "hi": 2.101
+   },
+   "lr_shrunk": 6.486,
+   "w": 0.9884,
+   "author": {
+    "n": 15
+   },
+   "lr_author": null,
+   "lr_author_lo": null,
+   "lr_author_hi": null,
+   "flag": "precision"
+  },
+  {
+   "table": "LRs: construction",
+   "level": "construction",
+   "key": "BORROWED_RIGOUR",
+   "construction": "BORROWED_RIGOUR",
+   "llm": {
+    "n": 56,
+    "documents": 17,
+    "rate": 0.3976,
+    "rate_lo": 0.2066,
+    "rate_hi": 0.6294
+   },
+   "pool": {
+    "n": 244,
+    "rate": 0.1713,
+    "rate_lo": 0.1259,
+    "rate_hi": 0.2272
+   },
+   "lr": 2.321,
+   "lr_lo": 1.157,
+   "lr_hi": 4.03,
+   "interval": "above 1",
+   "arxiv": {
+    "pre_n": 1270,
+    "post_n": 1129,
+    "ratio": 1.155,
+    "lo": 0.9894,
+    "hi": 1.355
+   },
+   "lr_shrunk": 2.189,
+   "w": 0.9156,
+   "author": {
+    "n": 6
+   },
+   "lr_author": null,
+   "lr_author_lo": null,
+   "lr_author_hi": null,
+   "flag": "vocabulary"
+  },
+  {
+   "table": "LRs: construction",
+   "level": "construction",
+   "key": "TRICOLON",
+   "construction": "TRICOLON",
+   "llm": {
+    "n": 806,
+    "documents": 61,
+    "rate": 5.722,
+    "rate_lo": 5.248,
+    "rate_hi": 6.247
+   },
+   "pool": {
+    "n": 4575,
+    "rate": 2.83,
+    "rate_lo": 2.666,
+    "rate_hi": 2.993
+   },
+   "lr": 2.022,
+   "lr_lo": 1.829,
+   "lr_hi": 2.248,
+   "interval": "above 1",
+   "arxiv": {
+    "pre_n": 16114,
+    "post_n": 17574,
+    "ratio": 1.417,
+    "lo": 1.338,
+    "hi": 1.5
+   },
+   "lr_shrunk": 2.02,
+   "w": 0.9974,
+   "author": {
+    "n": 272
+   },
+   "lr_author": 1.7,
+   "lr_author_lo": 1.416,
+   "lr_author_hi": 2.104,
+   "flag": ""
+  },
+  {
+   "table": "LRs: construction",
+   "level": "construction",
+   "key": "ALTERNATIVE_FRAMING",
+   "construction": "ALTERNATIVE_FRAMING",
+   "llm": {
+    "n": 109,
+    "documents": 28,
+    "rate": 0.7739,
+    "rate_lo": 0.5513,
+    "rate_hi": 0.9811
+   },
+   "pool": {
+    "n": 934,
+    "rate": 0.6474,
+    "rate_lo": 0.5822,
+    "rate_hi": 0.7155
+   },
+   "lr": 1.195,
+   "lr_lo": 0.828,
+   "lr_hi": 1.556,
+   "interval": "spans 1",
+   "arxiv": {
+    "pre_n": 1491,
+    "post_n": 2697,
+    "ratio": 2.351,
+    "lo": 2.105,
+    "hi": 2.636
+   },
+   "lr_shrunk": 1.213,
+   "w": 0.9781,
+   "author": {
+    "n": 20
+   },
+   "lr_author": 3.126,
+   "lr_author_lo": 1.827,
+   "lr_author_hi": 5.993,
+   "flag": ""
+  },
+  {
+   "table": "LRs: construction",
+   "level": "construction",
+   "key": "EMPHATIC_REFLEXIVE",
+   "construction": "EMPHATIC_REFLEXIVE",
+   "llm": {
+    "n": 39,
+    "documents": 24,
+    "rate": 0.2769,
+    "rate_lo": 0.1916,
+    "rate_hi": 0.3689
+   },
+   "pool": {
+    "n": 576,
+    "rate": 0.3168,
+    "rate_lo": 0.2777,
+    "rate_hi": 0.357
+   },
+   "lr": 0.874,
+   "lr_lo": 0.6005,
+   "lr_hi": 1.175,
+   "interval": "spans 1",
+   "arxiv": {
+    "pre_n": 592,
+    "post_n": 540,
+    "ratio": 1.185,
+    "lo": 0.991,
+    "hi": 1.422
+   },
+   "lr_shrunk": 0.8811,
+   "w": 0.9732,
+   "author": {
+    "n": 0
+   },
+   "lr_author": null,
+   "lr_author_lo": null,
+   "lr_author_hi": null,
+   "flag": ""
+  },
+  {
+   "table": "LRs: construction",
+   "level": "construction",
+   "key": "PARTICIPIAL_TAIL",
+   "construction": "PARTICIPIAL_TAIL",
+   "llm": {
+    "n": 54,
+    "documents": 28,
+    "rate": 0.3834,
+    "rate_lo": 0.2616,
+    "rate_hi": 0.5145
+   },
+   "pool": {
+    "n": 1182,
+    "rate": 0.7121,
+    "rate_lo": 0.6414,
+    "rate_hi": 0.7908
+   },
+   "lr": 0.5384,
+   "lr_lo": 0.3631,
+   "lr_hi": 0.7436,
+   "interval": "below 1",
+   "arxiv": {
+    "pre_n": 6297,
+    "post_n": 16997,
+    "ratio": 3.508,
+    "lo": 3.247,
+    "hi": 3.824
+   },
+   "lr_shrunk": 0.5686,
+   "w": 0.9709,
+   "author": {
+    "n": 65
+   },
+   "lr_author": 0.4765,
+   "lr_author_lo": 0.2757,
+   "lr_author_hi": 0.7893,
+   "flag": ""
+  },
+  {
+   "table": "LRs: construction",
+   "level": "construction",
+   "key": "ABSTRACT_ADVERB",
+   "construction": "ABSTRACT_ADVERB",
+   "llm": {
+    "n": 40,
+    "documents": 21,
+    "rate": 0.284,
+    "rate_lo": 0.1614,
+    "rate_hi": 0.4386
+   },
+   "pool": {
+    "n": 947,
+    "rate": 0.6315,
+    "rate_lo": 0.5578,
+    "rate_hi": 0.7026
+   },
+   "lr": 0.4497,
+   "lr_lo": 0.2506,
+   "lr_hi": 0.7057,
+   "interval": "below 1",
+   "arxiv": {
+    "pre_n": 2662,
+    "post_n": 3125,
+    "ratio": 1.526,
+    "lo": 1.39,
+    "hi": 1.677
+   },
+   "lr_shrunk": 0.4825,
+   "w": 0.9424,
+   "author": {
+    "n": 33
+   },
+   "lr_author": 0.6952,
+   "lr_author_lo": 0.3357,
+   "lr_author_hi": 1.35,
+   "flag": "vocabulary"
+  },
+  {
+   "table": "LRs: construction",
+   "level": "construction",
+   "key": "LLM_DICTION",
+   "construction": "LLM_DICTION",
+   "llm": {
+    "n": 32,
+    "documents": 10,
+    "rate": 0.2272,
+    "rate_lo": 0.04439,
+    "rate_hi": 0.5782
+   },
+   "pool": {
+    "n": 1058,
+    "rate": 0.6212,
+    "rate_lo": 0.512,
+    "rate_hi": 0.7486
+   },
+   "lr": 0.3657,
+   "lr_lo": 0.07111,
+   "lr_hi": 0.9356,
+   "interval": "below 1",
+   "arxiv": {
+    "pre_n": 7283,
+    "post_n": 7684,
+    "ratio": 1.371,
+    "lo": 1.249,
+    "hi": 1.501
+   },
+   "lr_shrunk": 0.5621,
+   "w": 0.6747,
+   "author": {
+    "n": 36
+   },
+   "lr_author": 0.5098,
+   "lr_author_lo": 0.08548,
+   "lr_author_hi": 1.722,
+   "flag": "vocabulary"
+  },
+  {
+   "table": "LRs: pattern",
+   "level": "pattern",
+   "key": "CORRECTIVE_CONTRAST|cc_negated_apposition",
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_negated_apposition",
+   "llm": {
+    "n": 213,
+    "documents": 47,
+    "rate": 1.512,
+    "rate_lo": 1.236,
+    "rate_hi": 1.813
+   },
+   "pool": {
+    "n": 132,
+    "rate": 0.07747,
+    "rate_lo": 0.06183,
+    "rate_hi": 0.09484
+   },
+   "lr": 19.52,
+   "lr_lo": 14.647,
+   "lr_hi": 26.17,
+   "interval": "above 1",
+   "arxiv": {
+    "pre_n": 78,
+    "post_n": 301,
+    "ratio": 5.015,
+    "lo": 3.478,
+    "hi": 7.092
+   },
+   "lr_shrunk": 19.02,
+   "w": 0.9808,
+   "author": {
+    "n": 5
+   },
+   "lr_author": null,
+   "lr_author_lo": null,
+   "lr_author_hi": null,
+   "flag": "precision"
+  },
+  {
+   "table": "LRs: pattern",
+   "level": "pattern",
+   "key": "CORRECTIVE_CONTRAST|cc_parallel_sibling",
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_parallel_sibling",
+   "llm": {
+    "n": 41,
+    "documents": 26,
+    "rate": 0.2911,
+    "rate_lo": 0.2021,
+    "rate_hi": 0.387
+   },
+   "pool": {
+    "n": 37,
+    "rate": 0.02966,
+    "rate_lo": 0.01824,
+    "rate_hi": 0.04219
+   },
+   "lr": 9.815,
+   "lr_lo": 5.76,
+   "lr_hi": 17.01,
+   "interval": "above 1",
+   "arxiv": {
+    "pre_n": 44,
+    "post_n": 77,
+    "ratio": 2.274,
+    "lo": 1.455,
+    "hi": 3.554
+   },
+   "lr_shrunk": 8.9754,
+   "w": 0.9389,
+   "author": {
+    "n": 3
+   },
+   "lr_author": null,
+   "lr_author_lo": null,
+   "lr_author_hi": null,
+   "flag": "precision"
+  },
+  {
+   "table": "LRs: pattern",
+   "level": "pattern",
+   "key": "ALTERNATIVE_FRAMING|af_rather_than",
+   "construction": "ALTERNATIVE_FRAMING",
+   "pattern": "af_rather_than",
+   "llm": {
+    "n": 103,
+    "documents": 27,
+    "rate": 0.7313,
+    "rate_lo": 0.5152,
+    "rate_hi": 0.9344
+   },
+   "pool": {
+    "n": 477,
+    "rate": 0.3244,
+    "rate_lo": 0.2706,
+    "rate_hi": 0.3824
+   },
+   "lr": 2.254,
+   "lr_lo": 1.511,
+   "lr_hi": 3.04,
+   "interval": "above 1",
+   "arxiv": {
+    "pre_n": 509,
+    "post_n": 2045,
+    "ratio": 5.221,
+    "lo": 4.37,
+    "hi": 6.233
+   },
+   "lr_shrunk": 2.306,
+   "w": 0.9728,
+   "author": {
+    "n": 19
+   },
+   "lr_author": null,
+   "lr_author_lo": null,
+   "lr_author_hi": null,
+   "flag": ""
+  },
+  {
+   "table": "LRs: pattern",
+   "level": "pattern",
+   "key": "TRICOLON|tricolon",
+   "construction": "TRICOLON",
+   "pattern": "tricolon",
+   "llm": {
+    "n": 805,
+    "documents": 61,
+    "rate": 5.7153,
+    "rate_lo": 5.241,
+    "rate_hi": 6.243
+   },
+   "pool": {
+    "n": 4569,
+    "rate": 2.829,
+    "rate_lo": 2.664,
+    "rate_hi": 2.991
+   },
+   "lr": 2.021,
+   "lr_lo": 1.83,
+   "lr_hi": 2.2447,
+   "interval": "above 1",
+   "arxiv": {
+    "pre_n": 16111,
+    "post_n": 17572,
+    "ratio": 1.417,
+    "lo": 1.338,
+    "hi": 1.5
+   },
+   "lr_shrunk": 2.019,
+   "w": 0.9974,
+   "author": {
+    "n": 272
+   },
+   "lr_author": 1.698,
+   "lr_author_lo": 1.413,
+   "lr_author_hi": 2.102,
+   "flag": ""
+  },
+  {
+   "table": "Rows without an LR",
+   "level": "construction",
+   "key": "CLOSER",
+   "construction": "CLOSER",
+   "llm": {
+    "n": 0,
+    "documents": 0,
+    "rate": 0.0,
+    "rate_lo": 0.0,
+    "rate_hi": 0.0
+   },
+   "pool": {
+    "n": 56,
+    "rate": 0.03148,
+    "rate_lo": 0.02206,
+    "rate_hi": 0.04286
+   },
+   "lr": null,
+   "lr_lo": null,
+   "lr_hi": null,
+   "interval": null,
+   "arxiv": {
+    "pre_n": 346,
+    "post_n": 307,
+    "ratio": 1.153,
+    "lo": 0.9415,
+    "hi": 1.394
+   },
+   "lr_shrunk": null,
+   "w": null,
+   "author": {
+    "n": 4
+   },
+   "lr_author": null,
+   "lr_author_lo": null,
+   "lr_author_hi": null,
+   "flag": ""
+  },
+  {
+   "table": "Rows without an LR",
+   "level": "construction",
+   "key": "CONSULTANT_REGISTER",
+   "construction": "CONSULTANT_REGISTER",
+   "llm": {
+    "n": 1,
+    "documents": 1,
+    "rate": 0.0071,
+    "rate_lo": 0.0,
+    "rate_hi": 0.02237
+   },
+   "pool": {
+    "n": 258,
+    "rate": 0.1507,
+    "rate_lo": 0.1205,
+    "rate_hi": 0.1897
+   },
+   "lr": null,
+   "lr_lo": null,
+   "lr_hi": null,
+   "interval": null,
+   "arxiv": {
+    "pre_n": 4267,
+    "post_n": 4803,
+    "ratio": 1.463,
+    "lo": 1.3054,
+    "hi": 1.6501
+   },
+   "lr_shrunk": null,
+   "w": null,
+   "author": {
+    "n": 11
+   },
+   "lr_author": null,
+   "lr_author_lo": null,
+   "lr_author_hi": null,
+   "flag": ""
+  },
+  {
+   "table": "Rows without an LR",
+   "level": "construction",
+   "key": "EMPTY_FRAME",
+   "construction": "EMPTY_FRAME",
+   "llm": {
+    "n": 0,
+    "documents": 0,
+    "rate": 0.0,
+    "rate_lo": 0.0,
+    "rate_hi": 0.0
+   },
+   "pool": {
+    "n": 180,
+    "rate": 0.1098,
+    "rate_lo": 0.08038,
+    "rate_hi": 0.1471
+   },
+   "lr": null,
+   "lr_lo": null,
+   "lr_hi": null,
+   "interval": null,
+   "arxiv": {
+    "pre_n": 436,
+    "post_n": 208,
+    "ratio": 0.62,
+    "lo": 0.4986,
+    "hi": 0.7685
+   },
+   "lr_shrunk": null,
+   "w": null,
+   "author": {
+    "n": 0
+   },
+   "lr_author": null,
+   "lr_author_lo": null,
+   "lr_author_hi": null,
+   "flag": ""
+  },
+  {
+   "table": "Rows without an LR",
+   "level": "construction",
+   "key": "EM_DASH",
+   "construction": "EM_DASH",
+   "llm": {
+    "n": 0,
+    "documents": 0,
+    "rate": 0.0,
+    "rate_lo": 0.0,
+    "rate_hi": 0.0
+   },
+   "pool": {
+    "n": 139,
+    "rate": 0.1275,
+    "rate_lo": 0.0842,
+    "rate_hi": 0.1773
+   },
+   "lr": null,
+   "lr_lo": null,
+   "lr_hi": null,
+   "interval": null,
+   "arxiv": {
+    "pre_n": 771,
+    "post_n": 3751,
+    "ratio": 6.322,
+    "lo": 4.611,
+    "hi": 8.961
+   },
+   "lr_shrunk": null,
+   "w": null,
+   "author": {
+    "n": 133
+   },
+   "lr_author": null,
+   "lr_author_lo": null,
+   "lr_author_hi": null,
+   "flag": ""
+  },
+  {
+   "table": "Rows without an LR",
+   "level": "construction",
+   "key": "FRAME_MARKER",
+   "construction": "FRAME_MARKER",
+   "llm": {
+    "n": 0,
+    "documents": 0,
+    "rate": 0.0,
+    "rate_lo": 0.0,
+    "rate_hi": 0.0
+   },
+   "pool": {
+    "n": 106,
+    "rate": 0.06065,
+    "rate_lo": 0.04665,
+    "rate_hi": 0.0772
+   },
+   "lr": null,
+   "lr_lo": null,
+   "lr_hi": null,
+   "interval": null,
+   "arxiv": {
+    "pre_n": 335,
+    "post_n": 172,
+    "ratio": 0.6672,
+    "lo": 0.5256,
+    "hi": 0.8391
+   },
+   "lr_shrunk": null,
+   "w": null,
+   "author": {
+    "n": 0
+   },
+   "lr_author": null,
+   "lr_author_lo": null,
+   "lr_author_hi": null,
+   "flag": ""
+  },
+  {
+   "table": "Rows without an LR",
+   "level": "construction",
+   "key": "GAPPED_ANTITHESIS",
+   "construction": "GAPPED_ANTITHESIS",
+   "llm": {
+    "n": 2,
+    "documents": 2,
+    "rate": 0.0142,
+    "rate_lo": 0.0,
+    "rate_hi": 0.0352
+   },
+   "pool": {
+    "n": 36,
+    "rate": 0.02425,
+    "rate_lo": 0.01178,
+    "rate_hi": 0.03989
+   },
+   "lr": null,
+   "lr_lo": null,
+   "lr_hi": null,
+   "interval": null,
+   "arxiv": {
+    "pre_n": 81,
+    "post_n": 71,
+    "ratio": 1.139,
+    "lo": 0.8036,
+    "hi": 1.554
+   },
+   "lr_shrunk": null,
+   "w": null,
+   "author": {
+    "n": 4
+   },
+   "lr_author": null,
+   "lr_author_lo": null,
+   "lr_author_hi": null,
+   "flag": ""
+  },
+  {
+   "table": "Rows without an LR",
+   "level": "construction",
+   "key": "HEDGE_STACK",
+   "construction": "HEDGE_STACK",
+   "llm": {
+    "n": 1,
+    "documents": 1,
+    "rate": 0.0071,
+    "rate_lo": 0.0,
+    "rate_hi": 0.02237
+   },
+   "pool": {
+    "n": 79,
+    "rate": 0.04594,
+    "rate_lo": 0.03096,
+    "rate_hi": 0.06274
+   },
+   "lr": null,
+   "lr_lo": null,
+   "lr_hi": null,
+   "interval": null,
+   "arxiv": {
+    "pre_n": 62,
+    "post_n": 23,
+    "ratio": 0.4821,
+    "lo": 0.2712,
+    "hi": 0.8387
+   },
+   "lr_shrunk": null,
+   "w": null,
+   "author": {
+    "n": 1
+   },
+   "lr_author": null,
+   "lr_author_lo": null,
+   "lr_author_hi": null,
+   "flag": ""
+  },
+  {
+   "table": "Rows without an LR",
+   "level": "construction",
+   "key": "HOLLOW_BOOSTER",
+   "construction": "HOLLOW_BOOSTER",
+   "llm": {
+    "n": 0,
+    "documents": 0,
+    "rate": 0.0,
+    "rate_lo": 0.0,
+    "rate_hi": 0.0
+   },
+   "pool": {
+    "n": 51,
+    "rate": 0.03875,
+    "rate_lo": 0.02524,
+    "rate_hi": 0.05199
+   },
+   "lr": null,
+   "lr_lo": null,
+   "lr_hi": null,
+   "interval": null,
+   "arxiv": {
+    "pre_n": 240,
+    "post_n": 598,
+    "ratio": 3.238,
+    "lo": 2.685,
+    "hi": 3.961
+   },
+   "lr_shrunk": null,
+   "w": null,
+   "author": {
+    "n": 0
+   },
+   "lr_author": null,
+   "lr_author_lo": null,
+   "lr_author_hi": null,
+   "flag": ""
+  },
+  {
+   "table": "Rows without an LR",
+   "level": "construction",
+   "key": "VAGUE_QUANTIFIER",
+   "construction": "VAGUE_QUANTIFIER",
+   "llm": {
+    "n": 0,
+    "documents": 0,
+    "rate": 0.0,
+    "rate_lo": 0.0,
+    "rate_hi": 0.0
+   },
+   "pool": {
+    "n": 113,
+    "rate": 0.06083,
+    "rate_lo": 0.04537,
+    "rate_hi": 0.07822
+   },
+   "lr": null,
+   "lr_lo": null,
+   "lr_hi": null,
+   "interval": null,
+   "arxiv": {
+    "pre_n": 1203,
+    "post_n": 1025,
+    "ratio": 1.107,
+    "lo": 0.9808,
+    "hi": 1.249
+   },
+   "lr_shrunk": null,
+   "w": null,
+   "author": {
+    "n": 8
+   },
+   "lr_author": null,
+   "lr_author_lo": null,
+   "lr_author_hi": null,
+   "flag": ""
+  },
+  {
+   "table": "Rows without an LR",
+   "level": "pattern",
+   "key": "ALTERNATIVE_FRAMING|af_instead_of",
+   "construction": "ALTERNATIVE_FRAMING",
+   "pattern": "af_instead_of",
+   "llm": {
+    "n": 6,
+    "documents": 6,
+    "rate": 0.0426,
+    "rate_lo": 0.014,
+    "rate_hi": 0.07779
+   },
+   "pool": {
+    "n": 451,
+    "rate": 0.3196,
+    "rate_lo": 0.27,
+    "rate_hi": 0.3745
+   },
+   "lr": null,
+   "lr_lo": null,
+   "lr_hi": null,
+   "interval": null,
+   "arxiv": {
+    "pre_n": 976,
+    "post_n": 642,
+    "ratio": 0.8548,
+    "lo": 0.7421,
+    "hi": 0.9823
+   },
+   "lr_shrunk": null,
+   "w": null,
+   "author": {
+    "n": 1
+   },
+   "lr_author": null,
+   "lr_author_lo": null,
+   "lr_author_hi": null,
+   "flag": ""
+  },
+  {
+   "table": "Rows without an LR",
+   "level": "pattern",
+   "key": "CORRECTIVE_CONTRAST|cc_additive",
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_additive",
+   "llm": {
+    "n": 0,
+    "documents": 0,
+    "rate": 0.0,
+    "rate_lo": 0.0,
+    "rate_hi": 0.0
+   },
+   "pool": {
+    "n": 61,
+    "rate": 0.03785,
+    "rate_lo": 0.02413,
+    "rate_hi": 0.05274
+   },
+   "lr": null,
+   "lr_lo": null,
+   "lr_hi": null,
+   "interval": null,
+   "arxiv": {
+    "pre_n": 363,
+    "post_n": 357,
+    "ratio": 1.278,
+    "lo": 1.043,
+    "hi": 1.551
+   },
+   "lr_shrunk": null,
+   "w": null,
+   "author": {
+    "n": 2
+   },
+   "lr_author": null,
+   "lr_author_lo": null,
+   "lr_author_hi": null,
+   "flag": "precision"
+  },
+  {
+   "table": "Rows without an LR",
+   "level": "pattern",
+   "key": "CORRECTIVE_CONTRAST|cc_cleft",
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_cleft",
+   "llm": {
+    "n": 10,
+    "documents": 8,
+    "rate": 0.071,
+    "rate_lo": 0.0275,
+    "rate_hi": 0.1279
+   },
+   "pool": {
+    "n": 23,
+    "rate": 0.01257,
+    "rate_lo": 0.006737,
+    "rate_hi": 0.01948
+   },
+   "lr": null,
+   "lr_lo": null,
+   "lr_hi": null,
+   "interval": null,
+   "arxiv": {
+    "pre_n": 8,
+    "post_n": 20,
+    "ratio": null,
+    "lo": null,
+    "hi": null
+   },
+   "lr_shrunk": null,
+   "w": null,
+   "author": {
+    "n": 2
+   },
+   "lr_author": null,
+   "lr_author_lo": null,
+   "lr_author_hi": null,
+   "flag": "precision"
+  },
+  {
+   "table": "Rows without an LR",
+   "level": "pattern",
+   "key": "CORRECTIVE_CONTRAST|cc_coordinated",
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_coordinated",
+   "llm": {
+    "n": 6,
+    "documents": 5,
+    "rate": 0.0426,
+    "rate_lo": 0.008741,
+    "rate_hi": 0.08315
+   },
+   "pool": {
+    "n": 220,
+    "rate": 0.1336,
+    "rate_lo": 0.1117,
+    "rate_hi": 0.159
+   },
+   "lr": null,
+   "lr_lo": null,
+   "lr_hi": null,
+   "interval": null,
+   "arxiv": {
+    "pre_n": 256,
+    "post_n": 287,
+    "ratio": 1.457,
+    "lo": 1.185,
+    "hi": 1.799
+   },
+   "lr_shrunk": null,
+   "w": null,
+   "author": {
+    "n": 3
+   },
+   "lr_author": null,
+   "lr_author_lo": null,
+   "lr_author_hi": null,
+   "flag": "precision"
+  },
+  {
+   "table": "Sanity reading",
+   "key": "CORRECTIVE_CONTRAST|cc_negated_apposition",
+   "level": "pattern",
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_negated_apposition",
+   "lr": 19.52,
+   "real": 18,
+   "read": 20
+  },
+  {
+   "table": "Sanity reading",
+   "key": "CORRECTIVE_CONTRAST|cc_parallel_sibling",
+   "level": "pattern",
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_parallel_sibling",
+   "lr": 9.815,
+   "real": 20,
+   "read": 20
+  },
+  {
+   "table": "Sanity reading",
+   "key": "CORRECTIVE_CONTRAST",
+   "level": "construction",
+   "construction": "CORRECTIVE_CONTRAST",
+   "lr": 6.584,
+   "real": 19,
+   "read": 20
+  },
+  {
+   "table": "Sanity reading",
+   "key": "BORROWED_RIGOUR",
+   "level": "construction",
+   "construction": "BORROWED_RIGOUR",
+   "lr": 2.321,
+   "real": 4,
+   "read": 20
+  },
+  {
+   "table": "Sanity reading",
+   "key": "ALTERNATIVE_FRAMING|af_rather_than",
+   "level": "pattern",
+   "construction": "ALTERNATIVE_FRAMING",
+   "pattern": "af_rather_than",
+   "lr": 2.254,
+   "real": 20,
+   "read": 20
+  },
+  {
+   "table": "Sanity reading",
+   "key": "ALTERNATIVE_FRAMING",
+   "level": "construction",
+   "construction": "ALTERNATIVE_FRAMING",
+   "lr": 1.195,
+   "real": 20,
+   "read": 20
+  },
+  {
+   "table": "Sanity reading",
+   "key": "EMPHATIC_REFLEXIVE",
+   "level": "construction",
+   "construction": "EMPHATIC_REFLEXIVE",
+   "lr": 0.874,
+   "real": 14,
+   "read": 20
+  },
+  {
+   "table": "Sanity reading",
+   "key": "PARTICIPIAL_TAIL",
+   "level": "construction",
+   "construction": "PARTICIPIAL_TAIL",
+   "lr": 0.5384,
+   "real": 19,
+   "read": 20
+  },
+  {
+   "table": "Sanity reading",
+   "key": "ABSTRACT_ADVERB",
+   "level": "construction",
+   "construction": "ABSTRACT_ADVERB",
+   "lr": 0.4497,
+   "real": 2,
+   "read": 20
+  },
+  {
+   "table": "Sanity reading",
+   "key": "LLM_DICTION",
+   "level": "construction",
+   "construction": "LLM_DICTION",
+   "lr": 0.3657,
+   "real": 0,
+   "read": 20
+  },
+  {
+   "table": "Proposed bands",
+   "key": "CORRECTIVE_CONTRAST|cc_negated_apposition",
+   "level": "pattern",
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_negated_apposition",
+   "current": "high",
+   "current_note": "",
+   "lr": 19.52,
+   "lr_lo": 14.647,
+   "lr_hi": 26.17,
+   "bands": {
+    "A": "high",
+    "B": "high",
+    "C": "high"
+   },
+   "flag": "precision"
+  },
+  {
+   "table": "Proposed bands",
+   "key": "CORRECTIVE_CONTRAST|cc_parallel_sibling",
+   "level": "pattern",
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_parallel_sibling",
+   "current": "high",
+   "current_note": "",
+   "lr": 9.815,
+   "lr_lo": 5.76,
+   "lr_hi": 17.01,
+   "bands": {
+    "A": "high",
+    "B": "high",
+    "C": "high"
+   },
+   "flag": "precision"
+  },
+  {
+   "table": "Proposed bands",
+   "key": "CORRECTIVE_CONTRAST",
+   "level": "construction",
+   "construction": "CORRECTIVE_CONTRAST",
+   "current": "high",
+   "current_note": "",
+   "lr": 6.584,
+   "lr_lo": 5.242,
+   "lr_hi": 8.202,
+   "bands": {
+    "A": "high",
+    "B": "high",
+    "C": "high"
+   },
+   "flag": "precision"
+  },
+  {
+   "table": "Proposed bands",
+   "key": "BORROWED_RIGOUR",
+   "level": "construction",
+   "construction": "BORROWED_RIGOUR",
+   "current": "med",
+   "current_note": "",
+   "lr": 2.321,
+   "lr_lo": 1.157,
+   "lr_hi": 4.03,
+   "bands": {
+    "A": "med",
+    "B": "high",
+    "C": "med"
+   },
+   "flag": "vocabulary"
+  },
+  {
+   "table": "Proposed bands",
+   "key": "ALTERNATIVE_FRAMING|af_rather_than",
+   "level": "pattern",
+   "construction": "ALTERNATIVE_FRAMING",
+   "pattern": "af_rather_than",
+   "current": "med",
+   "current_note": "per finding",
+   "lr": 2.254,
+   "lr_lo": 1.511,
+   "lr_hi": 3.04,
+   "bands": {
+    "A": "med",
+    "B": "high",
+    "C": "med"
+   },
+   "flag": ""
+  },
+  {
+   "table": "Proposed bands",
+   "key": "TRICOLON",
+   "level": "construction",
+   "construction": "TRICOLON",
+   "current": "low",
+   "current_note": "figures med",
+   "lr": 2.022,
+   "lr_lo": 1.829,
+   "lr_hi": 2.248,
+   "bands": {
+    "A": "med",
+    "B": "high",
+    "C": "med"
+   },
+   "flag": ""
+  },
+  {
+   "table": "Proposed bands",
+   "key": "TRICOLON|tricolon",
+   "level": "pattern",
+   "construction": "TRICOLON",
+   "pattern": "tricolon",
+   "current": "low",
+   "current_note": "figures med",
+   "lr": 2.021,
+   "lr_lo": 1.83,
+   "lr_hi": 2.2447,
+   "bands": {
+    "A": "med",
+    "B": "high",
+    "C": "med"
+   },
+   "flag": ""
+  },
+  {
+   "table": "Proposed bands",
+   "key": "ALTERNATIVE_FRAMING",
+   "level": "construction",
+   "construction": "ALTERNATIVE_FRAMING",
+   "current": "low",
+   "current_note": "",
+   "lr": 1.195,
+   "lr_lo": 0.828,
+   "lr_hi": 1.556,
+   "bands": {
+    "A": "low",
+    "B": "low",
+    "C": "low"
+   },
+   "flag": ""
+  },
+  {
+   "table": "Proposed bands",
+   "key": "EMPHATIC_REFLEXIVE",
+   "level": "construction",
+   "construction": "EMPHATIC_REFLEXIVE",
+   "current": "med",
+   "current_note": "",
+   "lr": 0.874,
+   "lr_lo": 0.6005,
+   "lr_hi": 1.175,
+   "bands": {
+    "A": "low",
+    "B": "low",
+    "C": "low"
+   },
+   "flag": ""
+  },
+  {
+   "table": "Proposed bands",
+   "key": "PARTICIPIAL_TAIL",
+   "level": "construction",
+   "construction": "PARTICIPIAL_TAIL",
+   "current": "high",
+   "current_note": "lemma use med",
+   "lr": 0.5384,
+   "lr_lo": 0.3631,
+   "lr_hi": 0.7436,
+   "bands": {
+    "A": "low",
+    "B": "low",
+    "C": "low"
+   },
+   "flag": ""
+  },
+  {
+   "table": "Proposed bands",
+   "key": "ABSTRACT_ADVERB",
+   "level": "construction",
+   "construction": "ABSTRACT_ADVERB",
+   "current": "high",
+   "current_note": "",
+   "lr": 0.4497,
+   "lr_lo": 0.2506,
+   "lr_hi": 0.7057,
+   "bands": {
+    "A": "low",
+    "B": "low",
+    "C": "low"
+   },
+   "flag": "vocabulary"
+  },
+  {
+   "table": "Proposed bands",
+   "key": "LLM_DICTION",
+   "level": "construction",
+   "construction": "LLM_DICTION",
+   "current": "low",
+   "current_note": "three forms med",
+   "lr": 0.3657,
+   "lr_lo": 0.07111,
+   "lr_hi": 0.9356,
+   "bands": {
+    "A": "low",
+    "B": "low",
+    "C": "low"
+   },
+   "flag": "vocabulary"
+  }
+ ]
+}

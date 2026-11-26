@@ -391,7 +391,7 @@ Tidied after TF-004. Step numbers are kept stable because task files
 cite them, so they do not give the order of work. The order is listed
 after the steps.
 
-Done: steps 1 to 7, 9 to 11, 14, 16 and 17. Planned: steps 8, 12, 13 and 15. The
+Done: steps 1 to 7, 9 to 11, 14, 16 and 17, and part 1 of step 8. Planned: part 2 of step 8, and steps 12, 13 and 15. The
 list stays in step order, so the numbers render as written.
 
 1. Drop `harvest.py` into `ticfinder/eval/`, run it, and confirm the
@@ -433,8 +433,25 @@ list stays in step order, so the numbers render as written.
 8. **Per-pattern LRs** for the design and spec registers: the public
    baseline and the author's specs against the `pacino` LLM specs, with
    the arXiv change as a prior.
-   Before it starts, have harvest and the arXiv scripts write JSON
-   summaries that step 8 can read directly.
+   Part 1 done (TF-012): 70 pacino design and interface files, 140,849
+   words after masking, analysed as `.txt` so the hang-indented
+   decision prose is kept. 12 construction and pattern rows have an LR.
+   `CORRECTIVE_CONTRAST` runs 6.58 times the pool (its apposition
+   pattern 19.5) and reads 19 of 20 real, against 49% in the pool.
+   `af_rather_than` and `TRICOLON` run about 2 times the pool.
+   `PARTICIPIAL_TAIL`, `ABSTRACT_ADVERB` and `LLM_DICTION` run below
+   it, and `EM_DASH` and `CONSULTANT_REGISTER` are absent from the
+   LLM side, which pacino's generation rules steer. The arXiv prior is
+   weak (tau2 1.11), so shrinkage moves rows little. Three rows count
+   domain vocabulary more than the construction. H2 and H3 hold and H4
+   fails. Three candidate cut sets are proposed and no level changed.
+   Part 2, still open: apply the levels. The user chose set C (med when
+   the LR interval's lower end is above 1, high when it is 3 or more):
+   `TRICOLON` and `tricolon` go from low to med and `EMPHATIC_REFLEXIVE`
+   from med to low. `PARTICIPIAL_TAIL` stays at high, an exception,
+   because the steered corpus runs low on it while arXiv shows a 3.5
+   times rise. The flagged rows keep their levels. Results in section
+   19.
 9. **arXiv paper bodies, a pilot** (TF-005). Done: 200 papers per
    window from the TF-004 set, measured from v1 LaTeX source with a new
    masker in `eval/arxiv_bodies.py`. For 5 of the 7 constructions with
@@ -557,7 +574,9 @@ fixed and split patterns. 8 needs 7 and uses 14's body ratios as its
 prior (9's if 14 has not run). 16 goes after 7 and before 8, because
 TF-009 found three detectors firing on normative spec text; 8 reads the
 reports 16 reran, at one ticfinder version. 17 goes after 16 and before 8; it
-changed no code, so 8 reads the TF-010 reports. 12 needs new labels from blog editing, so
+changed no code, so 8 reads the TF-010 reports. Part 1 of 8 is done;
+part 2, the level changes, needs the user's choice of cut points, and 15
+waits for those levels. 12 needs new labels from blog editing, so
 it goes when they exist. 13 comes after 8. 15 comes after 8, so its
 levels come from measured LRs. It can go before 13, or during 12's blog
 editing at `low` to collect accepted labels. Step 13's mining can also
@@ -2547,3 +2566,160 @@ difference lies in whether the second predicate fills the negated
 slot. A parse-level cue does not see that. Two leads remain untested: a
 corrective marker in the first conjunct (`not simply`, `not merely`),
 and parse agreement with `en_core_web_trf` (5.6) for the misparses.
+
+## 19. TF-012 results (2026-11-26)
+
+Step 8, part 1: per-pattern LRs for the design and spec register, the
+pacino LLM specs over the TF-010 equal-weight pool. ticfinder stays at
+494e4dd (sha256 f0fc55a44f37), and no detector, phrase list, level,
+pattern name or fingerprint changed. Every sentence read stays in
+`private/` and on the console. Report: `eval/llm-lr-2026-11-26.md`
+with its JSON (`jsoncheck.py` gives MATCH, 47 rows).
+
+### Phase 1: the corpus
+
+**Preconditions.** `make regress` passed, ticfinder matched its pin,
+and both TF-010 snapshots matched their checksum files. The corpus pin
+is pacino f88a61b. Its working tree had uncommitted edits, so every file
+is read from git at the pin.
+
+**Kept list.** 157 `.md` and `.adoc` files under `docs/` and
+`planning/`; the user approved 70 (234,602 raw words): the files under
+`planning/arch/`, `interfaces/`, `observ/`, `perf/`, `showcase/`,
+`testbenches/` and `verification/`, and three prose pages under
+`docs/`. Left out: the status and debt logs, an archived session log,
+prompts and prompt rules, the blog-process file, the task browser, the
+landing page, 79 generated placeholder pages, and, by the user's ruling,
+`PROJECT_CORE.md`, the RISC-V profile copy and the cgen-generated cache
+document.
+
+**Script.** `eval/llm_specs.py` has `survey`, `selftest`, `mask-report`
+and `analyse`. It writes only under `private/llm-specs/`. On top of the
+pool's markdown exclusions it adds multi-line HTML tags and `style`
+blocks, mkdocs admonition markers, and declaration lines (`name : input
+logic ...`, `name = value`). Its 15 selftest rows pass. At the user's
+request `make regress` now runs this selftest and `spec_baseline.py
+selftest` (58 rows); together they take under half a second.
+
+**Masking.** Analysed as `.md`, as the Rust and OpenTitan sources were,
+the median masked share was 49.8%. The planning files are decision
+registries whose entries continue on indented lines, and ticfinder's
+markdown-only indented-code rule blanked that prose as code. About 7
+of 40 spot-checked sentences were left garbled. The user chose to analyse
+the kept text as `.txt`, as the PEPs, RFCs and RISC-V sources were;
+ticfinder still masks fenced code, tables, inline code and HTML. Then
+the median masked share is 27.4% (4.4% to 89.6%), 26 files are over
+40%, and 173,973 words are kept by the ASCII measure (140,849 by
+ticfinder's count). Of 40 spot-checked sentences, 1 holds residue (a
+two-column directory listing) and 1 is borderline (an attribute list).
+**H1 holds.**
+
+### Phase 2: the measurement
+
+**Run.** 70 files in 101 s at nice 19 on one process, about 1,400 words
+a second; words per file 63 to 10,280, median 1,323. The pool and arXiv
+bootstraps rebuilt from the snapshots equal the TF-010 JSON on every
+row (39 of 39 pool rows, 42 of 42 arXiv rows).
+
+**LRs** (LLM rate over the equal-weight pool rate, 95% interval;
+findings LLM / pool).
+
+| row | LR | findings | arXiv post over pre | LR against author |
+|---|---|---|---|---|
+| `cc_negated_apposition` | 19.52 (14.65 to 26.17) | 213 / 132 | 5.01 | - |
+| `cc_parallel_sibling` | 9.81 (5.76 to 17.01) | 41 / 37 | 2.27 | - |
+| `CORRECTIVE_CONTRAST` | 6.58 (5.24 to 8.20) | 270 / 473 | 1.81 | - |
+| `BORROWED_RIGOUR` | 2.32 (1.16 to 4.03) | 56 / 244 | 1.16 | - |
+| `af_rather_than` | 2.25 (1.51 to 3.04) | 103 / 477 | 5.22 | - |
+| `TRICOLON` and `tricolon` | 2.02 (1.83 to 2.25) | 806 / 4,575 | 1.42 | 1.70 |
+| `ALTERNATIVE_FRAMING` | 1.20 (0.83 to 1.56) | 109 / 934 | 2.35 | 3.13 |
+| `EMPHATIC_REFLEXIVE` | 0.87 (0.60 to 1.18) | 39 / 576 | 1.19 | - |
+| `PARTICIPIAL_TAIL` | 0.54 (0.36 to 0.74) | 54 / 1,182 | 3.51 | 0.48 |
+| `ABSTRACT_ADVERB` | 0.45 (0.25 to 0.71) | 40 / 947 | 1.53 | 0.70 |
+| `LLM_DICTION` | 0.37 (0.07 to 0.94) | 32 / 1,058 | 1.37 | 0.51 |
+
+Rows with 20 findings in the pool and fewer in the LLM corpus get no
+LR: `EM_DASH` (0), `CONSULTANT_REGISTER` (1), `HOLLOW_BOOSTER`,
+`HEDGE_STACK`, `VAGUE_QUANTIFIER`, `CLOSER`, `EMPTY_FRAME`,
+`FRAME_MARKER`, `GAPPED_ANTITHESIS`, `af_instead_of` (6),
+`cc_coordinated` (6), `cc_cleft` (10) and `cc_additive` (0). The LLM
+writes the corrective contrast as an apposition (`cc_negated_apposition`,
+213 findings); the coordinated form has 6.
+
+**Prior.** The method-of-moments prior variance is 1.11 on the log
+scale, a prior spread of a factor of 2.9, with a mean log offset of
+-0.06. The arXiv change predicts the in-register LR poorly, so the
+weights on the raw LR run from 0.67 to 1.00. The 4 rows under 50
+findings on either side move by a median factor of 1.08, at most 1.54
+(`LLM_DICTION`, 0.37 to 0.56). The user chose the raw LRs for banding.
+
+**Hypotheses.**
+
+- H2 holds, at the threshold: 7 of 10 rows whose arXiv interval lies
+  above 1 have an LR above 1. The misses are `PARTICIPIAL_TAIL`,
+  `ABSTRACT_ADVERB` and `LLM_DICTION`.
+- H3 holds: all 6 rows with an LR against the author's specs fall on
+  the same side of 1 as against the pool.
+- H4 fails: of 12 LR rows, 7 lie above 1 and 3 below, and only 2
+  intervals contain 1, where 3 were needed.
+
+**Sanity reading.** 20 random LLM-corpus findings per row, counts only.
+
+| row | real | row | real |
+|---|---|---|---|
+| `cc_negated_apposition` | 18 / 20 | `ALTERNATIVE_FRAMING` | 20 / 20 |
+| `cc_parallel_sibling` | 20 / 20 | `EMPHATIC_REFLEXIVE` | 14 / 20 |
+| `CORRECTIVE_CONTRAST` | 19 / 20 | `PARTICIPIAL_TAIL` | 19 / 20 |
+| `BORROWED_RIGOUR` | 4 / 20 | `ABSTRACT_ADVERB` | 2 / 20 |
+| `af_rather_than` | 20 / 20 | `LLM_DICTION` | 0 / 20 |
+
+- `CORRECTIVE_CONTRAST` reads 19 of 20 real here against 49% in the
+  pool, so its LR is biased low; on real findings alone it would be
+  about twice as high.
+- `BORROWED_RIGOUR` findings are 9 literal RISC-V terms (`idempotent`,
+  `canonical` address), 7 structural uses of `by construction` and 4
+  figurative ones. `LLM_DICTION` findings are all literal domain terms
+  (`harness` 14, `dynamic` 5, `significant` 1), and 15 of the 20
+  `ABSTRACT_ADVERB` findings are `mutually exclusive`. These three rows
+  measure vocabulary and are flagged.
+- 3 `EMPHATIC_REFLEXIVE` findings are reciprocal or object reflexives.
+  3 more have a span that starts at the previous sentence's punctuation
+  and a context sentence without the match. The pool has the same span
+  artifact at a similar rate (22 of 11,014 findings), so the bug is in
+  ticfinder; it is left for a later task.
+
+**The corpus is steered.** pacino's prompts and its CLAUDE.md ban em
+dashes and decorative phrasing, and the LLM corpus has no `EM_DASH` and
+one `CONSULTANT_REGISTER` finding. The LRs measure this author's steered
+model output. The low `PARTICIPIAL_TAIL` LR, against its 3.5 rise in
+arXiv, is likely an effect of steering. It does not show that LLMs avoid
+the construction.
+
+### Phase 3: report and bands
+
+**Proposed bands**, over the raw LR. Below the med cut is low.
+
+| set | med from | high from |
+|---|---|---|
+| A | LR 1.5 | LR 3 |
+| B | LR 1.25 | LR 2 |
+| C | lower bound above 1 | lower bound 3 |
+
+Sets A and C give the same band to every row. Of the 6 unflagged
+rows, A and C change 4: `TRICOLON` and `tricolon` low to med,
+`EMPHATIC_REFLEXIVE` med to low, `PARTICIPIAL_TAIL` high to low. B also
+moves `af_rather_than` from med to high, and takes `TRICOLON` to high,
+so 5 change. `ALTERNATIVE_FRAMING` stays low in every set. The flagged
+`CORRECTIVE_CONTRAST` rows are high in every set, as they are now; the
+vocabulary rows would be med or high (`BORROWED_RIGOUR`) and low
+(`ABSTRACT_ADVERB`, `LLM_DICTION`). No level changed. Lowering
+`PARTICIPIAL_TAIL` on a steered corpus would undo a level the arXiv rise
+set, so it needs the user's judgement more than the others.
+
+**Verdict.** H1, H2 and H3 hold; H4 fails. The LLM specs differ from
+the human pool on 10 of 12 rows, in both directions. For the corrective
+contrast, `rather than` and the tricolon the LR agrees with the arXiv
+rise. For the participial tail, abstract adverbs and LLM diction it
+does not, through steering and domain vocabulary. Part 2 of step 8 is
+the user's choice of cut points, then the level changes with test rows
+and harvest measured before and after.

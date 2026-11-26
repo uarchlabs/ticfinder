@@ -2,7 +2,7 @@
 
 Terms used in the ticfinder roadmap, task files and notes, grouped by
 where they come from. Table 1 holds standard terms. Table 2 holds
-ticfinder's own terms, often an ordinary word with a stretched meaning. Table 3 holds terms coined in TF-003 to TF-011, which have no
+ticfinder's own terms, often an ordinary word with a stretched meaning. Table 3 holds terms coined in TF-003 to TF-012, which have no
 meaning outside this project.
 
 ## Table 1. Standard terms, used in their usual sense
@@ -34,6 +34,8 @@ meaning outside this project.
 | reflexive pronoun | a "-self" pronoun that refers back to the subject: "passing itself off as evidence" |
 | passive | a clause whose subject receives the action: "the value is passed as an argument" |
 | particle | the small word of a phrasal verb: the "off" in "passed off as" |
+| empirical Bayes, shrinkage | estimating a prior from the data across many rows, then pulling each row's estimate toward it by how uncertain the row is |
+| method of moments | estimating a parameter by matching an average in the data to its expected value; here the prior variance from the spread of rows around the prior |
 | lookbehind | a match condition on the text before the match; spaCy's Matcher has none, so a pattern can only test tokens inside its own span |
 
 ## Table 2. Project terms: borrowed words with a ticfinder meaning, defined in CLAUDE.md or the roadmap
@@ -58,7 +60,7 @@ meaning outside this project.
 | waiver, stale waiver | a fingerprint the editor marked as acceptable; stale when no current finding matches it | a detector fix can make a waiver stale without invalidating it; `--prune-stale` removes it |
 | all sections, body sections | in TF-005, all four section types together, against the `body` section type alone | the TF-005 `HOLLOW_BOOSTER` ratio 3.31 is body sections; all sections give 2.98 |
 
-## Table 3. Terms from TF-003 to TF-011 with no outside standing
+## Table 3. Terms from TF-003 to TF-012 with no outside standing
 
 | term | meaning | where |
 |---|---|---|
@@ -123,3 +125,12 @@ meaning outside this project.
 | held-out reading | a seeded, labelled reading kept apart from the development set and labelled before any cue is written; a cue is judged on it | TF-011 phase 1 |
 | corrective marker | a word in the second conjunct that signals replacement: `instead`, `rather`, `merely`, `only`, `simply`, `just` | TF-011 phase 2 |
 | corrective pair | a `but` coordination whose second conjunct fills the negated element's slot (`does not use X, but a tracing collector`); the opposite of a concessive pair | TF-011 |
+| LLM corpus | the 70 pacino design, interface and planning files at f88a61b, the LLM side of the step 8 LRs | TF-012 phase 1 |
+| decision registry | a pacino planning file of numbered entries (`PF-2   text`) whose prose continues on lines indented under the text; ticfinder's markdown indented-code rule would blank it, so the LLM corpus is analysed as `.txt` | TF-012 phase 1 |
+| declaration line | a whole line `name : input logic ...`, `NAME[0:4] : int ...` or `name = value` outside a fence; blanked as an exclusion | TF-012 phase 1 |
+| joint bootstrap | an LR draw is an LLM-corpus draw (seed 12012) over the pool draw with the same index (seed 9009); the two corpora are resampled independently | TF-012 phase 2 |
+| pin check | rebuilding the pool and arXiv bootstraps from the TF-010 snapshots and comparing every rate and ratio row with the TF-010 JSON before an LR is computed | TF-012 phase 2 |
+| shrunk LR, tau2, w | the LR after the empirical Bayes step toward the arXiv post over pre ratio; tau2 is the prior variance on the log scale, w the weight left on the raw log LR | TF-012 phase 2 |
+| steered corpus | LLM text written under instructions that ban some constructions (pacino bans em dashes and decorative phrasing), so its LRs measure that model output, not unsteered LLM text | TF-012 phase 2 |
+| vocabulary row | an LR row whose LLM findings are mostly literal domain terms (`idempotent`, `harness`, `mutually exclusive`), flagged and not banded | TF-012 phase 2 |
+| band, cut set | a level (low, med, high) given by LR cut points; a cut set is one choice of the med and high cuts | TF-012 phase 3 |

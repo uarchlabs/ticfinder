@@ -679,8 +679,359 @@ def show_sample(key, n):
               f"SENT:  {' '.join(f['context'].split())[:400]}")
 
 
+# --------------------------------------------------------------- report
+#
+# The sanity reading (requirement 10): real instances in 20 random
+# LLM-corpus findings for the 5 rows with the highest LR and the 5 with the
+# lowest, read on the console. Counts only.
+SANITY = {
+    "CORRECTIVE_CONTRAST|cc_negated_apposition": (18, 20),
+    "CORRECTIVE_CONTRAST|cc_parallel_sibling": (20, 20),
+    "CORRECTIVE_CONTRAST": (19, 20),
+    "BORROWED_RIGOUR": (4, 20),
+    "ALTERNATIVE_FRAMING|af_rather_than": (20, 20),
+    "ALTERNATIVE_FRAMING": (20, 20),
+    "EMPHATIC_REFLEXIVE": (14, 20),
+    "PARTICIPIAL_TAIL": (19, 20),
+    "ABSTRACT_ADVERB": (2, 20),
+    "LLM_DICTION": (0, 20),
+}
+# Rows whose LLM findings the reading found to be mostly literal domain
+# terms (idempotent, canonical, harness, mutually exclusive): the LR measures
+# vocabulary, so they are flagged and not banded.
+VOCAB = {"BORROWED_RIGOUR", "ABSTRACT_ADVERB", "LLM_DICTION"}
+# Current level of each banded unit, from tools/ticfinder.py and the phrase
+# file at 494e4dd, with the per-finding levels that differ from it.
+CURRENT = {
+    "CORRECTIVE_CONTRAST": ("high", ""),
+    "CORRECTIVE_CONTRAST|cc_negated_apposition": ("high", ""),
+    "CORRECTIVE_CONTRAST|cc_parallel_sibling": ("high", ""),
+    "BORROWED_RIGOUR": ("med", ""),
+    "ALTERNATIVE_FRAMING": ("low", ""),
+    "ALTERNATIVE_FRAMING|af_rather_than": ("med", "per finding"),
+    "TRICOLON": ("low", "figures med"),
+    "TRICOLON|tricolon": ("low", "figures med"),
+    "EMPHATIC_REFLEXIVE": ("med", ""),
+    "PARTICIPIAL_TAIL": ("high", "lemma use med"),
+    "ABSTRACT_ADVERB": ("high", ""),
+    "LLM_DICTION": ("low", "three forms med"),
+}
+# Candidate cut sets over the raw LR (the user chose raw over shrunk).
+# (name, statistic, med from, high from); below med is low.
+BANDS = [
+    ("A", "lr", 1.5, 3.0),
+    ("B", "lr", 1.25, 2.0),
+    ("C", "lo", 1.0, 3.0),
+]
+
+
+def flag_of(r):
+    cid = r["key"].split("|")[0]
+    if cid == FLAGGED:
+        return "precision"
+    if r["key"] in VOCAB:
+        return "vocabulary"
+    return ""
+
+
+def band(r, stat, med, high):
+    x = r["lr"] if stat == "lr" else r["lr_ci"][0]
+    return "high" if x >= high else "med" if x >= med else "low"
+
+
 def write_report(args, ver, rows, nfiles, words, checks):
-    raise SystemExit("report writing is phase 3")
+    tf = AR.load_tf()
+    summ = mask_summary(tf)
+    today = __import__("datetime").date.today().isoformat()
+    out_path = Path(args.report)
+    L, J = [], []
+    p = L.append
+    pct = [x["pct"] for x in summ]
+    lr_rows = [r for r in rows if "lr" in r]
+    H = hypotheses(rows)
+
+    p("# Likelihood ratios for the design and spec register: pacino LLM "
+      "specs against the public pool")
+    p("")
+    p(f"Generated {today} by `eval/llm_specs.py` (TF-012). Aggregates only: "
+      "no document text and, for the author's specifications, no per-file "
+      "figures. LR is the rate in the LLM specs over the rate in the "
+      "equal-weight pool of pre-2022 human specs (roadmap 5.3).")
+    p("")
+    p("## Setup")
+    p("")
+    p("| item | value |")
+    p("|---|---|")
+    p(f"| LLM corpus | {nfiles} design, interface and planning files under "
+      f"`docs/` and `planning/` in pacino at {PIN[:7]}, read from git; "
+      "status and session logs, prompts, blog-process files, generated "
+      "pages and copies of third-party documents left out (TF-012 "
+      "requirement 2) |")
+    p("| exclusions | the pool's markdown rules (front matter, comments, "
+      "headings, tables, link markup) plus multi-line HTML, mkdocs "
+      "admonition markers and declaration lines (`selftest` holds the "
+      "rows); then ticfinder's own masking, the text analysed as `.txt` so "
+      "the hang-indented decision prose is not taken for indented code |")
+    p(f"| ticfinder | `tools/ticfinder.py` at {ver['commit']} (sha256 "
+      f"{ver['sha256']}); defaults: `en_core_web_md`, code masker on, "
+      "`ticfinder-phrases.json` |")
+    p("| human side | the TF-010 tables: the equal-weight pool of five "
+      "sources (`private/specs-tf010/`), the author's 36 specification "
+      "files, and the arXiv `cs.AR` full-run bodies, all sections "
+      "(`private/arxiv/bodies-tf010/`) |")
+    p(f"| bootstrap | {DRAWS} draws over documents: the LLM files with seed "
+      f"{LLM_SEED}; the pool and the author's files rebuilt as "
+      f"`spec_baseline.py` draws them (seed {POOL_SEED}); arXiv as "
+      f"`arxiv_bodies.py` draws it (seed {ARXIV_SEED}). An LR draw is an LLM "
+      "draw over the pool draw of the same index. Nearest-rank percentile "
+      "95% intervals for ratios |")
+    p(f"| rows | construction and pattern rows with at least {MIN_N} "
+      f"findings in the LLM corpus or the pool; an LR needs {MIN_N} on both "
+      "sides. A pattern that is its construction's only pattern is left "
+      "out |")
+    p("| prior | normal-normal empirical Bayes on the log scale toward the "
+      "log arXiv post over pre ratio. The prior variance is tau2 plus the "
+      "arXiv bootstrap variance, with tau2 = max(0, mean((y - m)^2 - s2 - "
+      "a2)) over the rows with an LR and an arXiv ratio; w is the weight "
+      "left on the raw log LR |")
+    p("")
+    p("## Sample and masking")
+    p("")
+    p("| measure | value |")
+    p("|---|---|")
+    p(f"| files | {nfiles} |")
+    p(f"| raw words | {sum(x['raw_words'] for x in summ):,} |")
+    p(f"| kept words (ticfinder) | {words:,} |")
+    p(f"| median masked share | {SB.median(pct):.1f}% (min {min(pct):.1f}%, "
+      f"max {max(pct):.1f}%) |")
+    p(f"| files over 40% masked | {sum(x > 40 for x in pct)} |")
+    p("")
+    p("Pin checks: " + "; ".join(checks) + ".")
+    p("")
+
+    def jrow(table, r):
+        lvl, k = r["level"], r["key"]
+        L_, P_, U = r["llm"], r["pool"], r["author"]
+        return {"table": table, "level": lvl, "key": k,
+                **AR.split_key(lvl, k),
+                "llm": SB.jrate(L_["rate"], L_["ci"], n=L_["n"],
+                                documents=L_["docs"]),
+                "pool": SB.jrate(P_["rate"], P_["ci"], n=P_["n"]),
+                "lr": AR.jnum(r.get("lr")),
+                "lr_lo": AR.jnum(r["lr_ci"][0]) if "lr" in r else None,
+                "lr_hi": AR.jnum(r["lr_ci"][1]) if "lr" in r else None,
+                "interval": interval(r["lr_ci"]) if "lr" in r else None,
+                "arxiv": {"pre_n": r["ax_n"][0], "post_n": r["ax_n"][1],
+                          "ratio": AR.jnum(r.get("ax")),
+                          "lo": AR.jnum(r["ax_ci"][0]) if "ax" in r
+                          else None,
+                          "hi": AR.jnum(r["ax_ci"][1]) if "ax" in r
+                          else None},
+                "lr_shrunk": AR.jnum(r.get("lr_shrunk")),
+                "w": AR.jnum(r.get("w")),
+                "author": {"n": U["n"]},
+                "lr_author": AR.jnum(r.get("lr_author")),
+                "lr_author_lo": AR.jnum(r["lr_author_ci"][0])
+                if "lr_author" in r else None,
+                "lr_author_hi": AR.jnum(r["lr_author_ci"][1])
+                if "lr_author" in r else None,
+                "flag": flag_of(r)}
+
+    p("## LRs")
+    p("")
+    p(f"Rows with at least {MIN_N} findings on both sides, sorted by LR. "
+      "Rates are findings per 1,000 words (95% CI). The arXiv column is the "
+      "post over pre ratio, all sections. Flags: `precision` for "
+      f"`{FLAGGED}` and its patterns, whose pool findings were 49% real "
+      "(TF-010), so the LR is biased low; `vocabulary` for rows whose LLM "
+      "findings are mostly literal domain terms (sanity reading below).")
+    p("")
+    for lvl in LR_LEVELS:
+        p(f"### {lvl}")
+        p("")
+        p(f"| {lvl} | LLM n | LLM rate (95% CI) | pool n | pool rate "
+          "(95% CI) | LR (95% CI) | interval | arXiv post over pre (95% CI) "
+          "| LR shrunk | w | author n | LR against author (95% CI) | flag |")
+        p("|---|---|---|---|---|---|---|---|---|---|---|---|---|")
+        for r in sorted((r for r in lr_rows if r["level"] == lvl),
+                        key=lambda r: (-r["lr"], r["key"])):
+            j = jrow(f"LRs: {lvl}", r)
+            J.append(j)
+            p(render_lr(j))
+        p("")
+
+    p("## Rows without an LR")
+    p("")
+    p(f"Rows with at least {MIN_N} findings on one side only.")
+    p("")
+    p("| row | LLM n | LLM rate (95% CI) | pool n | pool rate (95% CI) | "
+      "arXiv post over pre (95% CI) |")
+    p("|---|---|---|---|---|---|")
+    for r in sorted((r for r in rows if "lr" not in r),
+                    key=lambda r: (r["level"], r["key"])):
+        j = jrow("Rows without an LR", r)
+        J.append(j)
+        p(render_lr(j))
+    p("")
+
+    info = shrink.info
+    small = [r for r in lr_rows if "lr_shrunk" in r
+             and min(r["llm"]["n"], r["pool"]["n"]) < SMALL_N]
+    mv = [abs(math.log(r["lr_shrunk"] / r["lr"])) for r in small]
+    p("## Prior")
+    p("")
+    p(f"{info['rows']} rows have an LR and an arXiv ratio. tau2 is "
+      f"{info['tau2']:.3f} on the log scale (a prior standard deviation of "
+      f"a factor of {math.exp(math.sqrt(info['tau2'])):.2f}), and the mean "
+      f"log LR less the log arXiv ratio is {info['mean_offset']:.3f}. The "
+      "arXiv change predicts the in-register LR poorly, so the weights left "
+      f"on the raw LR run from {min(r['w'] for r in lr_rows if 'w' in r):.2f}"
+      f" to {max(r['w'] for r in lr_rows if 'w' in r):.2f}. The "
+      f"{len(small)} rows under {SMALL_N} findings on either side move by a "
+      f"median factor of {math.exp(SB.median(mv)):.2f} and at most "
+      f"{math.exp(max(mv)):.2f}.")
+    p("")
+
+    h2, h2y = H["h2"]
+    h3, h3y = H["h3"]
+    lr_, above, inside, below = H["h4"]
+    p("## Hypotheses")
+    p("")
+    p(f"H2: {len(h2y)} of {len(h2)} rows whose arXiv interval lies above 1 "
+      f"have an LR above 1 (70% needed): "
+      f"{'holds' if h2 and len(h2y) >= 0.7 * len(h2) else 'fails'}. Misses: "
+      + ", ".join(f"`{r['key']}`" for r in h2 if r not in h2y) + ".")
+    p("")
+    p(f"H3: {len(h3y)} of {len(h3)} rows with an LR against the author's "
+      "specifications fall on the same side of 1 as the LR against the pool "
+      f"(two thirds needed): "
+      f"{'holds' if h3 and len(h3y) >= 2 * len(h3) / 3 else 'fails'}.")
+    p("")
+    q = len(lr_) / 4
+    p(f"H4: of {len(lr_)} LR rows, {len(above)} have an interval above 1, "
+      f"{len(inside)} an interval that contains 1 and {len(below)} an "
+      "interval below 1 (a quarter needed above and a quarter containing "
+      f"1): {'holds' if len(above) >= q and len(inside) >= q else 'fails'}.")
+    p("")
+
+    p("## Sanity reading")
+    p("")
+    p("20 random LLM-corpus findings for each of the 5 rows with the highest "
+      "LR and the 5 with the lowest (TRICOLON and its pattern sit between). "
+      "Real instances counted on the console.")
+    p("")
+    p("| row | LR | real |")
+    p("|---|---|---|")
+    by = {r["key"]: r for r in lr_rows}
+    for k in sorted(SANITY, key=lambda k: -by[k]["lr"]):
+        a, n = SANITY[k]
+        J.append({"table": "Sanity reading", "key": k,
+                  "level": by[k]["level"], **AR.split_key(by[k]["level"], k),
+                  "lr": AR.jnum(by[k]["lr"]), "real": a, "read": n})
+        p(f"| `{k.replace('|', ' / ')}` | {AR.fmt(by[k]['lr'])} | {a} / {n} |")
+    p("")
+
+    p("## Proposed bands")
+    p("")
+    p("Candidate cut points over the raw LR. Below the med cut is low. "
+      "Flagged rows are shown with the band each set would give but are "
+      "not counted. No level changes in this task.")
+    p("")
+    for name, stat, med, high in BANDS:
+        what = "LR" if stat == "lr" else "lower 95% bound of the LR"
+        p(f"- Set {name}: {what}; med from {med:g}, high from {high:g}.")
+    p("")
+    p("| row | current level | LR (95% CI) | "
+      + " | ".join(f"set {b[0]}" for b in BANDS) + " | flag |")
+    p("|---|---|---|" + "---|" * len(BANDS) + "---|")
+    changes = {b[0]: [] for b in BANDS}
+    for r in sorted(lr_rows, key=lambda r: (-r["lr"], r["key"])):
+        cur, note = CURRENT[r["key"]]
+        got = {b[0]: band(r, *b[1:]) for b in BANDS}
+        fl = flag_of(r)
+        if not fl:
+            for b, v in got.items():
+                if v != cur:
+                    changes[b].append((r["key"], cur, v))
+        J.append({"table": "Proposed bands", "key": r["key"],
+                  "level": r["level"], **AR.split_key(r["level"], r["key"]),
+                  "current": cur, "current_note": note,
+                  "lr": AR.jnum(r["lr"]), "lr_lo": AR.jnum(r["lr_ci"][0]),
+                  "lr_hi": AR.jnum(r["lr_ci"][1]), "bands": got, "flag": fl})
+        p(render_band(J[-1]))
+    p("")
+    nb = sum(1 for r in lr_rows if not flag_of(r))
+    for b in BANDS:
+        ch = changes[b[0]]
+        p(f"Set {b[0]}: {len(ch)} of {nb} unflagged rows change level"
+          + (": " + ", ".join(f"`{k.replace('|', ' / ')}` {a} to {v}"
+                              for k, a, v in ch) if ch else "") + ".")
+        p("")
+    out_path.write_text("\n".join(L), encoding="utf-8")
+    print(f"wrote {out_path}", file=sys.stderr)
+    if args.json:
+        AR.write_json(args.json, "llm-lr", ver, AB.sig4({
+            "report": out_path.name, "min_n": MIN_N, "pool_used": SB.POOL,
+            "corpus_pin": PIN, "analysed_as": ANALYSE_AS,
+            "bootstrap": {"draws": DRAWS, "seed": LLM_SEED,
+                          "pool_seed": POOL_SEED, "arxiv_seed": ARXIV_SEED,
+                          "interval": "percentile 95%, nearest rank for "
+                                      "ratios; LR draws pair the LLM and "
+                                      "pool draws by index"},
+            "sample": {"files": nfiles, "words": words,
+                       "raw_words": sum(x["raw_words"] for x in summ),
+                       "masked_share_median": SB.median(pct),
+                       "masked_share_over_40": sum(x > 40 for x in pct)},
+            "prior": {"rows": info["rows"], "tau2": info["tau2"],
+                      "mean_offset": info["mean_offset"]},
+            "pin_checks": checks,
+            "bands": [{"set": b[0], "statistic": b[1], "med": b[2],
+                       "high": b[3]} for b in BANDS],
+            "note": "LR = LLM rate over the equal-weight pool rate"}),
+            AB.sig4(J))
+
+
+def ci3(d, k):
+    v, lo, hi = d.get(k), d.get(k + "_lo"), d.get(k + "_hi")
+    return "-" if v is None else f"{fmtj(v)} ({fmtj(lo)} to {fmtj(hi)})"
+
+
+def fmtj(x):
+    if x is None:
+        return "-"
+    if x == "inf":
+        return "inf"
+    return f"{x:.2f}"
+
+
+def rate3(d):
+    return f"{fmtj(d['rate'])} ({fmtj(d['rate_lo'])} to {fmtj(d['rate_hi'])})"
+
+
+def render_lr(j):
+    """One LR or no-LR row from its JSON row; jsoncheck.py renders the same
+    way."""
+    k = j["key"].replace("|", " / ")
+    a = j["arxiv"]
+    ax = ("-" if a["ratio"] is None else
+          f"{fmtj(a['ratio'])} ({fmtj(a['lo'])} to {fmtj(a['hi'])})")
+    if j["table"] == "Rows without an LR":
+        return (f"| `{k}` | {j['llm']['n']} | {rate3(j['llm'])} | "
+                f"{j['pool']['n']} | {rate3(j['pool'])} | {ax} |")
+    return (f"| `{k}` | {j['llm']['n']} | {rate3(j['llm'])} | "
+            f"{j['pool']['n']} | {rate3(j['pool'])} | {ci3(j, 'lr')} | "
+            f"{j['interval']} | {ax} | {fmtj(j['lr_shrunk'])} | "
+            f"{fmtj(j['w'])} | {j['author']['n']} | {ci3(j, 'lr_author')} | "
+            f"{j['flag'] or '-'} |")
+
+
+def render_band(j):
+    k = j["key"].replace("|", " / ")
+    cur = j["current"] + (f" ({j['current_note']})" if j["current_note"]
+                          else "")
+    return (f"| `{k}` | {cur} | {ci3(j, 'lr')} | "
+            + " | ".join(j["bands"][b[0]] for b in BANDS)
+            + f" | {j['flag'] or '-'} |")
 
 
 # ---------------------------------------------------------------- main
