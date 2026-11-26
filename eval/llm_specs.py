@@ -500,10 +500,10 @@ def pin_checks(MB, AX, keys):
     return out
 
 
-def build_rows():
-    """Every construction and pattern row with at least MIN_N findings in
-    the LLM corpus or the pool, with rates, LRs and the arXiv prior."""
-    import numpy as np
+def boots():
+    """The three bootstraps of the TF-012 joint draw, from the pinned
+    tables: the pool (seed 9009), arXiv (seed 8008) and the LLM corpus
+    (seed 12012)."""
     SB.use_tables(str(POOL_TABLES), str(ARXIV_TABLES), ARXIV_SHA)
     ver, _, _, by, author, arxiv_pre = SB.load_tables()
     groups = {**{s: by[s] for s in SB.SOURCES}, "arxiv": arxiv_pre,
@@ -514,6 +514,14 @@ def build_rows():
     AX = AB.Boot(arows, DRAWS, ARXIV_SEED)
     llm = load_llm(ver["sha256"])
     LB = LBoot(llm, DRAWS, LLM_SEED)
+    return ver, by, groups, MB, arows, AX, llm, LB
+
+
+def build_rows():
+    """Every construction and pattern row with at least MIN_N findings in
+    the LLM corpus or the pool, with rates, LRs and the arXiv prior."""
+    import numpy as np
+    ver, by, groups, MB, arows, AX, llm, LB = boots()
     pat_of = defaultdict(set)
     for rs in [*groups.values(), llm, arows["pre"], arows["post"]]:
         for r in rs:
@@ -591,9 +599,93 @@ def fmt(x):
     return AR.fmt(x) if x is not None else "-"
 
 
+TRICOLON_PAT = "TRICOLON|tricolon"
+TRICOLON_LABELS = ("enumeration", "list-like", "figure")
+
+
+def label_lrs():
+    """The TRICOLON LR for each label of the `tricolon` pattern (TF-013),
+    from the stored subtype counts and the same joint bootstrap as the
+    pattern rows, so the label draws pair with the pattern draws. The
+    author table (TF-010) holds construction and pattern counts only, so a
+    label LR against the author's specs cannot be computed from it."""
+    ver, by, groups, MB, arows, AX, llm, LB = boots()
+    author_sub = any("subtype" in r["counts"] for r in groups["author"])
+    out = []
+    keys = [("pattern", TRICOLON_PAT)] + [
+        ("subtype", f"{TRICOLON_PAT}|{lab}") for lab in TRICOLON_LABELS]
+    for lvl, k in keys:
+        L = LB.stat(lvl, k)
+        s = MB.stat(lvl, k)
+        P, U = s["pool"], s["g"]["author"]
+        row = {"level": lvl, "key": k, "llm": L,
+               "pool": {"n": P["n"], **P[SB.POOL]}, "author": U,
+               "author_stored": lvl != "subtype" or author_sub}
+        if L["n"] >= MIN_N and P["n"] >= MIN_N:
+            row["lr"], row["lr_ci"] = SB.ratio(
+                L["rate"], row["pool"]["rate"], L["draws"],
+                row["pool"]["draws"])
+        if row["author_stored"] and L["n"] >= MIN_N and U["n"] >= MIN_N:
+            row["lr_author"], row["lr_author_ci"] = SB.ratio(
+                L["rate"], U["rate"], L["draws"], U["draws"])
+        for t in ("all", "abstract"):
+            a = AX.stat(t, lvl, k)
+            row[f"ax_{t}_n"] = (a["o"]["pre"]["n"], a["o"]["post"]["n"])
+            if min(row[f"ax_{t}_n"]) >= MIN_N:
+                row[f"ax_{t}"], row[f"ax_{t}_ci"] = a["ratio"], a["ratio_ci"]
+        out.append(row)
+    return ver, out
+
+
+def cmd_labels(args):
+    """Console only: the TRICOLON LR per label and its set C band."""
+    ver, rows = label_lrs()
+    C = next(b for b in BANDS if b[0] == "C")
+    print(f"ticfinder {ver['sha256']}; {DRAWS} draws, LLM seed {LLM_SEED}, "
+          f"pool seed {POOL_SEED}, arXiv seed {ARXIV_SEED}; LR rows need "
+          f"{MIN_N} findings on both sides")
+    print(f"\n{'row':32s} {'LLM n':>6} {'pool n':>6} {'LR (95% CI)':>24} "
+          f"{'set C':>5} {'vs author':>22} {'arXiv all (95% CI)':>24} "
+          f"{'arXiv abstract (95% CI)':>24}")
+    for r in rows:
+        name = r["key"] if r["level"] == "pattern" else \
+            "  " + r["key"].split("|")[-1]
+        lr = lr_cell(r) if "lr" in r else "-"
+        bc = band(r, *C[1:]) if "lr" in r else "-"
+        au = (lr_cell(r, "lr_author") if "lr_author" in r else
+              "-" if r["author_stored"] else "not stored")
+        ax = {t: (SB.ci_txt(r[f"ax_{t}"], r[f"ax_{t}_ci"])
+                  if f"ax_{t}" in r else "-") for t in ("all", "abstract")}
+        print(f"{name:32s} {r['llm']['n']:6d} {r['pool']['n']:6d} {lr:>24} "
+              f"{bc:>5} {au:>22} {ax['all']:>24} {ax['abstract']:>24}")
+    pat = rows[0]
+    labs = rows[1:]
+    nsum = sum(r["llm"]["n"] for r in labs), sum(r["pool"]["n"] for r in labs)
+    print(f"\nlabel findings sum to LLM {nsum[0]} of {pat['llm']['n']}, pool "
+          f"{nsum[1]} of {pat['pool']['n']} for {TRICOLON_PAT}")
+    lj = AR.HERE / "llm-lr-2026-11-26.json"
+    want = next(r for r in json.loads(lj.read_text(encoding="utf-8"))["rows"]
+                if r["table"] == "LRs: pattern" and r["key"] == TRICOLON_PAT)
+    got = AB.sig4({"lr": float(pat["lr"]), "lr_lo": float(pat["lr_ci"][0]),
+                   "lr_hi": float(pat["lr_ci"][1])})
+    same = got == {k: want[k] for k in ("lr", "lr_lo", "lr_hi")}
+    print(f"{TRICOLON_PAT} LR against {lj.name}: "
+          + ("equal" if same else f"DIFFERS {got} vs {want}"))
+    ok = [r for r in labs if "lr" in r]
+    h1 = [r for r in ok if r["lr_ci"][0] > 1]
+    print(f"H1: {len(h1)} of {len(labs)} labels have an LR interval whose "
+          f"lower end is above 1 ({len(ok)} have an LR): "
+          + ", ".join(f"{r['key'].split('|')[-1]} {band(r, *C[1:])}"
+                      for r in ok))
+    print("\narXiv abstract: the abstract section of the TF-010 full body "
+          "tables, not the TF-004 abstract corpus.")
+
+
 def cmd_analyse(args):
     if args.sample:
         return show_sample(args.sample, args.n)
+    if args.labels:
+        return cmd_labels(args)
     if not args.report_only:
         run_llm_analysis()
     ver, rows, MB, AX, nfiles, words, checks = build_rows()
@@ -1058,6 +1150,9 @@ def main():
     a.add_argument("--report", help="write the markdown report here")
     a.add_argument("--json", metavar="PATH")
     a.add_argument("--sample", metavar="KEY")
+    a.add_argument("--labels", action="store_true",
+                   help="the TRICOLON LR per label from the stored tables, "
+                        "on the console; writes nothing (TF-013)")
     a.add_argument("-n", type=int, default=20)
     args = ap.parse_args()
     if args.cmd != "selftest" and \

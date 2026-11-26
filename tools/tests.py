@@ -373,6 +373,16 @@ PATTERN_CASES = [
                          "saturating counter.", {"participial_tail": "med"}),
     ("PARTICIPIAL_TAIL", "The cache warms on startup, making subsequent "
                          "requests faster.", {"participial_tail": "high"}),
+    # TF-013: levels from the TF-012 LRs under set C (roadmap s.19, s.20).
+    # Every `tricolon` label reports at med; the figure row was med before.
+    ("TRICOLON", "A TAGE entry holds a counter, a usefulness field, and a "
+                 "target.", {"tricolon": "med"}),                # enumeration
+    ("TRICOLON", "Supported formats include JSON, YAML, and TOML.",
+     {"tricolon": "med"}),                                       # list-like
+    ("TRICOLON", "The parser is fast, correct, and easy to extend.",
+     {"tricolon": "med"}),                                       # figure
+    ("EMPHATIC_REFLEXIVE", "The rule document itself is the reference.",
+     {"emphatic_reflexive": "low"}),
 ]
 
 

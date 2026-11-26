@@ -1456,7 +1456,7 @@ def abstract_adverb(doc, nlp):
     "EMPHATIC_REFLEXIVE", "Emphatic reflexive",
     "'the rule document itself'. Marks a distinction the sentence may not "
     "have earned. Check that the contrast is real.",
-    "med")
+    "low")   # TF-013: med to low, LR 0.87 (0.60 to 1.18), roadmap s.19
 def emphatic_reflexive(doc, nlp):
     out = []
     for tok in doc:
@@ -1499,7 +1499,7 @@ PT_LEMMA_CONFIDENCE = {"use": "med"}
     "rhetorical tricolon and no test separates them reliably, so the label is "
     "a hint and the judgement is yours. Filter with --off tricolon or waive "
     "the enumerations.",
-    "low")
+    "med")   # TF-013: low to med, LR 2.02 (1.83 to 2.25), roadmap s.19
 def tricolon(doc, nlp):
     """Coordination of three or more items, classified but not suppressed.
 
@@ -1507,11 +1507,16 @@ def tricolon(doc, nlp):
     no test separates them reliably. Rather than guess and hide the ones it
     guesses wrong, this reports every coordination and labels how
     list-like it looks, so the reviewer decides. The subtype is in the
-    finding label and drives confidence:
+    finding label:
 
         figure       few enumeration signals -- probably rhetorical
         list-like    some signals
         enumeration  several signals -- probably an ordinary list
+
+    Every label reports at med (TF-013). Before it, figure ran at med and
+    the other two at low; the TF-012 LR of each label has a lower bound
+    above 1 in the spec register (roadmap s.19 and s.20), so set C gives
+    each med.
 
     Genuine parse errors are still dropped: a coordination with no commas is
     a compound, not a series.
@@ -1588,9 +1593,9 @@ def tricolon(doc, nlp):
             score += 1                      # uneven members: narration
 
         if score >= 3:
-            kind, conf = "enumeration", "low"
+            kind, conf = "enumeration", "med"
         elif score >= 1:
-            kind, conf = "list-like", "low"
+            kind, conf = "list-like", "med"
         else:
             kind, conf = "figure", "med"
 
