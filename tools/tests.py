@@ -67,6 +67,8 @@ EXPECTED = {
     "PARTICIPIAL_TAIL": ["participial_tail"],
     "TRICOLON": ["tricolon", "tricolon_parataxis"],
     "DISGUISE_METAPHOR": ["disguise_metaphor"],
+    "TRAILING_LIGHT_VERB": ["trailing_light_verb"],
+    "OBJECT_RELATIVE": ["zero_object_relative", "that_object_relative"],
 }
 
 EXPECTED_PHRASE = ["FRAME_MARKER", "HOLLOW_BOOSTER", "CLOSER", "HEDGE_STACK"]
@@ -236,6 +238,75 @@ CASES = [
     # is not supported.
     ("DISGUISE_METAPHOR", False, "The test is passing for all seeds."),
 
+    # -- trailing light verb ---------------------------------------------
+    ("TRAILING_LIGHT_VERB", True,
+     "Note the count of the array write the last primitive made."),
+    ("TRAILING_LIGHT_VERB", True,
+     "Log the call the handler did before exiting."),
+    ("TRAILING_LIGHT_VERB", True, "Check the update the worker performed."),
+    ("TRAILING_LIGHT_VERB", True, "Return the request the client issued."),
+    ("TRAILING_LIGHT_VERB", True,
+     "Retry the fetch the scheduler made on startup."),
+    ("TRAILING_LIGHT_VERB", True, "Undo the write we did."),
+    ("TRAILING_LIGHT_VERB", False, "Open the file you sent."),
+    ("TRAILING_LIGHT_VERB", False, "Fix the bug we found yesterday."),
+    ("TRAILING_LIGHT_VERB", False,
+     "Note how many elements the last primitive wrote."),
+    ("TRAILING_LIGHT_VERB", False, "This change made the test fail."),
+    ("TRAILING_LIGHT_VERB", False, "We made a copy."),
+    ("TRAILING_LIGHT_VERB", False,
+     "Whatever the parser did, the output is wrong."),
+    ("TRAILING_LIGHT_VERB", False, "The test made sure the write landed."),
+    ("TRAILING_LIGHT_VERB", False,
+     "After the meeting the team made progress."),
+
+    # -- object relative -------------------------------------------------
+    ("OBJECT_RELATIVE", True,
+     "Set defaults for every variable the loops assign."),
+    ("OBJECT_RELATIVE", True,
+     "Defaults for every variable the loops assign are zero."),
+    ("OBJECT_RELATIVE", True,
+     "Check every register the decode stage writes."),
+    ("OBJECT_RELATIVE", True,
+     "The names the planning documents use are stable."),
+    ("OBJECT_RELATIVE", True,
+     "Note the count of the array write the last primitive triggered."),
+    ("OBJECT_RELATIVE", True, "Flush the buffer the worker thread fills."),
+    ("OBJECT_RELATIVE", True,
+     "We reviewed the code the intern wrote yesterday."),
+    # pronoun subjects are the easy, common case and are not reported
+    ("OBJECT_RELATIVE", False, "Open the file you sent."),
+    ("OBJECT_RELATIVE", False, "The bug we found yesterday is fixed."),
+    # light verbs belong to TRAILING_LIGHT_VERB
+    ("OBJECT_RELATIVE", False,
+     "Note the count of the array write the last primitive made."),
+    # with a relativiser
+    ("OBJECT_RELATIVE", True,
+     "Set defaults for every variable that the loops assign."),
+    ("OBJECT_RELATIVE", True,
+     "Use the names which the planning documents use."),
+    # the rewrite, and subject relatives and complement clauses with 'that'
+    ("OBJECT_RELATIVE", False,
+     "Set defaults for every variable assigned by the loops."),
+    ("OBJECT_RELATIVE", False, "The dog that bit the man ran."),
+    ("OBJECT_RELATIVE", False, "The value that we computed is wrong."),
+    ("OBJECT_RELATIVE", False, "The tool reports that the build passed."),
+    ("OBJECT_RELATIVE", False, "It is clear that the design works."),
+    # same tags, not a relative clause
+    ("OBJECT_RELATIVE", False, "In the end the team decided."),
+    ("OBJECT_RELATIVE", False, "When the build finishes the tests run."),
+    ("OBJECT_RELATIVE", False, "This is the way the cache works."),
+    ("OBJECT_RELATIVE", False, "The day the build broke was Friday."),
+    ("OBJECT_RELATIVE", False,
+     "Every cycle the predictor updates the table."),
+    ("OBJECT_RELATIVE", False,
+     "The 155 JSON rows match the report rows exactly."),
+    ("OBJECT_RELATIVE", False,
+     "A normal run counts the waivers held in the file."),
+    ("OBJECT_RELATIVE", False,
+     "Flag a finding whose content words recur."),
+    ("OBJECT_RELATIVE", False, "The value was triggered by the timer."),
+
     # -- hollow booster (phrase pattern, runs through analyse) ------------
     # `significantly,` is a booster only at the start of a sentence;
     # mid-sentence it is a manner adverb (TF-006).
@@ -383,6 +454,34 @@ PATTERN_CASES = [
      {"tricolon": "med"}),                                       # figure
     ("EMPHATIC_REFLEXIVE", "The rule document itself is the reference.",
      {"emphatic_reflexive": "low"}),
+    # TF-014: object relatives and light verbs start at low, every load
+    # included, until measured LRs set them (roadmap step 15). The adv1
+    # patch had load 2 or more at med and TRAILING_LIGHT_VERB at med, by
+    # judgement. The first row is load 3, the second load 1.
+    ("OBJECT_RELATIVE", "Check every register the decode stage writes.",
+     {"zero_object_relative": "low"}),
+    ("OBJECT_RELATIVE", "We reviewed the code the intern wrote yesterday.",
+     {"zero_object_relative": "low"}),
+    ("OBJECT_RELATIVE", "Check every register that the decode stage writes.",
+     {"that_object_relative": "low"}),
+    ("TRAILING_LIGHT_VERB",
+     "Note the count of the array write the last primitive made.",
+     {"trailing_light_verb": "low"}),
+    ("TRAILING_LIGHT_VERB", "The decision the team made was final.",
+     {"trailing_light_verb": "low"}),                          # collocate
+]
+
+# Rewrite suggestions (OBJECT_RELATIVE). Need lemminflect; skipped without.
+SUGGESTION_CASES = [
+    ("Set defaults for every variable the loops assign.",
+     "every variable assigned by the loops"),
+    ("Check every register that the decode stage writes.",
+     "every register written by the decode stage"),
+    ("Flush the buffer the worker thread fills.",
+     "the buffer filled by the worker thread"),
+    # no suggestion: stranded preposition, and a verb with no passive
+    ("Close the file the logger writes to.", ""),
+    ("Count the bits the status field has.", ""),
 ]
 
 
@@ -888,6 +987,15 @@ def test_detectors(nlp):
             got[pname] = conf
         check("detectors", f"{cid} patterns {sorted(want)}: {text[:30]}",
               got == want, f"want={want} got={got}: {text[:70]}")
+
+    if tf.getInflection is None:
+        print("  skip suggestions (lemminflect not installed)")
+    else:
+        for text, want in SUGGESTION_CASES:
+            hits = tf.run_construction("OBJECT_RELATIVE", nlp(text), nlp)
+            got = [h[0]._.tf_suggestion for h in hits]
+            check("detectors", f"suggestion: {text[:40]}",
+                  got == [want], f"want {want!r} got {got}")
 
     def norm(x):
         return " ".join(x.split()).lower()

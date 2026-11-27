@@ -2938,3 +2938,62 @@ migrated. They held the totals from before TF-010 (141, 54, 302) and
 now hold 132, 52, 292 and 3. The summary records ticfinder sha256
 9a03a6bfeeb4, the phase 1 version, with `tf_commit` 28642ea "with
 uncommitted changes", since it was written before the phase 1 commit.
+
+### Phase 2: the new constructions
+
+ticfinder started at c762d76 (sha256 9a03a6bfeeb4), the phase 1
+commit. The user chose to land rewrite suggestions with `lemminflect`
+(0.2.3, which the user installed).
+
+**The rebuild.** The patch's `ticfinder.py` hunks applied to c762d76
+with line offsets only. Its `tests.py` hunks did not apply and were
+rebuilt by hand. Where the code differs from the patch:
+
+- `TRAILING_LIGHT_VERB` is at low; the patch had med.
+- `OBJECT_RELATIVE` reports every load at low; the patch had med for a
+  load of 2 or more. The label still carries the load (`[load 2]`).
+  Collocates such as "the decision the team made" still return low,
+  which now equals the construction's level, so a later level change
+  keeps them apart.
+- `analyse()` copies a span's suggestion only for `OBJECT_RELATIVE`
+  (the new `SUGGESTS` set). spaCy keys a span extension by the span's
+  character bounds, so another construction's span with the same
+  bounds would otherwise carry the suggestion.
+- The patch's `PATTERN_CASES` rows asked for med on a load 3 finding;
+  they now ask for low, and two `TRAILING_LIGHT_VERB` rows fix its
+  level, one of them a collocate. The suggestion rows run before the
+  span rows instead of before the `TRICOLON` count rows.
+- The README rows and install note wait for phase 3.
+
+What either construction matches, its guards, and the patch's 40
+`CASES` rows and 5 suggestion rows are unchanged.
+
+**Tests.** `make regress` passed. All 40 of the patch's rows pass in
+the full suite, so none went into `PENDING`. With the 5 suggestion rows
+and the 5 level rows, 50 new checks run. `eval/jsoncheck.py` gives
+MATCH on all 7 committed report pairs. It reads report summaries, not
+ticfinder's `--json`, so the `suggestion` field does not reach it; in
+`--json` the field is a string on every finding, empty for every
+existing construction.
+
+**H2 holds.** ticfinder ran on the phase 1 after set with `--json` and
+waived findings shown. Every finding of an existing construction is
+identical in span, fingerprint, label, confidence and context (README
+22, notes 43, blogs 1,135). The waived, disabled and stale counts are
+unchanged, and the only spans that cross a sentence boundary are still
+the 4 cross-sentence clefts. New findings, all at low:
+
+| input | words | `zero_object_relative` by load 0 / 1 / 2 / 3 | `that_object_relative` 0 / 1 / 2 | `TRAILING_LIGHT_VERB` |
+|---|---|---|---|---|
+| `README.md` | 2,807 | 0 / 0 / 0 / 0 | 0 | 0 |
+| `notes/*.md` | 3,624 | 1 / 1 / 0 / 0 | 0 | 4 (`make`) |
+| pacino blogs | 97,075 | 5 / 12 / 9 / 2 | 2 / 1 / 2 | 2 (`make`) |
+
+Of the 28 blog `zero_object_relative` findings, 18 carry a suggestion,
+and so do all 5 `that_object_relative` findings.
+
+**Speed.** On the 33 blogs, the phase 1 and phase 2 versions were run
+in turn, twice, at nice 19. The first pair (100.0 s and 71.1 s)
+includes a cold start under a load average near 24. The second pair
+took 68.13 s and 68.07 s, about 1,425 words a second for both. The two
+constructions cost nothing that this machine can measure.

@@ -27,6 +27,21 @@ from pathlib import Path
 
 import spacy
 from spacy.matcher import Matcher, DependencyMatcher
+from spacy.tokens import Span
+
+try:                    # optional: rewrite suggestions for OBJECT_RELATIVE
+    from lemminflect import getInflection
+except ImportError:     # findings still report without it
+    getInflection = None
+
+# A pattern may set span._.tf_suggestion on a span it returns; analyse()
+# copies it to Finding.suggestion. Kept out of the fingerprint.
+if not Span.has_extension("tf_suggestion"):
+    Span.set_extension("tf_suggestion", default="")
+# spaCy keys a span extension by the span's character bounds, so another
+# construction's span with the same bounds would read the value too.
+# analyse() copies it only for these constructions (TF-014).
+SUGGESTS = {"OBJECT_RELATIVE"}
 
 MODEL = "en_core_web_md"
 
@@ -388,6 +403,7 @@ class Finding:
     confidence: str = "med"
     pattern: str = ""
     fp: str = ""
+    suggestion: str = ""
 
 
 # ------------------------------------------------------------------ waivers
@@ -1723,6 +1739,245 @@ def disguise_metaphor(doc, nlp):
     return out
 
 
+@construction(
+    "TRAILING_LIGHT_VERB", "Nominalised action closed by a light verb",
+    "'the array write the last primitive made'. The action is a noun and an "
+    "empty verb at the end of the clause points back at it, so the reader "
+    "holds the noun until the verb arrives. Use the action as the verb: "
+    "'the elements the last primitive wrote'.",
+    "low")   # TF-014: low until measured LRs set it (roadmap step 15)
+def trailing_light_verb(doc, nlp):
+    """A nominalised action picked up again by an empty verb at clause end.
+
+    'Note the count of the array write the last primitive made.'
+
+    The real action ('write') has been turned into a noun, and a light verb
+    ('made') ending an object relative clause points back at it.
+
+    The dependency parse is not used. On exactly these sentences the parser
+    garden-paths the way a reader does -- `md` tags 'write' as a verb and
+    attaches 'primitive' as its object -- so `relcl` is rarely there to find.
+    The test is on the surface instead, using only POS tags:
+
+        DET NOMINAL  [DET ADJ* NOUN | PRON]  LIGHT_VERB  (no object follows)
+
+    i.e. a noun phrase, then a second noun phrase with no relativiser
+    between them, then a light verb with nothing left to be its object.
+
+    Known false positive: 'make' meaning 'create' has the same shape ('the
+    tests the team made'). Waive those.
+    """
+    LIGHT = {"make", "do", "perform", "execute", "issue", "conduct"}
+    SUBJ_PRON = {"i", "we", "you", "they", "he", "she", "it"}
+    # Anything that could start the light verb's own object.
+    OBJ_START = {"DET", "NOUN", "PROPN", "PRON", "ADJ", "NUM", "PART"}
+    # 'the decision the team made', 'the progress we made': the nominal is
+    # the established way to say it, so these report at low confidence.
+    COLLOCATE = {"decision", "choice", "mistake", "error", "progress",
+                 "change", "assumption", "point", "effort", "work", "job",
+                 "promise", "offer", "deal", "difference", "sense"}
+    out = []
+    for tok in doc:
+        if tok.lemma_.lower() not in LIGHT or tok.tag_ not in ("VBD", "VBN"):
+            continue
+        if tok.dep_ in ("aux", "auxpass"):
+            continue
+        nxt = doc[tok.i + 1] if tok.i + 1 < len(doc) else None
+        if nxt is not None and (nxt.pos_ in OBJ_START or nxt.lower_ == "so"):
+            continue                    # 'made the test fail', 'made sure'
+        # Walk left over the relative clause's subject.
+        j = tok.i - 1
+        if j >= 0 and doc[j].lower_ in SUBJ_PRON:
+            j -= 1
+        else:
+            while j >= 0 and doc[j].pos_ in ("NOUN", "PROPN", "ADJ", "NUM"):
+                j -= 1
+            if j < 0 or doc[j].pos_ != "DET" or j == tok.i - 1:
+                continue
+            j -= 1
+        if j < 0:
+            continue
+        nominal = doc[j]
+        # A noun, or a verb-form the tagger misread ('write', 'call',
+        # 'fetch'). It must follow a determiner, which a main verb would not.
+        if nominal.pos_ not in ("NOUN", "VERB"):
+            continue
+        k = j
+        while k > 0 and doc[k - 1].pos_ in ("NOUN", "PROPN", "ADJ", "NUM"):
+            k -= 1
+        if k == 0 or doc[k - 1].pos_ != "DET":
+            continue
+        # TF-014: the construction is low, so a collocate's low equals it;
+        # kept so a later level change keeps collocates apart
+        conf = "low" if nominal.lemma_.lower() in COLLOCATE else None
+        out.append((doc[k - 1:tok.i + 1], tok.lemma_.lower(), conf))
+    return out
+
+
+# Verbs with no natural passive: 'the bits had by the field'.
+_NO_PASSIVE = {"have", "lack", "cost", "resemble", "weigh", "equal", "fit",
+               "suit", "mean", "get", "become", "seem", "contain", "need",
+               "want", "like", "know", "say", "think", "see", "take", "give"}
+
+
+def _passive_rewrite(doc, np_start, rel_end, subj_start, v):
+    """'every variable the loops assign' -> 'every variable assigned by the
+    loops'. Returns "" where the rewrite would read worse or is unknown."""
+    if getInflection is None or v.lemma_.lower() in _NO_PASSIVE:
+        return ""
+    nxt = doc[v.i + 1] if v.i + 1 < len(doc) else None
+    if nxt is not None and nxt.pos_ == "ADP":
+        return ""                       # stranded: 'the file the log writes to'
+    if v.i - subj_start > 5:
+        return ""                       # a long 'by' phrase reads worse
+    forms = getInflection(v.lemma_, tag="VBN")
+    if not forms:
+        return ""
+    head = doc[np_start:rel_end].text
+    agent = doc[subj_start:v.i].text
+    return f"{head} {forms[0]} by {agent}"
+
+
+def _object_relatives(doc, with_relativiser):
+    """Shared core for both OBJECT_RELATIVE patterns.
+
+    The check is on POS tags, not the dependency parse. On the dense cases
+    the parser misreads the clause's subject as an object, or its verb as a
+    new main clause, and it labels 'that' variously `mark` or `dobj`:
+
+        DET [ADJ|NOUN]* HEAD [that|which]  DET [ADJ|NOUN]* NOUN  VERB  (no object)
+
+    Pronoun subjects ('the file you sent') are not reported: they are the
+    common, easy case. Light verbs are left to TRAILING_LIGHT_VERB.
+    """
+    LIGHT = {"make", "do", "perform", "execute", "issue", "conduct"}
+    RELATIVISER = {"that", "which", "whom"}
+    OBJ_START = {"DET", "NOUN", "PROPN", "PRON", "ADJ", "NUM", "PART"}
+    NP_MOD = {"ADJ", "NOUN", "PROPN", "NUM"}
+    # Heads that take a relative adverb, not an object gap: 'the way the
+    # cache works', 'the day the build broke'.
+    ADVERBIAL_HEAD = {"way", "time", "times", "day", "moment", "reason",
+                      "place", "year", "point", "extent", "case", "cycle",
+                      "instant", "manner", "degree", "order"}
+    # Bare-noun time adverbs, which follow the verb but are not its object.
+    TEMPORAL = {"yesterday", "today", "tomorrow", "now", "earlier",
+                "later", "first", "last", "once", "twice", "again"}
+    SUBORD = {"when", "if", "while", "because", "after", "before", "once",
+              "until", "since", "as", "unless", "whenever", "where",
+              "although", "though"}
+    out = []
+    for sent in doc.sents:
+        verbs = [t for t in sent if t.pos_ in ("VERB", "AUX")]
+        for v in sent:
+            if v.pos_ != "VERB" or v.tag_ not in ("VBD", "VBP", "VBZ", "VBN"):
+                continue
+            if v.lemma_.lower() in LIGHT:
+                continue
+            nxt = doc[v.i + 1] if v.i + 1 < sent.end else None
+            # The tagger reads a past tense after a noun as a participle
+            # ('the primitive triggered'). A real one takes 'by' or an aux.
+            if v.tag_ == "VBN" and (
+                    (nxt is not None and nxt.lower_ == "by")
+                    or doc[v.i - 1].pos_ == "AUX"):
+                continue
+            if nxt is not None and nxt.lower_ not in TEMPORAL and (
+                    nxt.pos_ in OBJ_START or nxt.lower_ == "so"):
+                continue
+            # The clause subject: DET [mods]* NOUN, ending just before v.
+            j = v.i - 1
+            if j < sent.start or doc[j].pos_ not in NP_MOD:
+                continue
+            while j >= sent.start and doc[j].pos_ in NP_MOD:
+                j -= 1
+            if j < sent.start or doc[j].pos_ != "DET":
+                continue
+            if doc[j].lower_ in ("whose", "which", "what", "whichever"):
+                continue                # a relativiser, not a subject
+            subj_start = j
+            # The relativiser, if this pattern wants one.
+            h = subj_start - 1
+            if with_relativiser:
+                if h < sent.start or doc[h].lower_ not in RELATIVISER:
+                    continue
+                rel_end = h             # head NP ends before 'that'
+                h -= 1
+            else:
+                rel_end = subj_start
+            # The head: a noun, or a nominalised verb the tagger misread.
+            if h < sent.start or doc[h].pos_ not in ("NOUN", "PROPN", "VERB"):
+                continue
+            head = doc[h]
+            # A verb-tagged head counts only in its base form ('the array
+            # write'); 'run counts' is a subject and its main verb.
+            if head.pos_ == "VERB" and head.tag_ not in ("VB", "VBP"):
+                continue
+            # After a noun it also needs a past-tense clause verb: 'the JSON
+            # rows match the report rows' has the same tags as 'the array
+            # write the primitive made', with 'rows' read as a verb.
+            if head.pos_ == "VERB" and doc[h - 1].pos_ in NP_MOD \
+                    and v.tag_ not in ("VBD", "VBN"):
+                continue
+            if head.lemma_.lower() in ADVERBIAL_HEAD:
+                continue
+            k = h
+            while k > sent.start and doc[k - 1].pos_ in NP_MOD:
+                k -= 1
+            if k == sent.start or doc[k - 1].pos_ not in ("DET", "PRON"):
+                continue
+            np_start = k - 1
+            # A subordinate clause with no comma looks the same:
+            # 'When the build finishes the tests run.'
+            before = doc[sent.start:np_start]
+            subs = [t.i for t in before if t.lower_ in SUBORD]
+            if subs and not any(t.pos_ in ("VERB", "AUX") for t in before
+                                if t.i > max(subs)):
+                continue
+            # A relative clause needs a main verb elsewhere; without one
+            # this is just a fronted phrase: 'In the end the team decided.'
+            if not any(t.i < np_start or t.i > v.i for t in verbs):
+                continue
+            prev = doc[np_start - 1] if np_start > sent.start else None
+            nested = prev is not None and prev.pos_ == "ADP"
+            stacked = (h - 1 >= k and doc[h - 1].pos_ in ("NOUN", "PROPN")) \
+                or head.pos_ == "VERB"
+            long_subj = v.i - subj_start >= 3
+            final = nxt is None or nxt.text in (".", ";", ":", "!", "?",
+                                                ")", ",")
+            load = sum((nested, stacked, long_subj, final))
+            # TF-014: every load reports low until measured LRs set the
+            # levels (roadmap step 15); the label keeps the load so
+            # harvest can group by it
+            conf = "low"
+            span = doc[np_start:v.i + 1]
+            span._.tf_suggestion = _passive_rewrite(doc, np_start, rel_end,
+                                                    subj_start, v)
+            out.append((span, f"load {load}", conf))
+    return out
+
+
+@construction(
+    "OBJECT_RELATIVE", "Object relative clause, verb last",
+    "'every variable the loops assign'. The noun is the object of the "
+    "clause's verb, so the verb comes after the clause's own subject and "
+    "the reader holds the noun until it arrives. Usually fine when short; "
+    "graded by load. Rewrite as a reduced passive, which makes it a subject "
+    "relative: 'every variable assigned by the loops'.",
+    "low")
+def zero_object_relative(doc, nlp):
+    """Object relative with no relativiser: 'every variable the loops
+    assign'. The form frontier models overuse (Clark et al. 2026)."""
+    return _object_relatives(doc, with_relativiser=False)
+
+
+@pattern("OBJECT_RELATIVE")
+def that_object_relative(doc, nlp):
+    """Object relative with 'that' or 'which': 'every variable that the
+    loops assign'. Easier to read than the zero form, so its findings
+    always report at low confidence."""
+    return [(s, sub, "low") for s, sub, conf in
+            _object_relatives(doc, with_relativiser=True)]
+
+
 # ------------------------------------------------- lexical / phrasal layer
 
 PHRASE_PATTERNS = {
@@ -1973,7 +2228,9 @@ def build_html(path, raw, findings, stats):
         f'<span class="ln">{html.escape(f.fp)} &middot; L{f.line}</span>'
         f'<span class="cid" style="color:{CONF_COLOR[f.confidence]}">'
         f'{f.construction}</span>'
-        f'<div class="tx">{html.escape(f.text[:110])}</div></div>'
+        f'<div class="tx">{html.escape(f.text[:110])}</div>'
+        + (f'<div class="tx">try: {html.escape(f.suggestion)}</div>'
+           if f.suggestion else '') + '</div>'
         for i, f in enumerate(findings))
 
     hidden = len(findings) - len(kept)
@@ -2085,7 +2342,9 @@ def analyse(path, nlp, only=None, extra=(), disabled=(), code_mask=None):
             context=span.sent.text.strip().replace("\n", " "),
             line=line_of(raw, span.start_char),
             start=span.start_char, end=span.end_char,
-            note=note, confidence=conf, pattern=pname))
+            note=note, confidence=conf, pattern=pname,
+            suggestion=getattr(span._, "tf_suggestion", "")
+            if cid in SUGGESTS else ""))
 
     # structural
     for cid, meta in CONSTRUCTIONS.items():
@@ -2365,6 +2624,8 @@ def report(path, findings, stats, plain=False, show_stats=False,
         head = f"  {c['d']}{f.fp}{c['0']} {col}L{f.line:<5}{c['0']} {tag}"
         room = W - (2 + 7 + 7 + (len(sub) + 3 if sub else 0))
         print(a(head + txt[:room]))
+        if f.suggestion:
+            print(a(f"{c['d']}         try: {f.suggestion}{c['0']}"))
         if show_context and f.context:
             ctx = window(f.context, f.text, W - 15)
             print(a(f"{c['d']}         {ctx}{c['0']}"))
