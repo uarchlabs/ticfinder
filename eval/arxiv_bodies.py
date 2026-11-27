@@ -1409,6 +1409,98 @@ def verdict(n, lo, hi):
     return "flat"
 
 
+# TF-015: object relatives and light verbs, shared by the three analysis
+# scripts. (name, level, key); a load group's key is a tuple of subtype
+# keys, counted as their sum. The zero form's load runs from 0 to 4.
+ORC = "OBJECT_RELATIVE"
+ORC_ZERO = f"{ORC}|zero_object_relative"
+ORC_THAT = f"{ORC}|that_object_relative"
+ORC_LOADS = (("load 0-1", (0, 1)), ("load 2+", (2, 3, 4)))
+ORC_ROWS = (
+    [(ORC, "construction", ORC)]
+    + [(f"{ORC}|{x}", "pattern", f"{ORC}|{x}") for x in (
+        "zero_object_relative", "that_object_relative",
+        "aux_object_relative", "as_parenthetical")]
+    + [(f"{ORC_ZERO}|{name}", "subtype",
+        tuple(f"{ORC_ZERO}|load {i}" for i in loads))
+       for name, loads in ORC_LOADS]
+    + [("TRAILING_LIGHT_VERB", "construction", "TRAILING_LIGHT_VERB")])
+ZT_NOTE = ("The zero to `that` ratio is the `zero_object_relative` rate over "
+           "the `that_object_relative` rate. Both rates come from the same "
+           "bootstrap draw, so the ratio's interval is paired; a ratio of "
+           "ratios divides two corpora's ratio draws of the same index. "
+           f"`too few` when a count is under {MIN_N}. Nearest-rank 95% "
+           "intervals.")
+
+
+def ratio_draws(a, b, ad, bd):
+    """The point ratio a / b, and its draws and nearest-rank 95% interval
+    from paired draws ad / bd (TF-015)."""
+    import numpy as np
+    with np.errstate(divide="ignore", invalid="ignore"):
+        r = a / b if b else (math.inf if a else math.nan)
+        d = ad / bd
+    return r, d, pct(d, nearest=True)
+
+
+def ci_side(lo, hi):
+    if lo > 1:
+        return "above 1"
+    if hi < 1:
+        return "below 1"
+    return "spans 1"
+
+
+def _f2(x):
+    if x is None:
+        return "-"
+    if x == "inf":
+        return "inf"
+    return f"{x:.2f}"
+
+
+def _zt_cell(d):
+    if d is None:
+        return "too few"
+    return f"{_f2(d['value'])} ({_f2(d['lo'])} to {_f2(d['hi'])})"
+
+
+def zt_row(corpus, zero_n, that_n, r, ci):
+    """A "Zero to that ratio" JSON row (TF-015)."""
+    ok = zero_n >= MIN_N and that_n >= MIN_N
+    return {"table": "Zero to that ratio", "corpus": corpus,
+            "zero_n": int(zero_n), "that_n": int(that_n),
+            "ratio": {"value": AR.jnum(r), "lo": AR.jnum(ci[0]),
+                      "hi": AR.jnum(ci[1])} if ok else None,
+            "interval": ci_side(*ci) if ok else None}
+
+
+def ror_row(first, second, r, ci, ok):
+    """A "Zero to that ratio of ratios" JSON row: first's ratio over
+    second's (TF-015)."""
+    return {"table": "Zero to that ratio of ratios", "first": first,
+            "second": second,
+            "ratio": {"value": AR.jnum(r), "lo": AR.jnum(ci[0]),
+                      "hi": AR.jnum(ci[1])} if ok else None,
+            "interval": ci_side(*ci) if ok else None}
+
+
+def zt_line(j):
+    """One markdown row from a zt_row or ror_row; jsoncheck.py renders the
+    same way."""
+    if j["table"] == "Zero to that ratio":
+        return (f"| {j['corpus']} | {j['zero_n']} | {j['that_n']} | "
+                f"{_zt_cell(j['ratio'])} | {j['interval'] or '-'} |")
+    return (f"| {j['first']} over {j['second']} | {_zt_cell(j['ratio'])} | "
+            f"{j['interval'] or '-'} |")
+
+
+ZT_HEAD = ["| corpus | zero n | that n | zero over that (95% CI) | "
+           "interval |", "|---|---|---|---|---|"]
+ROR_HEAD = ["| comparison | ratio of ratios (95% CI) | interval |",
+            "|---|---|---|"]
+
+
 def tf004_intervals():
     """{level: {key: (n, ratio, lo, hi)}} from the committed TF-004 report."""
     out = {"construction": {}, "pattern": {}}
@@ -1959,6 +2051,8 @@ def write_body_report(args):
                   f"{verdict(s['n'], *s['ratio_ci'])} |")
                 jstat(t, "pattern", k, s, "ALTERNATIVE_FRAMING by pattern")
         p("")
+    if full:
+        orc_sections(B, p, J, jstat)
     out_path.write_text("\n".join(L), encoding="utf-8")
     print(f"wrote {out_path}", file=sys.stderr)
     if args.json:
@@ -2017,6 +2111,66 @@ def write_body_report(args):
     big.sort(reverse=True)
     print("largest body ratio change (constructions, n>=20): "
           + ", ".join(f"{k} {r:.2f}" for _, k, r in big[:5]))
+
+
+def orc_sections(B, p, J, jstat):
+    """TF-015: object relatives and light verbs by window, and the zero to
+    `that` ratio with its post over pre ratio of ratios."""
+    ORC_TYPES = ("all", "body")
+    p("## Object relatives and light verbs")
+    p("")
+    p("TF-015 rows: `OBJECT_RELATIVE`, its four patterns, the zero form by "
+      "load group (the sum of its subtype counts) and "
+      "`TRAILING_LIGHT_VERB`, listed whatever their counts. The verdict is "
+      f"`too few` when either window has under {MIN_N} findings.")
+    p("")
+    for t in ORC_TYPES:
+        p(f"### {t}")
+        p("")
+        p("| row | pre n | pre pooled (95% CI) | pre mean per paper "
+          "(95% CI) | post n | post pooled (95% CI) | post mean per paper "
+          "(95% CI) | ratio (95% CI) | verdict |")
+        p("|---|---|---|---|---|---|---|---|---|")
+        for name, lvl, k in ORC_ROWS:
+            s = B.stat(t, lvl, k)
+            a, b = s["o"]["pre"], s["o"]["post"]
+            v = ("too few" if min(a["n"], b["n"]) < MIN_N
+                 else verdict(s["n"], *s["ratio_ci"]))
+            p(f"| `{name.replace('|', ' / ')}` | {a['n']} | "
+              f"{ci_txt(a['rate'], a['ci'])} | "
+              f"{ci_txt(a['mean'], a['mean_ci'])} | {b['n']} | "
+              f"{ci_txt(b['rate'], b['ci'])} | "
+              f"{ci_txt(b['mean'], b['mean_ci'])} | "
+              f"{ci_txt(s['ratio'], s['ratio_ci'])} | {v} |")
+            jstat(t, lvl, name, s, f"Object relatives and light verbs: {t}")
+            J[-1]["verdict"] = v
+        p("")
+    p("## Zero to that ratio")
+    p("")
+    p(ZT_NOTE)
+    p("")
+    for line in ZT_HEAD:
+        p(line)
+    zt = {}
+    for t in ORC_TYPES:
+        z, th = B.stat(t, "pattern", ORC_ZERO), B.stat(t, "pattern", ORC_THAT)
+        for w in ("pre", "post"):
+            zo, to = z["o"][w], th["o"][w]
+            r, d, ci = ratio_draws(zo["rate"], to["rate"], zo["draws"],
+                                   to["draws"])
+            zt[(t, w)] = (min(zo["n"], to["n"]), r, d)
+            J.append(zt_row(f"arXiv {w}, {t}", zo["n"], to["n"], r, ci))
+            p(zt_line(J[-1]))
+    p("")
+    for line in ROR_HEAD:
+        p(line)
+    for t in ORC_TYPES:
+        (na, ra, da), (nb, rb, db) = zt[(t, "post")], zt[(t, "pre")]
+        r, _, ci = ratio_draws(ra, rb, da, db)
+        J.append(ror_row(f"arXiv post, {t}", f"arXiv pre, {t}", r, ci,
+                         min(na, nb) >= MIN_N))
+        p(zt_line(J[-1]))
+    p("")
 
 
 def main():

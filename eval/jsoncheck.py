@@ -11,8 +11,10 @@ skipped. Also checks that no numeric field holds a string other than
 rows from each side and exits 1.
 
 Handles the "arxiv-rates" (TF-004), "arxiv-bodies" (TF-005 pilot and
-TF-008 full run), "spec-baseline" (TF-009) and "llm-lr" (TF-012) kinds. The harvest summary has a different row shape and
-is not covered.
+TF-008 full run), "spec-baseline" (TF-009) and "llm-lr" (TF-012) kinds,
+and in any of them the TF-015 rows: the zero to `that` ratio, its ratio
+of ratios, and the LR rows for object relatives and light verbs. The
+harvest summary has a different row shape and is not covered.
 """
 import json
 import sys
@@ -95,8 +97,37 @@ def render_llm(r, bands):
             f"{ci3(r, 'lr_author')} | {r['flag'] or '-'} |")
 
 
+def zt(d):
+    """A TF-015 ratio cell: "too few" when either side is under 20."""
+    return "too few" if d is None else c(d)
+
+
+def render_zt(r):
+    """TF-015: the zero to `that` ratio of one corpus, or a ratio of two
+    corpora's ratios."""
+    if r["table"] == "Zero to that ratio":
+        return (f"| {r['corpus']} | {r['zero_n']} | {r['that_n']} | "
+                f"{zt(r['ratio'])} | {r['interval'] or '-'} |")
+    return (f"| {r['first']} over {r['second']} | {zt(r['ratio'])} | "
+            f"{r['interval'] or '-'} |")
+
+
+def render_orc_llm(r):
+    """TF-015: an LR row for object relatives and light verbs."""
+    a = r["arxiv"]
+    ax = "-" if a["ratio"] is None else ci(a["ratio"], a["lo"], a["hi"])
+    lr = "too few" if r["lr"] is None else ci3(r, "lr")
+    return (f"| `{key(r)}` | {r['llm']['n']} | {rr(r['llm'])} | "
+            f"{r['pool']['n']} | {rr(r['pool'])} | {lr} | "
+            f"{r['interval'] or '-'} | {ax} | {r['band_c'] or '-'} |")
+
+
 def render(kind, r, j=None):
     t = r["table"]
+    if t.startswith("Zero to that ratio"):
+        return render_zt(r)
+    if t == "Object relatives and light verbs: LRs":
+        return render_orc_llm(r)
     if kind == "llm-lr":
         return render_llm(r, j["bands"])
     if kind == "spec-baseline":

@@ -1163,7 +1163,8 @@ MIN_N = AB.MIN_N
 LEVELS = AB.LEVELS
 AUTHOR_TABLE = SPECS / "author.jsonl"   # per-file counts, no text
 TMP = SPECS / "tmp"
-ARXIV_PIN = "f0fc55a44f37"  # the TF-010 full tables (ticfinder 494e4dd);
+ARXIV_PIN = "0aa23656bb24"  # the TF-015 full tables (ticfinder 22cf4fa);
+#   TF-010 to TF-014 used f0fc55a44f37, now in private/arxiv/bodies-tf015/;
 #   TF-008/TF-009 used 81ade1e30516, now in private/arxiv/bodies-tf008/
 ARXIV_DIR = None            # None: private/arxiv/bodies/
 AUTHOR_LEVELS = ("construction", "pattern")
@@ -1349,7 +1350,8 @@ class MBoot:
 
     def group(self, g, lvl, key):
         np = self.np
-        c = np.array([r["counts"].get(lvl, {}).get(key, 0)
+        keys = key if isinstance(key, tuple) else (key,)  # TF-015: sums
+        c = np.array([sum(r["counts"].get(lvl, {}).get(k, 0) for k in keys)
                       for r in self.rows[g]], dtype=float)
         cd = c[self.idx[g]].sum(axis=1)
         with np.errstate(divide="ignore", invalid="ignore"):
@@ -1694,6 +1696,7 @@ def write_report(args):
       "the pooled rate. H4 needs at least half: "
       f"{'holds' if h4 and h4x >= len(h4) / 2 else 'fails'}.")
     p("")
+    orc_section(B, p, J)
     out_path.write_text("\n".join(L), encoding="utf-8")
     print(f"wrote {out_path}", file=sys.stderr)
     if args.json:
@@ -1727,6 +1730,62 @@ def write_report(args):
     if h2:
         big = max(h2, key=lambda x: x[2])
         print(f"largest pool over arXiv: {big[1]} {big[2]:.2f}")
+
+
+def orc_section(B, p, J):
+    """TF-015: rates for object relatives and light verbs, every row
+    whatever its count, and the zero to `that` ratio per corpus."""
+    title = "Rates: object relatives and light verbs"
+    p("## Object relatives and light verbs")
+    p("")
+    p("TF-015 rows: `OBJECT_RELATIVE`, its four patterns, the zero form by "
+      "load group (the sum of its subtype counts) and "
+      "`TRAILING_LIGHT_VERB`, listed whatever their counts. Source cells "
+      "are findings, then rate (95% CI).")
+    p("")
+    p("| row | n | documents | pooled by words (95% CI) | equal-weight "
+      "(95% CI) | " + " | ".join(NAMES[s] for s in SOURCES) + " |")
+    p("|---|---|---|---|---|" + "---|" * len(SOURCES))
+    for name, lvl, k in AB.ORC_ROWS:
+        s = B.stat(lvl, k)
+        P = s["pool"]
+        cells = [f"{s['g'][g]['n']}, "
+                 f"{ci_txt(s['g'][g]['rate'], s['g'][g]['ci'])}"
+                 for g in SOURCES]
+        p(f"| `{name.replace('|', ' / ')}` | {P['n']} | {P['docs']} | "
+          f"{ci_txt(P['words']['rate'], P['words']['ci'])} | "
+          f"{ci_txt(P['equal']['rate'], P['equal']['ci'])} | "
+          + " | ".join(cells) + " |")
+        J.append({"table": title, "level": lvl, "key": name,
+                  **AR.split_key(lvl, name), "n": P["n"],
+                  "documents": P["docs"],
+                  "pool_words": jrate(P["words"]["rate"], P["words"]["ci"]),
+                  "pool_equal": jrate(P["equal"]["rate"], P["equal"]["ci"]),
+                  "sources": {g: jrate(s["g"][g]["rate"], s["g"][g]["ci"],
+                                       n=s["g"][g]["n"],
+                                       documents=s["g"][g]["docs"])
+                              for g in SOURCES}})
+    p("")
+    p("## Zero to that ratio")
+    p("")
+    p(AB.ZT_NOTE + " The pool is the equal-weight pool: the mean of the "
+      "source rates, for each form.")
+    p("")
+    for line in AB.ZT_HEAD:
+        p(line)
+    z, t = B.stat("pattern", AB.ORC_ZERO), B.stat("pattern", AB.ORC_THAT)
+    sides = [("pool, equal-weight", z["pool"]["n"], z["pool"]["equal"],
+              t["pool"]["n"], t["pool"]["equal"])]
+    sides += [(NAMES[g], z["g"][g]["n"], z["g"][g], t["g"][g]["n"],
+               t["g"][g]) for g in SOURCES]
+    sides.append(("author", z["g"]["author"]["n"], z["g"]["author"],
+                  t["g"]["author"]["n"], t["g"]["author"]))
+    for name, zn, zs, tn, ts in sides:
+        r, _, ci = AB.ratio_draws(zs["rate"], ts["rate"], zs["draws"],
+                                  ts["draws"])
+        J.append(AB.zt_row(name, zn, tn, r, ci))
+        p(AB.zt_line(J[-1]))
+    p("")
 
 
 # ---------------------------------------------------------------- main

@@ -1,0 +1,8092 @@
+{
+ "schema": 1,
+ "kind": "spec-baseline",
+ "tf_commit": "22cf4fa",
+ "tf_sha256": "0aa23656bb24",
+ "generated": "2026-11-27",
+ "report": "spec-baseline-2026-11-27.md",
+ "min_n": 20,
+ "pool_used": "equal",
+ "bootstrap": {
+  "draws": 2000,
+  "seed": 9009,
+  "interval": "percentile 95%, nearest rank for ratios; one index matrix per source, for arXiv and for the author"
+ },
+ "sample": {
+  "peps": {
+   "documents": 123,
+   "raw_words": 360029,
+   "words": 285161,
+   "masked_share_median": 28.35,
+   "masked_share_over_40": 28
+  },
+  "ietf": {
+   "documents": 177,
+   "raw_words": 1511288,
+   "words": 1017707,
+   "masked_share_median": 33.44,
+   "masked_share_over_40": 59
+  },
+  "rust": {
+   "documents": 153,
+   "raw_words": 352699,
+   "words": 253255,
+   "masked_share_median": 31.77,
+   "masked_share_over_40": 37
+  },
+  "riscv": {
+   "documents": 44,
+   "raw_words": 141171,
+   "words": 97174,
+   "masked_share_median": 31.71,
+   "masked_share_over_40": 14
+  },
+  "opentitan": {
+   "documents": 105,
+   "raw_words": 232486,
+   "words": 163521,
+   "masked_share_median": 31.453,
+   "masked_share_over_40": 32
+  }
+ },
+ "arxiv": {
+  "papers": 778,
+  "words": 4975688,
+  "table_sha256": "0aa23656bb24"
+ },
+ "author": {
+  "files": 36,
+  "words": 80788,
+  "words_ascii": 89371,
+  "rows_reaching_min_n": 7
+ },
+ "note": "ratios compare two corpora; they are not likelihood ratios",
+ "rows": [
+  {
+   "table": "Rates: construction",
+   "level": "construction",
+   "key": "TRICOLON",
+   "construction": "TRICOLON",
+   "n": 4575,
+   "documents": 515,
+   "pool_words": {
+    "rate": 2.518,
+    "rate_lo": 2.391,
+    "rate_hi": 2.666
+   },
+   "pool_equal": {
+    "rate": 2.83,
+    "rate_lo": 2.666,
+    "rate_hi": 2.993
+   },
+   "sources": {
+    "peps": {
+     "n": 772,
+     "documents": 111,
+     "rate": 2.707,
+     "rate_lo": 2.29,
+     "rate_hi": 3.264
+    },
+    "ietf": {
+     "n": 2418,
+     "documents": 169,
+     "rate": 2.376,
+     "rate_lo": 2.231,
+     "rate_hi": 2.529
+    },
+    "rust": {
+     "n": 510,
+     "documents": 123,
+     "rate": 2.014,
+     "rate_lo": 1.753,
+     "rate_hi": 2.298
+    },
+    "riscv": {
+     "n": 408,
+     "documents": 33,
+     "rate": 4.199,
+     "rate_lo": 3.667,
+     "rate_hi": 4.67
+    },
+    "opentitan": {
+     "n": 467,
+     "documents": 79,
+     "rate": 2.856,
+     "rate_lo": 2.607,
+     "rate_hi": 3.153
+    }
+   }
+  },
+  {
+   "table": "Rates: construction",
+   "level": "construction",
+   "key": "PARTICIPIAL_TAIL",
+   "construction": "PARTICIPIAL_TAIL",
+   "n": 1182,
+   "documents": 342,
+   "pool_words": {
+    "rate": 0.6506,
+    "rate_lo": 0.5991,
+    "rate_hi": 0.7124
+   },
+   "pool_equal": {
+    "rate": 0.7121,
+    "rate_lo": 0.6414,
+    "rate_hi": 0.7908
+   },
+   "sources": {
+    "peps": {
+     "n": 237,
+     "documents": 77,
+     "rate": 0.8311,
+     "rate_lo": 0.6979,
+     "rate_hi": 0.9493
+    },
+    "ietf": {
+     "n": 568,
+     "documents": 122,
+     "rate": 0.5581,
+     "rate_lo": 0.4934,
+     "rate_hi": 0.6353
+    },
+    "rust": {
+     "n": 195,
+     "documents": 89,
+     "rate": 0.77,
+     "rate_lo": 0.6386,
+     "rate_hi": 0.9006
+    },
+    "riscv": {
+     "n": 69,
+     "documents": 19,
+     "rate": 0.7101,
+     "rate_lo": 0.5188,
+     "rate_hi": 0.9833
+    },
+    "opentitan": {
+     "n": 113,
+     "documents": 35,
+     "rate": 0.691,
+     "rate_lo": 0.4874,
+     "rate_hi": 0.8954
+    }
+   }
+  },
+  {
+   "table": "Rates: construction",
+   "level": "construction",
+   "key": "ALTERNATIVE_FRAMING",
+   "construction": "ALTERNATIVE_FRAMING",
+   "n": 934,
+   "documents": 314,
+   "pool_words": {
+    "rate": 0.5141,
+    "rate_lo": 0.4477,
+    "rate_hi": 0.5867
+   },
+   "pool_equal": {
+    "rate": 0.6474,
+    "rate_lo": 0.5822,
+    "rate_hi": 0.7155
+   },
+   "sources": {
+    "peps": {
+     "n": 335,
+     "documents": 84,
+     "rate": 1.1748,
+     "rate_lo": 0.9804,
+     "rate_hi": 1.416
+    },
+    "ietf": {
+     "n": 263,
+     "documents": 90,
+     "rate": 0.2584,
+     "rate_lo": 0.2178,
+     "rate_hi": 0.3009
+    },
+    "rust": {
+     "n": 243,
+     "documents": 102,
+     "rate": 0.9595,
+     "rate_lo": 0.8131,
+     "rate_hi": 1.122
+    },
+    "riscv": {
+     "n": 66,
+     "documents": 21,
+     "rate": 0.6792,
+     "rate_lo": 0.5234,
+     "rate_hi": 0.8758
+    },
+    "opentitan": {
+     "n": 27,
+     "documents": 17,
+     "rate": 0.1651,
+     "rate_lo": 0.08941,
+     "rate_hi": 0.2441
+    }
+   }
+  },
+  {
+   "table": "Rates: construction",
+   "level": "construction",
+   "key": "ABSTRACT_ADVERB",
+   "construction": "ABSTRACT_ADVERB",
+   "n": 947,
+   "documents": 309,
+   "pool_words": {
+    "rate": 0.5212,
+    "rate_lo": 0.4559,
+    "rate_hi": 0.596
+   },
+   "pool_equal": {
+    "rate": 0.6315,
+    "rate_lo": 0.5578,
+    "rate_hi": 0.7026
+   },
+   "sources": {
+    "peps": {
+     "n": 207,
+     "documents": 67,
+     "rate": 0.7259,
+     "rate_lo": 0.5643,
+     "rate_hi": 0.8858
+    },
+    "ietf": {
+     "n": 391,
+     "documents": 113,
+     "rate": 0.3842,
+     "rate_lo": 0.3234,
+     "rate_hi": 0.4705
+    },
+    "rust": {
+     "n": 204,
+     "documents": 87,
+     "rate": 0.8055,
+     "rate_lo": 0.6729,
+     "rate_hi": 0.9523
+    },
+    "riscv": {
+     "n": 85,
+     "documents": 18,
+     "rate": 0.8747,
+     "rate_lo": 0.6179,
+     "rate_hi": 1.124
+    },
+    "opentitan": {
+     "n": 60,
+     "documents": 24,
+     "rate": 0.3669,
+     "rate_lo": 0.2544,
+     "rate_hi": 0.4758
+    }
+   }
+  },
+  {
+   "table": "Rates: construction",
+   "level": "construction",
+   "key": "LLM_DICTION",
+   "construction": "LLM_DICTION",
+   "n": 1058,
+   "documents": 301,
+   "pool_words": {
+    "rate": 0.5823,
+    "rate_lo": 0.4671,
+    "rate_hi": 0.7081
+   },
+   "pool_equal": {
+    "rate": 0.6212,
+    "rate_lo": 0.512,
+    "rate_hi": 0.7486
+   },
+   "sources": {
+    "peps": {
+     "n": 228,
+     "documents": 62,
+     "rate": 0.7995,
+     "rate_lo": 0.5254,
+     "rate_hi": 1.107
+    },
+    "ietf": {
+     "n": 546,
+     "documents": 114,
+     "rate": 0.5365,
+     "rate_lo": 0.3818,
+     "rate_hi": 0.7326
+    },
+    "rust": {
+     "n": 133,
+     "documents": 59,
+     "rate": 0.5252,
+     "rate_lo": 0.4022,
+     "rate_hi": 0.6443
+    },
+    "riscv": {
+     "n": 77,
+     "documents": 18,
+     "rate": 0.7924,
+     "rate_lo": 0.4374,
+     "rate_hi": 1.253
+    },
+    "opentitan": {
+     "n": 74,
+     "documents": 48,
+     "rate": 0.4525,
+     "rate_lo": 0.2796,
+     "rate_hi": 0.6644
+    }
+   }
+  },
+  {
+   "table": "Rates: construction",
+   "level": "construction",
+   "key": "EMPHATIC_REFLEXIVE",
+   "construction": "EMPHATIC_REFLEXIVE",
+   "n": 576,
+   "documents": 234,
+   "pool_words": {
+    "rate": 0.317,
+    "rate_lo": 0.276,
+    "rate_hi": 0.3616
+   },
+   "pool_equal": {
+    "rate": 0.3168,
+    "rate_lo": 0.2777,
+    "rate_hi": 0.357
+   },
+   "sources": {
+    "peps": {
+     "n": 118,
+     "documents": 47,
+     "rate": 0.4138,
+     "rate_lo": 0.3151,
+     "rate_hi": 0.5149
+    },
+    "ietf": {
+     "n": 285,
+     "documents": 91,
+     "rate": 0.28,
+     "rate_lo": 0.2299,
+     "rate_hi": 0.3491
+    },
+    "rust": {
+     "n": 114,
+     "documents": 66,
+     "rate": 0.4501,
+     "rate_lo": 0.3614,
+     "rate_hi": 0.5489
+    },
+    "riscv": {
+     "n": 19,
+     "documents": 10,
+     "rate": 0.1955,
+     "rate_lo": 0.09717,
+     "rate_hi": 0.2993
+    },
+    "opentitan": {
+     "n": 40,
+     "documents": 20,
+     "rate": 0.2446,
+     "rate_lo": 0.1636,
+     "rate_hi": 0.3331
+    }
+   }
+  },
+  {
+   "table": "Rates: construction",
+   "level": "construction",
+   "key": "CORRECTIVE_CONTRAST",
+   "construction": "CORRECTIVE_CONTRAST",
+   "n": 473,
+   "documents": 242,
+   "pool_words": {
+    "rate": 0.2603,
+    "rate_lo": 0.2315,
+    "rate_hi": 0.2936
+   },
+   "pool_equal": {
+    "rate": 0.2912,
+    "rate_lo": 0.2568,
+    "rate_hi": 0.33
+   },
+   "sources": {
+    "peps": {
+     "n": 154,
+     "documents": 70,
+     "rate": 0.54,
+     "rate_lo": 0.4323,
+     "rate_hi": 0.6546
+    },
+    "ietf": {
+     "n": 179,
+     "documents": 82,
+     "rate": 0.1759,
+     "rate_lo": 0.1465,
+     "rate_hi": 0.2083
+    },
+    "rust": {
+     "n": 98,
+     "documents": 64,
+     "rate": 0.387,
+     "rate_lo": 0.3099,
+     "rate_hi": 0.4677
+    },
+    "riscv": {
+     "n": 23,
+     "documents": 13,
+     "rate": 0.2367,
+     "rate_lo": 0.1524,
+     "rate_hi": 0.3374
+    },
+    "opentitan": {
+     "n": 19,
+     "documents": 13,
+     "rate": 0.1162,
+     "rate_lo": 0.06118,
+     "rate_hi": 0.1769
+    }
+   }
+  },
+  {
+   "table": "Rates: construction",
+   "level": "construction",
+   "key": "BORROWED_RIGOUR",
+   "construction": "BORROWED_RIGOUR",
+   "n": 244,
+   "documents": 118,
+   "pool_words": {
+    "rate": 0.1343,
+    "rate_lo": 0.1018,
+    "rate_hi": 0.1631
+   },
+   "pool_equal": {
+    "rate": 0.1713,
+    "rate_lo": 0.1259,
+    "rate_hi": 0.2272
+   },
+   "sources": {
+    "peps": {
+     "n": 55,
+     "documents": 38,
+     "rate": 0.1929,
+     "rate_lo": 0.1434,
+     "rate_hi": 0.2484
+    },
+    "ietf": {
+     "n": 105,
+     "documents": 32,
+     "rate": 0.1032,
+     "rate_lo": 0.05014,
+     "rate_hi": 0.1501
+    },
+    "rust": {
+     "n": 44,
+     "documents": 31,
+     "rate": 0.1737,
+     "rate_lo": 0.1147,
+     "rate_hi": 0.2411
+    },
+    "riscv": {
+     "n": 34,
+     "documents": 11,
+     "rate": 0.3499,
+     "rate_lo": 0.1625,
+     "rate_hi": 0.6256
+    },
+    "opentitan": {
+     "n": 6,
+     "documents": 6,
+     "rate": 0.03669,
+     "rate_lo": 0.01301,
+     "rate_hi": 0.06368
+    }
+   }
+  },
+  {
+   "table": "Rates: construction",
+   "level": "construction",
+   "key": "CONSULTANT_REGISTER",
+   "construction": "CONSULTANT_REGISTER",
+   "n": 258,
+   "documents": 129,
+   "pool_words": {
+    "rate": 0.142,
+    "rate_lo": 0.1131,
+    "rate_hi": 0.1791
+   },
+   "pool_equal": {
+    "rate": 0.1507,
+    "rate_lo": 0.1205,
+    "rate_hi": 0.1897
+   },
+   "sources": {
+    "peps": {
+     "n": 31,
+     "documents": 20,
+     "rate": 0.1087,
+     "rate_lo": 0.06286,
+     "rate_hi": 0.1691
+    },
+    "ietf": {
+     "n": 138,
+     "documents": 53,
+     "rate": 0.1356,
+     "rate_lo": 0.09434,
+     "rate_hi": 0.1908
+    },
+    "rust": {
+     "n": 49,
+     "documents": 31,
+     "rate": 0.1935,
+     "rate_lo": 0.1268,
+     "rate_hi": 0.2777
+    },
+    "riscv": {
+     "n": 17,
+     "documents": 9,
+     "rate": 0.1749,
+     "rate_lo": 0.07158,
+     "rate_hi": 0.3111
+    },
+    "opentitan": {
+     "n": 23,
+     "documents": 16,
+     "rate": 0.1407,
+     "rate_lo": 0.0787,
+     "rate_hi": 0.2123
+    }
+   }
+  },
+  {
+   "table": "Rates: construction",
+   "level": "construction",
+   "key": "EM_DASH",
+   "construction": "EM_DASH",
+   "n": 139,
+   "documents": 39,
+   "pool_words": {
+    "rate": 0.07651,
+    "rate_lo": 0.04704,
+    "rate_hi": 0.1152
+   },
+   "pool_equal": {
+    "rate": 0.1275,
+    "rate_lo": 0.0842,
+    "rate_hi": 0.1773
+   },
+   "sources": {
+    "peps": {
+     "n": 72,
+     "documents": 15,
+     "rate": 0.2525,
+     "rate_lo": 0.1133,
+     "rate_hi": 0.4169
+    },
+    "ietf": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    },
+    "rust": {
+     "n": 48,
+     "documents": 14,
+     "rate": 0.1895,
+     "rate_lo": 0.07309,
+     "rate_hi": 0.3414
+    },
+    "riscv": {
+     "n": 19,
+     "documents": 10,
+     "rate": 0.1955,
+     "rate_lo": 0.09727,
+     "rate_hi": 0.3185
+    },
+    "opentitan": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    }
+   }
+  },
+  {
+   "table": "Rates: construction",
+   "level": "construction",
+   "key": "EMPTY_FRAME",
+   "construction": "EMPTY_FRAME",
+   "n": 180,
+   "documents": 110,
+   "pool_words": {
+    "rate": 0.09907,
+    "rate_lo": 0.08151,
+    "rate_hi": 0.1193
+   },
+   "pool_equal": {
+    "rate": 0.1098,
+    "rate_lo": 0.08038,
+    "rate_hi": 0.1471
+   },
+   "sources": {
+    "peps": {
+     "n": 42,
+     "documents": 27,
+     "rate": 0.1473,
+     "rate_lo": 0.092,
+     "rate_hi": 0.2205
+    },
+    "ietf": {
+     "n": 77,
+     "documents": 44,
+     "rate": 0.07566,
+     "rate_lo": 0.0603,
+     "rate_hi": 0.09299
+    },
+    "rust": {
+     "n": 41,
+     "documents": 27,
+     "rate": 0.1619,
+     "rate_lo": 0.1021,
+     "rate_hi": 0.2246
+    },
+    "riscv": {
+     "n": 10,
+     "documents": 4,
+     "rate": 0.1029,
+     "rate_lo": 0.01145,
+     "rate_hi": 0.2593
+    },
+    "opentitan": {
+     "n": 10,
+     "documents": 8,
+     "rate": 0.06115,
+     "rate_lo": 0.02361,
+     "rate_hi": 0.1032
+    }
+   }
+  },
+  {
+   "table": "Rates: construction",
+   "level": "construction",
+   "key": "OBJECT_RELATIVE",
+   "construction": "OBJECT_RELATIVE",
+   "n": 125,
+   "documents": 87,
+   "pool_words": {
+    "rate": 0.0688,
+    "rate_lo": 0.05472,
+    "rate_hi": 0.08086
+   },
+   "pool_equal": {
+    "rate": 0.0668,
+    "rate_lo": 0.05228,
+    "rate_hi": 0.08085
+   },
+   "sources": {
+    "peps": {
+     "n": 22,
+     "documents": 17,
+     "rate": 0.07715,
+     "rate_lo": 0.04374,
+     "rate_hi": 0.1145
+    },
+    "ietf": {
+     "n": 67,
+     "documents": 39,
+     "rate": 0.06583,
+     "rate_lo": 0.04563,
+     "rate_hi": 0.08147
+    },
+    "rust": {
+     "n": 25,
+     "documents": 20,
+     "rate": 0.09871,
+     "rate_lo": 0.06001,
+     "rate_hi": 0.14
+    },
+    "riscv": {
+     "n": 6,
+     "documents": 6,
+     "rate": 0.06174,
+     "rate_lo": 0.02705,
+     "rate_hi": 0.1001
+    },
+    "opentitan": {
+     "n": 5,
+     "documents": 5,
+     "rate": 0.03058,
+     "rate_lo": 0.006596,
+     "rate_hi": 0.05921
+    }
+   }
+  },
+  {
+   "table": "Rates: construction",
+   "level": "construction",
+   "key": "VAGUE_QUANTIFIER",
+   "construction": "VAGUE_QUANTIFIER",
+   "n": 113,
+   "documents": 75,
+   "pool_words": {
+    "rate": 0.0622,
+    "rate_lo": 0.04734,
+    "rate_hi": 0.07978
+   },
+   "pool_equal": {
+    "rate": 0.06083,
+    "rate_lo": 0.04537,
+    "rate_hi": 0.07822
+   },
+   "sources": {
+    "peps": {
+     "n": 23,
+     "documents": 16,
+     "rate": 0.08066,
+     "rate_lo": 0.04622,
+     "rate_hi": 0.116
+    },
+    "ietf": {
+     "n": 56,
+     "documents": 34,
+     "rate": 0.05503,
+     "rate_lo": 0.03617,
+     "rate_hi": 0.08044
+    },
+    "rust": {
+     "n": 24,
+     "documents": 17,
+     "rate": 0.09477,
+     "rate_lo": 0.0505,
+     "rate_hi": 0.1454
+    },
+    "riscv": {
+     "n": 3,
+     "documents": 3,
+     "rate": 0.03087,
+     "rate_lo": 0.0,
+     "rate_hi": 0.08407
+    },
+    "opentitan": {
+     "n": 7,
+     "documents": 5,
+     "rate": 0.04281,
+     "rate_lo": 0.01258,
+     "rate_hi": 0.07898
+    }
+   }
+  },
+  {
+   "table": "Rates: construction",
+   "level": "construction",
+   "key": "FRAME_MARKER",
+   "construction": "FRAME_MARKER",
+   "n": 106,
+   "documents": 80,
+   "pool_words": {
+    "rate": 0.05834,
+    "rate_lo": 0.04739,
+    "rate_hi": 0.07179
+   },
+   "pool_equal": {
+    "rate": 0.06065,
+    "rate_lo": 0.04665,
+    "rate_hi": 0.0772
+   },
+   "sources": {
+    "peps": {
+     "n": 21,
+     "documents": 17,
+     "rate": 0.07364,
+     "rate_lo": 0.04195,
+     "rate_hi": 0.1099
+    },
+    "ietf": {
+     "n": 48,
+     "documents": 32,
+     "rate": 0.04716,
+     "rate_lo": 0.03395,
+     "rate_hi": 0.06282
+    },
+    "rust": {
+     "n": 26,
+     "documents": 21,
+     "rate": 0.1027,
+     "rate_lo": 0.06344,
+     "rate_hi": 0.1462
+    },
+    "riscv": {
+     "n": 3,
+     "documents": 3,
+     "rate": 0.03087,
+     "rate_lo": 0.0,
+     "rate_hi": 0.07598
+    },
+    "opentitan": {
+     "n": 8,
+     "documents": 7,
+     "rate": 0.04892,
+     "rate_lo": 0.01802,
+     "rate_hi": 0.08814
+    }
+   }
+  },
+  {
+   "table": "Rates: construction",
+   "level": "construction",
+   "key": "HEDGE_STACK",
+   "construction": "HEDGE_STACK",
+   "n": 79,
+   "documents": 55,
+   "pool_words": {
+    "rate": 0.04348,
+    "rate_lo": 0.03213,
+    "rate_hi": 0.057
+   },
+   "pool_equal": {
+    "rate": 0.04594,
+    "rate_lo": 0.03096,
+    "rate_hi": 0.06274
+   },
+   "sources": {
+    "peps": {
+     "n": 9,
+     "documents": 9,
+     "rate": 0.03156,
+     "rate_lo": 0.01472,
+     "rate_hi": 0.05146
+    },
+    "ietf": {
+     "n": 40,
+     "documents": 25,
+     "rate": 0.0393,
+     "rate_lo": 0.02617,
+     "rate_hi": 0.05709
+    },
+    "rust": {
+     "n": 21,
+     "documents": 14,
+     "rate": 0.08292,
+     "rate_lo": 0.03695,
+     "rate_hi": 0.1344
+    },
+    "riscv": {
+     "n": 5,
+     "documents": 4,
+     "rate": 0.05145,
+     "rate_lo": 0.01058,
+     "rate_hi": 0.1037
+    },
+    "opentitan": {
+     "n": 4,
+     "documents": 3,
+     "rate": 0.02446,
+     "rate_lo": 0.0,
+     "rate_hi": 0.05823
+    }
+   }
+  },
+  {
+   "table": "Rates: construction",
+   "level": "construction",
+   "key": "HOLLOW_BOOSTER",
+   "construction": "HOLLOW_BOOSTER",
+   "n": 51,
+   "documents": 42,
+   "pool_words": {
+    "rate": 0.02807,
+    "rate_lo": 0.01871,
+    "rate_hi": 0.03937
+   },
+   "pool_equal": {
+    "rate": 0.03875,
+    "rate_lo": 0.02524,
+    "rate_hi": 0.05199
+   },
+   "sources": {
+    "peps": {
+     "n": 21,
+     "documents": 17,
+     "rate": 0.07364,
+     "rate_lo": 0.04123,
+     "rate_hi": 0.1085
+    },
+    "ietf": {
+     "n": 8,
+     "documents": 8,
+     "rate": 0.007861,
+     "rate_lo": 0.002824,
+     "rate_hi": 0.01477
+    },
+    "rust": {
+     "n": 18,
+     "documents": 14,
+     "rate": 0.07107,
+     "rate_lo": 0.03448,
+     "rate_hi": 0.1126
+    },
+    "riscv": {
+     "n": 4,
+     "documents": 3,
+     "rate": 0.04116,
+     "rate_lo": 0.0,
+     "rate_hi": 0.08622
+    },
+    "opentitan": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    }
+   }
+  },
+  {
+   "table": "Rates: construction",
+   "level": "construction",
+   "key": "CLOSER",
+   "construction": "CLOSER",
+   "n": 56,
+   "documents": 49,
+   "pool_words": {
+    "rate": 0.03082,
+    "rate_lo": 0.02268,
+    "rate_hi": 0.04019
+   },
+   "pool_equal": {
+    "rate": 0.03148,
+    "rate_lo": 0.02206,
+    "rate_hi": 0.04286
+   },
+   "sources": {
+    "peps": {
+     "n": 14,
+     "documents": 13,
+     "rate": 0.0491,
+     "rate_lo": 0.0267,
+     "rate_hi": 0.07598
+    },
+    "ietf": {
+     "n": 23,
+     "documents": 20,
+     "rate": 0.0226,
+     "rate_lo": 0.01436,
+     "rate_hi": 0.0334
+    },
+    "rust": {
+     "n": 16,
+     "documents": 14,
+     "rate": 0.06318,
+     "rate_lo": 0.03289,
+     "rate_hi": 0.09683
+    },
+    "riscv": {
+     "n": 1,
+     "documents": 1,
+     "rate": 0.01029,
+     "rate_lo": 0.0,
+     "rate_hi": 0.04013
+    },
+    "opentitan": {
+     "n": 2,
+     "documents": 1,
+     "rate": 0.01223,
+     "rate_lo": 0.0,
+     "rate_hi": 0.04243
+    }
+   }
+  },
+  {
+   "table": "Rates: construction",
+   "level": "construction",
+   "key": "GAPPED_ANTITHESIS",
+   "construction": "GAPPED_ANTITHESIS",
+   "n": 36,
+   "documents": 23,
+   "pool_words": {
+    "rate": 0.01981,
+    "rate_lo": 0.01114,
+    "rate_hi": 0.02897
+   },
+   "pool_equal": {
+    "rate": 0.02425,
+    "rate_lo": 0.01178,
+    "rate_hi": 0.03989
+   },
+   "sources": {
+    "peps": {
+     "n": 6,
+     "documents": 5,
+     "rate": 0.02104,
+     "rate_lo": 0.003923,
+     "rate_hi": 0.03826
+    },
+    "ietf": {
+     "n": 17,
+     "documents": 9,
+     "rate": 0.0167,
+     "rate_lo": 0.006362,
+     "rate_hi": 0.02881
+    },
+    "rust": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.007897,
+     "rate_lo": 0.0,
+     "rate_hi": 0.01989
+    },
+    "riscv": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.02058,
+     "rate_lo": 0.0,
+     "rate_hi": 0.04287
+    },
+    "opentitan": {
+     "n": 9,
+     "documents": 5,
+     "rate": 0.05504,
+     "rate_lo": 0.006881,
+     "rate_hi": 0.129
+    }
+   }
+  },
+  {
+   "table": "Rates: pattern",
+   "level": "pattern",
+   "key": "TRICOLON|tricolon",
+   "construction": "TRICOLON",
+   "pattern": "tricolon",
+   "n": 4569,
+   "documents": 515,
+   "pool_words": {
+    "rate": 2.5148,
+    "rate_lo": 2.387,
+    "rate_hi": 2.66497
+   },
+   "pool_equal": {
+    "rate": 2.829,
+    "rate_lo": 2.664,
+    "rate_hi": 2.991
+   },
+   "sources": {
+    "peps": {
+     "n": 772,
+     "documents": 111,
+     "rate": 2.707,
+     "rate_lo": 2.29,
+     "rate_hi": 3.264
+    },
+    "ietf": {
+     "n": 2413,
+     "documents": 169,
+     "rate": 2.371,
+     "rate_lo": 2.227,
+     "rate_hi": 2.525
+    },
+    "rust": {
+     "n": 509,
+     "documents": 123,
+     "rate": 2.01,
+     "rate_lo": 1.746,
+     "rate_hi": 2.297
+    },
+    "riscv": {
+     "n": 408,
+     "documents": 33,
+     "rate": 4.199,
+     "rate_lo": 3.667,
+     "rate_hi": 4.67
+    },
+    "opentitan": {
+     "n": 467,
+     "documents": 79,
+     "rate": 2.856,
+     "rate_lo": 2.607,
+     "rate_hi": 3.153
+    }
+   }
+  },
+  {
+   "table": "Rates: pattern",
+   "level": "pattern",
+   "key": "PARTICIPIAL_TAIL|participial_tail",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "n": 1182,
+   "documents": 342,
+   "pool_words": {
+    "rate": 0.6506,
+    "rate_lo": 0.5991,
+    "rate_hi": 0.7124
+   },
+   "pool_equal": {
+    "rate": 0.7121,
+    "rate_lo": 0.6414,
+    "rate_hi": 0.7908
+   },
+   "sources": {
+    "peps": {
+     "n": 237,
+     "documents": 77,
+     "rate": 0.8311,
+     "rate_lo": 0.6979,
+     "rate_hi": 0.9493
+    },
+    "ietf": {
+     "n": 568,
+     "documents": 122,
+     "rate": 0.5581,
+     "rate_lo": 0.4934,
+     "rate_hi": 0.6353
+    },
+    "rust": {
+     "n": 195,
+     "documents": 89,
+     "rate": 0.77,
+     "rate_lo": 0.6386,
+     "rate_hi": 0.9006
+    },
+    "riscv": {
+     "n": 69,
+     "documents": 19,
+     "rate": 0.7101,
+     "rate_lo": 0.5188,
+     "rate_hi": 0.9833
+    },
+    "opentitan": {
+     "n": 113,
+     "documents": 35,
+     "rate": 0.691,
+     "rate_lo": 0.4874,
+     "rate_hi": 0.8954
+    }
+   }
+  },
+  {
+   "table": "Rates: pattern",
+   "level": "pattern",
+   "key": "ABSTRACT_ADVERB|abstract_adverb",
+   "construction": "ABSTRACT_ADVERB",
+   "pattern": "abstract_adverb",
+   "n": 947,
+   "documents": 309,
+   "pool_words": {
+    "rate": 0.5212,
+    "rate_lo": 0.4559,
+    "rate_hi": 0.596
+   },
+   "pool_equal": {
+    "rate": 0.6315,
+    "rate_lo": 0.5578,
+    "rate_hi": 0.7026
+   },
+   "sources": {
+    "peps": {
+     "n": 207,
+     "documents": 67,
+     "rate": 0.7259,
+     "rate_lo": 0.5643,
+     "rate_hi": 0.8858
+    },
+    "ietf": {
+     "n": 391,
+     "documents": 113,
+     "rate": 0.3842,
+     "rate_lo": 0.3234,
+     "rate_hi": 0.4705
+    },
+    "rust": {
+     "n": 204,
+     "documents": 87,
+     "rate": 0.8055,
+     "rate_lo": 0.6729,
+     "rate_hi": 0.9523
+    },
+    "riscv": {
+     "n": 85,
+     "documents": 18,
+     "rate": 0.8747,
+     "rate_lo": 0.6179,
+     "rate_hi": 1.124
+    },
+    "opentitan": {
+     "n": 60,
+     "documents": 24,
+     "rate": 0.3669,
+     "rate_lo": 0.2544,
+     "rate_hi": 0.4758
+    }
+   }
+  },
+  {
+   "table": "Rates: pattern",
+   "level": "pattern",
+   "key": "LLM_DICTION|-",
+   "construction": "LLM_DICTION",
+   "pattern": "-",
+   "n": 1058,
+   "documents": 301,
+   "pool_words": {
+    "rate": 0.5823,
+    "rate_lo": 0.4671,
+    "rate_hi": 0.7081
+   },
+   "pool_equal": {
+    "rate": 0.6212,
+    "rate_lo": 0.512,
+    "rate_hi": 0.7486
+   },
+   "sources": {
+    "peps": {
+     "n": 228,
+     "documents": 62,
+     "rate": 0.7995,
+     "rate_lo": 0.5254,
+     "rate_hi": 1.107
+    },
+    "ietf": {
+     "n": 546,
+     "documents": 114,
+     "rate": 0.5365,
+     "rate_lo": 0.3818,
+     "rate_hi": 0.7326
+    },
+    "rust": {
+     "n": 133,
+     "documents": 59,
+     "rate": 0.5252,
+     "rate_lo": 0.4022,
+     "rate_hi": 0.6443
+    },
+    "riscv": {
+     "n": 77,
+     "documents": 18,
+     "rate": 0.7924,
+     "rate_lo": 0.4374,
+     "rate_hi": 1.253
+    },
+    "opentitan": {
+     "n": 74,
+     "documents": 48,
+     "rate": 0.4525,
+     "rate_lo": 0.2796,
+     "rate_hi": 0.6644
+    }
+   }
+  },
+  {
+   "table": "Rates: pattern",
+   "level": "pattern",
+   "key": "ALTERNATIVE_FRAMING|af_rather_than",
+   "construction": "ALTERNATIVE_FRAMING",
+   "pattern": "af_rather_than",
+   "n": 477,
+   "documents": 177,
+   "pool_words": {
+    "rate": 0.2625,
+    "rate_lo": 0.2179,
+    "rate_hi": 0.3168
+   },
+   "pool_equal": {
+    "rate": 0.3244,
+    "rate_lo": 0.2706,
+    "rate_hi": 0.3824
+   },
+   "sources": {
+    "peps": {
+     "n": 198,
+     "documents": 54,
+     "rate": 0.6943,
+     "rate_lo": 0.5025,
+     "rate_hi": 0.9179
+    },
+    "ietf": {
+     "n": 140,
+     "documents": 55,
+     "rate": 0.1376,
+     "rate_lo": 0.1046,
+     "rate_hi": 0.1718
+    },
+    "rust": {
+     "n": 95,
+     "documents": 48,
+     "rate": 0.3751,
+     "rate_lo": 0.2782,
+     "rate_hi": 0.4775
+    },
+    "riscv": {
+     "n": 35,
+     "documents": 14,
+     "rate": 0.3602,
+     "rate_lo": 0.2182,
+     "rate_hi": 0.507
+    },
+    "opentitan": {
+     "n": 9,
+     "documents": 6,
+     "rate": 0.05504,
+     "rate_lo": 0.01302,
+     "rate_hi": 0.1151
+    }
+   }
+  },
+  {
+   "table": "Rates: pattern",
+   "level": "pattern",
+   "key": "ALTERNATIVE_FRAMING|af_instead_of",
+   "construction": "ALTERNATIVE_FRAMING",
+   "pattern": "af_instead_of",
+   "n": 451,
+   "documents": 223,
+   "pool_words": {
+    "rate": 0.2482,
+    "rate_lo": 0.2109,
+    "rate_hi": 0.2937
+   },
+   "pool_equal": {
+    "rate": 0.3196,
+    "rate_lo": 0.27,
+    "rate_hi": 0.3745
+   },
+   "sources": {
+    "peps": {
+     "n": 135,
+     "documents": 60,
+     "rate": 0.4734,
+     "rate_lo": 0.3711,
+     "rate_hi": 0.5814
+    },
+    "ietf": {
+     "n": 121,
+     "documents": 62,
+     "rate": 0.1189,
+     "rate_lo": 0.09603,
+     "rate_hi": 0.1486
+    },
+    "rust": {
+     "n": 146,
+     "documents": 76,
+     "rate": 0.5765,
+     "rate_lo": 0.4507,
+     "rate_hi": 0.7247
+    },
+    "riscv": {
+     "n": 31,
+     "documents": 13,
+     "rate": 0.319,
+     "rate_lo": 0.1634,
+     "rate_hi": 0.5065
+    },
+    "opentitan": {
+     "n": 18,
+     "documents": 12,
+     "rate": 0.1101,
+     "rate_lo": 0.05246,
+     "rate_hi": 0.1804
+    }
+   }
+  },
+  {
+   "table": "Rates: pattern",
+   "level": "pattern",
+   "key": "EMPHATIC_REFLEXIVE|emphatic_reflexive",
+   "construction": "EMPHATIC_REFLEXIVE",
+   "pattern": "emphatic_reflexive",
+   "n": 576,
+   "documents": 234,
+   "pool_words": {
+    "rate": 0.317,
+    "rate_lo": 0.276,
+    "rate_hi": 0.3616
+   },
+   "pool_equal": {
+    "rate": 0.3168,
+    "rate_lo": 0.2777,
+    "rate_hi": 0.357
+   },
+   "sources": {
+    "peps": {
+     "n": 118,
+     "documents": 47,
+     "rate": 0.4138,
+     "rate_lo": 0.3151,
+     "rate_hi": 0.5149
+    },
+    "ietf": {
+     "n": 285,
+     "documents": 91,
+     "rate": 0.28,
+     "rate_lo": 0.2299,
+     "rate_hi": 0.3491
+    },
+    "rust": {
+     "n": 114,
+     "documents": 66,
+     "rate": 0.4501,
+     "rate_lo": 0.3614,
+     "rate_hi": 0.5489
+    },
+    "riscv": {
+     "n": 19,
+     "documents": 10,
+     "rate": 0.1955,
+     "rate_lo": 0.09717,
+     "rate_hi": 0.2993
+    },
+    "opentitan": {
+     "n": 40,
+     "documents": 20,
+     "rate": 0.2446,
+     "rate_lo": 0.1636,
+     "rate_hi": 0.3331
+    }
+   }
+  },
+  {
+   "table": "Rates: pattern",
+   "level": "pattern",
+   "key": "BORROWED_RIGOUR|-",
+   "construction": "BORROWED_RIGOUR",
+   "pattern": "-",
+   "n": 244,
+   "documents": 118,
+   "pool_words": {
+    "rate": 0.1343,
+    "rate_lo": 0.1018,
+    "rate_hi": 0.1631
+   },
+   "pool_equal": {
+    "rate": 0.1713,
+    "rate_lo": 0.1259,
+    "rate_hi": 0.2272
+   },
+   "sources": {
+    "peps": {
+     "n": 55,
+     "documents": 38,
+     "rate": 0.1929,
+     "rate_lo": 0.1434,
+     "rate_hi": 0.2484
+    },
+    "ietf": {
+     "n": 105,
+     "documents": 32,
+     "rate": 0.1032,
+     "rate_lo": 0.05014,
+     "rate_hi": 0.1501
+    },
+    "rust": {
+     "n": 44,
+     "documents": 31,
+     "rate": 0.1737,
+     "rate_lo": 0.1147,
+     "rate_hi": 0.2411
+    },
+    "riscv": {
+     "n": 34,
+     "documents": 11,
+     "rate": 0.3499,
+     "rate_lo": 0.1625,
+     "rate_hi": 0.6256
+    },
+    "opentitan": {
+     "n": 6,
+     "documents": 6,
+     "rate": 0.03669,
+     "rate_lo": 0.01301,
+     "rate_hi": 0.06368
+    }
+   }
+  },
+  {
+   "table": "Rates: pattern",
+   "level": "pattern",
+   "key": "CONSULTANT_REGISTER|-",
+   "construction": "CONSULTANT_REGISTER",
+   "pattern": "-",
+   "n": 258,
+   "documents": 129,
+   "pool_words": {
+    "rate": 0.142,
+    "rate_lo": 0.1131,
+    "rate_hi": 0.1791
+   },
+   "pool_equal": {
+    "rate": 0.1507,
+    "rate_lo": 0.1205,
+    "rate_hi": 0.1897
+   },
+   "sources": {
+    "peps": {
+     "n": 31,
+     "documents": 20,
+     "rate": 0.1087,
+     "rate_lo": 0.06286,
+     "rate_hi": 0.1691
+    },
+    "ietf": {
+     "n": 138,
+     "documents": 53,
+     "rate": 0.1356,
+     "rate_lo": 0.09434,
+     "rate_hi": 0.1908
+    },
+    "rust": {
+     "n": 49,
+     "documents": 31,
+     "rate": 0.1935,
+     "rate_lo": 0.1268,
+     "rate_hi": 0.2777
+    },
+    "riscv": {
+     "n": 17,
+     "documents": 9,
+     "rate": 0.1749,
+     "rate_lo": 0.07158,
+     "rate_hi": 0.3111
+    },
+    "opentitan": {
+     "n": 23,
+     "documents": 16,
+     "rate": 0.1407,
+     "rate_lo": 0.0787,
+     "rate_hi": 0.2123
+    }
+   }
+  },
+  {
+   "table": "Rates: pattern",
+   "level": "pattern",
+   "key": "CORRECTIVE_CONTRAST|cc_coordinated",
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_coordinated",
+   "n": 220,
+   "documents": 147,
+   "pool_words": {
+    "rate": 0.1211,
+    "rate_lo": 0.1049,
+    "rate_hi": 0.1377
+   },
+   "pool_equal": {
+    "rate": 0.1336,
+    "rate_lo": 0.1117,
+    "rate_hi": 0.159
+   },
+   "sources": {
+    "peps": {
+     "n": 56,
+     "documents": 39,
+     "rate": 0.1964,
+     "rate_lo": 0.1446,
+     "rate_hi": 0.2548
+    },
+    "ietf": {
+     "n": 88,
+     "documents": 47,
+     "rate": 0.08647,
+     "rate_lo": 0.06305,
+     "rate_hi": 0.1056
+    },
+    "rust": {
+     "n": 56,
+     "documents": 45,
+     "rate": 0.2211,
+     "rate_lo": 0.1652,
+     "rate_hi": 0.2788
+    },
+    "riscv": {
+     "n": 10,
+     "documents": 8,
+     "rate": 0.1029,
+     "rate_lo": 0.04307,
+     "rate_hi": 0.1892
+    },
+    "opentitan": {
+     "n": 10,
+     "documents": 8,
+     "rate": 0.06115,
+     "rate_lo": 0.023,
+     "rate_hi": 0.1168
+    }
+   }
+  },
+  {
+   "table": "Rates: pattern",
+   "level": "pattern",
+   "key": "EM_DASH|-",
+   "construction": "EM_DASH",
+   "pattern": "-",
+   "n": 139,
+   "documents": 39,
+   "pool_words": {
+    "rate": 0.07651,
+    "rate_lo": 0.04704,
+    "rate_hi": 0.1152
+   },
+   "pool_equal": {
+    "rate": 0.1275,
+    "rate_lo": 0.0842,
+    "rate_hi": 0.1773
+   },
+   "sources": {
+    "peps": {
+     "n": 72,
+     "documents": 15,
+     "rate": 0.2525,
+     "rate_lo": 0.1133,
+     "rate_hi": 0.4169
+    },
+    "ietf": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    },
+    "rust": {
+     "n": 48,
+     "documents": 14,
+     "rate": 0.1895,
+     "rate_lo": 0.07309,
+     "rate_hi": 0.3414
+    },
+    "riscv": {
+     "n": 19,
+     "documents": 10,
+     "rate": 0.1955,
+     "rate_lo": 0.09727,
+     "rate_hi": 0.3185
+    },
+    "opentitan": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    }
+   }
+  },
+  {
+   "table": "Rates: pattern",
+   "level": "pattern",
+   "key": "EMPTY_FRAME|-",
+   "construction": "EMPTY_FRAME",
+   "pattern": "-",
+   "n": 180,
+   "documents": 110,
+   "pool_words": {
+    "rate": 0.09907,
+    "rate_lo": 0.08151,
+    "rate_hi": 0.1193
+   },
+   "pool_equal": {
+    "rate": 0.1098,
+    "rate_lo": 0.08038,
+    "rate_hi": 0.1471
+   },
+   "sources": {
+    "peps": {
+     "n": 42,
+     "documents": 27,
+     "rate": 0.1473,
+     "rate_lo": 0.092,
+     "rate_hi": 0.2205
+    },
+    "ietf": {
+     "n": 77,
+     "documents": 44,
+     "rate": 0.07566,
+     "rate_lo": 0.0603,
+     "rate_hi": 0.09299
+    },
+    "rust": {
+     "n": 41,
+     "documents": 27,
+     "rate": 0.1619,
+     "rate_lo": 0.1021,
+     "rate_hi": 0.2246
+    },
+    "riscv": {
+     "n": 10,
+     "documents": 4,
+     "rate": 0.1029,
+     "rate_lo": 0.01145,
+     "rate_hi": 0.2593
+    },
+    "opentitan": {
+     "n": 10,
+     "documents": 8,
+     "rate": 0.06115,
+     "rate_lo": 0.02361,
+     "rate_hi": 0.1032
+    }
+   }
+  },
+  {
+   "table": "Rates: pattern",
+   "level": "pattern",
+   "key": "CORRECTIVE_CONTRAST|cc_negated_apposition",
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_negated_apposition",
+   "n": 132,
+   "documents": 97,
+   "pool_words": {
+    "rate": 0.07265,
+    "rate_lo": 0.05854,
+    "rate_hi": 0.08853
+   },
+   "pool_equal": {
+    "rate": 0.07747,
+    "rate_lo": 0.06183,
+    "rate_hi": 0.09484
+   },
+   "sources": {
+    "peps": {
+     "n": 48,
+     "documents": 38,
+     "rate": 0.1683,
+     "rate_lo": 0.1191,
+     "rate_hi": 0.2219
+    },
+    "ietf": {
+     "n": 53,
+     "documents": 33,
+     "rate": 0.05208,
+     "rate_lo": 0.03701,
+     "rate_hi": 0.07188
+    },
+    "rust": {
+     "n": 22,
+     "documents": 18,
+     "rate": 0.08687,
+     "rate_lo": 0.0519,
+     "rate_hi": 0.12502
+    },
+    "riscv": {
+     "n": 6,
+     "documents": 5,
+     "rate": 0.06174,
+     "rate_lo": 0.01544,
+     "rate_hi": 0.1118
+    },
+    "opentitan": {
+     "n": 3,
+     "documents": 3,
+     "rate": 0.01835,
+     "rate_lo": 0.0,
+     "rate_hi": 0.03957
+    }
+   }
+  },
+  {
+   "table": "Rates: pattern",
+   "level": "pattern",
+   "key": "VAGUE_QUANTIFIER|-",
+   "construction": "VAGUE_QUANTIFIER",
+   "pattern": "-",
+   "n": 113,
+   "documents": 75,
+   "pool_words": {
+    "rate": 0.0622,
+    "rate_lo": 0.04734,
+    "rate_hi": 0.07978
+   },
+   "pool_equal": {
+    "rate": 0.06083,
+    "rate_lo": 0.04537,
+    "rate_hi": 0.07822
+   },
+   "sources": {
+    "peps": {
+     "n": 23,
+     "documents": 16,
+     "rate": 0.08066,
+     "rate_lo": 0.04622,
+     "rate_hi": 0.116
+    },
+    "ietf": {
+     "n": 56,
+     "documents": 34,
+     "rate": 0.05503,
+     "rate_lo": 0.03617,
+     "rate_hi": 0.08044
+    },
+    "rust": {
+     "n": 24,
+     "documents": 17,
+     "rate": 0.09477,
+     "rate_lo": 0.0505,
+     "rate_hi": 0.1454
+    },
+    "riscv": {
+     "n": 3,
+     "documents": 3,
+     "rate": 0.03087,
+     "rate_lo": 0.0,
+     "rate_hi": 0.08407
+    },
+    "opentitan": {
+     "n": 7,
+     "documents": 5,
+     "rate": 0.04281,
+     "rate_lo": 0.01258,
+     "rate_hi": 0.07898
+    }
+   }
+  },
+  {
+   "table": "Rates: pattern",
+   "level": "pattern",
+   "key": "FRAME_MARKER|-",
+   "construction": "FRAME_MARKER",
+   "pattern": "-",
+   "n": 106,
+   "documents": 80,
+   "pool_words": {
+    "rate": 0.05834,
+    "rate_lo": 0.04739,
+    "rate_hi": 0.07179
+   },
+   "pool_equal": {
+    "rate": 0.06065,
+    "rate_lo": 0.04665,
+    "rate_hi": 0.0772
+   },
+   "sources": {
+    "peps": {
+     "n": 21,
+     "documents": 17,
+     "rate": 0.07364,
+     "rate_lo": 0.04195,
+     "rate_hi": 0.1099
+    },
+    "ietf": {
+     "n": 48,
+     "documents": 32,
+     "rate": 0.04716,
+     "rate_lo": 0.03395,
+     "rate_hi": 0.06282
+    },
+    "rust": {
+     "n": 26,
+     "documents": 21,
+     "rate": 0.1027,
+     "rate_lo": 0.06344,
+     "rate_hi": 0.1462
+    },
+    "riscv": {
+     "n": 3,
+     "documents": 3,
+     "rate": 0.03087,
+     "rate_lo": 0.0,
+     "rate_hi": 0.07598
+    },
+    "opentitan": {
+     "n": 8,
+     "documents": 7,
+     "rate": 0.04892,
+     "rate_lo": 0.01802,
+     "rate_hi": 0.08814
+    }
+   }
+  },
+  {
+   "table": "Rates: pattern",
+   "level": "pattern",
+   "key": "HEDGE_STACK|-",
+   "construction": "HEDGE_STACK",
+   "pattern": "-",
+   "n": 79,
+   "documents": 55,
+   "pool_words": {
+    "rate": 0.04348,
+    "rate_lo": 0.03213,
+    "rate_hi": 0.057
+   },
+   "pool_equal": {
+    "rate": 0.04594,
+    "rate_lo": 0.03096,
+    "rate_hi": 0.06274
+   },
+   "sources": {
+    "peps": {
+     "n": 9,
+     "documents": 9,
+     "rate": 0.03156,
+     "rate_lo": 0.01472,
+     "rate_hi": 0.05146
+    },
+    "ietf": {
+     "n": 40,
+     "documents": 25,
+     "rate": 0.0393,
+     "rate_lo": 0.02617,
+     "rate_hi": 0.05709
+    },
+    "rust": {
+     "n": 21,
+     "documents": 14,
+     "rate": 0.08292,
+     "rate_lo": 0.03695,
+     "rate_hi": 0.1344
+    },
+    "riscv": {
+     "n": 5,
+     "documents": 4,
+     "rate": 0.05145,
+     "rate_lo": 0.01058,
+     "rate_hi": 0.1037
+    },
+    "opentitan": {
+     "n": 4,
+     "documents": 3,
+     "rate": 0.02446,
+     "rate_lo": 0.0,
+     "rate_hi": 0.05823
+    }
+   }
+  },
+  {
+   "table": "Rates: pattern",
+   "level": "pattern",
+   "key": "HOLLOW_BOOSTER|-",
+   "construction": "HOLLOW_BOOSTER",
+   "pattern": "-",
+   "n": 51,
+   "documents": 42,
+   "pool_words": {
+    "rate": 0.02807,
+    "rate_lo": 0.01871,
+    "rate_hi": 0.03937
+   },
+   "pool_equal": {
+    "rate": 0.03875,
+    "rate_lo": 0.02524,
+    "rate_hi": 0.05199
+   },
+   "sources": {
+    "peps": {
+     "n": 21,
+     "documents": 17,
+     "rate": 0.07364,
+     "rate_lo": 0.04123,
+     "rate_hi": 0.1085
+    },
+    "ietf": {
+     "n": 8,
+     "documents": 8,
+     "rate": 0.007861,
+     "rate_lo": 0.002824,
+     "rate_hi": 0.01477
+    },
+    "rust": {
+     "n": 18,
+     "documents": 14,
+     "rate": 0.07107,
+     "rate_lo": 0.03448,
+     "rate_hi": 0.1126
+    },
+    "riscv": {
+     "n": 4,
+     "documents": 3,
+     "rate": 0.04116,
+     "rate_lo": 0.0,
+     "rate_hi": 0.08622
+    },
+    "opentitan": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    }
+   }
+  },
+  {
+   "table": "Rates: pattern",
+   "level": "pattern",
+   "key": "CORRECTIVE_CONTRAST|cc_additive",
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_additive",
+   "n": 61,
+   "documents": 46,
+   "pool_words": {
+    "rate": 0.03358,
+    "rate_lo": 0.02305,
+    "rate_hi": 0.04813
+   },
+   "pool_equal": {
+    "rate": 0.03785,
+    "rate_lo": 0.02413,
+    "rate_hi": 0.05274
+   },
+   "sources": {
+    "peps": {
+     "n": 26,
+     "documents": 14,
+     "rate": 0.09118,
+     "rate_lo": 0.04336,
+     "rate_hi": 0.1524
+    },
+    "ietf": {
+     "n": 20,
+     "documents": 19,
+     "rate": 0.01965,
+     "rate_lo": 0.01095,
+     "rate_hi": 0.03144
+    },
+    "rust": {
+     "n": 10,
+     "documents": 9,
+     "rate": 0.03949,
+     "rate_lo": 0.01582,
+     "rate_hi": 0.06723
+    },
+    "riscv": {
+     "n": 2,
+     "documents": 1,
+     "rate": 0.02058,
+     "rate_lo": 0.0,
+     "rate_hi": 0.05354
+    },
+    "opentitan": {
+     "n": 3,
+     "documents": 3,
+     "rate": 0.01835,
+     "rate_lo": 0.0,
+     "rate_hi": 0.03994
+    }
+   }
+  },
+  {
+   "table": "Rates: pattern",
+   "level": "pattern",
+   "key": "OBJECT_RELATIVE|zero_object_relative",
+   "construction": "OBJECT_RELATIVE",
+   "pattern": "zero_object_relative",
+   "n": 57,
+   "documents": 45,
+   "pool_words": {
+    "rate": 0.03137,
+    "rate_lo": 0.02321,
+    "rate_hi": 0.03943
+   },
+   "pool_equal": {
+    "rate": 0.03344,
+    "rate_lo": 0.02286,
+    "rate_hi": 0.04494
+   },
+   "sources": {
+    "peps": {
+     "n": 12,
+     "documents": 11,
+     "rate": 0.04208,
+     "rate_lo": 0.0202,
+     "rate_hi": 0.06817
+    },
+    "ietf": {
+     "n": 27,
+     "documents": 18,
+     "rate": 0.02653,
+     "rate_lo": 0.01564,
+     "rate_hi": 0.03586
+    },
+    "rust": {
+     "n": 13,
+     "documents": 11,
+     "rate": 0.05133,
+     "rate_lo": 0.02463,
+     "rate_hi": 0.08228
+    },
+    "riscv": {
+     "n": 4,
+     "documents": 4,
+     "rate": 0.04116,
+     "rate_lo": 0.01014,
+     "rate_hi": 0.08202
+    },
+    "opentitan": {
+     "n": 1,
+     "documents": 1,
+     "rate": 0.006115,
+     "rate_lo": 0.0,
+     "rate_hi": 0.02021
+    }
+   }
+  },
+  {
+   "table": "Rates: pattern",
+   "level": "pattern",
+   "key": "CLOSER|-",
+   "construction": "CLOSER",
+   "pattern": "-",
+   "n": 56,
+   "documents": 49,
+   "pool_words": {
+    "rate": 0.03082,
+    "rate_lo": 0.02268,
+    "rate_hi": 0.04019
+   },
+   "pool_equal": {
+    "rate": 0.03148,
+    "rate_lo": 0.02206,
+    "rate_hi": 0.04286
+   },
+   "sources": {
+    "peps": {
+     "n": 14,
+     "documents": 13,
+     "rate": 0.0491,
+     "rate_lo": 0.0267,
+     "rate_hi": 0.07598
+    },
+    "ietf": {
+     "n": 23,
+     "documents": 20,
+     "rate": 0.0226,
+     "rate_lo": 0.01436,
+     "rate_hi": 0.0334
+    },
+    "rust": {
+     "n": 16,
+     "documents": 14,
+     "rate": 0.06318,
+     "rate_lo": 0.03289,
+     "rate_hi": 0.09683
+    },
+    "riscv": {
+     "n": 1,
+     "documents": 1,
+     "rate": 0.01029,
+     "rate_lo": 0.0,
+     "rate_hi": 0.04013
+    },
+    "opentitan": {
+     "n": 2,
+     "documents": 1,
+     "rate": 0.01223,
+     "rate_lo": 0.0,
+     "rate_hi": 0.04243
+    }
+   }
+  },
+  {
+   "table": "Rates: pattern",
+   "level": "pattern",
+   "key": "CORRECTIVE_CONTRAST|cc_parallel_sibling",
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_parallel_sibling",
+   "n": 37,
+   "documents": 31,
+   "pool_words": {
+    "rate": 0.02037,
+    "rate_lo": 0.0138,
+    "rate_hi": 0.02787
+   },
+   "pool_equal": {
+    "rate": 0.02966,
+    "rate_lo": 0.01824,
+    "rate_hi": 0.04219
+   },
+   "sources": {
+    "peps": {
+     "n": 18,
+     "documents": 14,
+     "rate": 0.06312,
+     "rate_lo": 0.0331,
+     "rate_hi": 0.09841
+    },
+    "ietf": {
+     "n": 8,
+     "documents": 7,
+     "rate": 0.007861,
+     "rate_lo": 0.003234,
+     "rate_hi": 0.01294
+    },
+    "rust": {
+     "n": 5,
+     "documents": 5,
+     "rate": 0.01974,
+     "rate_lo": 0.004054,
+     "rate_hi": 0.03748
+    },
+    "riscv": {
+     "n": 5,
+     "documents": 4,
+     "rate": 0.05145,
+     "rate_lo": 0.009531,
+     "rate_hi": 0.1047
+    },
+    "opentitan": {
+     "n": 1,
+     "documents": 1,
+     "rate": 0.006115,
+     "rate_lo": 0.0,
+     "rate_hi": 0.01892
+    }
+   }
+  },
+  {
+   "table": "Rates: pattern",
+   "level": "pattern",
+   "key": "GAPPED_ANTITHESIS|gapped_antithesis",
+   "construction": "GAPPED_ANTITHESIS",
+   "pattern": "gapped_antithesis",
+   "n": 36,
+   "documents": 23,
+   "pool_words": {
+    "rate": 0.01981,
+    "rate_lo": 0.01114,
+    "rate_hi": 0.02897
+   },
+   "pool_equal": {
+    "rate": 0.02425,
+    "rate_lo": 0.01178,
+    "rate_hi": 0.03989
+   },
+   "sources": {
+    "peps": {
+     "n": 6,
+     "documents": 5,
+     "rate": 0.02104,
+     "rate_lo": 0.003923,
+     "rate_hi": 0.03826
+    },
+    "ietf": {
+     "n": 17,
+     "documents": 9,
+     "rate": 0.0167,
+     "rate_lo": 0.006362,
+     "rate_hi": 0.02881
+    },
+    "rust": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.007897,
+     "rate_lo": 0.0,
+     "rate_hi": 0.01989
+    },
+    "riscv": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.02058,
+     "rate_lo": 0.0,
+     "rate_hi": 0.04287
+    },
+    "opentitan": {
+     "n": 9,
+     "documents": 5,
+     "rate": 0.05504,
+     "rate_lo": 0.006881,
+     "rate_hi": 0.129
+    }
+   }
+  },
+  {
+   "table": "Rates: pattern",
+   "level": "pattern",
+   "key": "OBJECT_RELATIVE|that_object_relative",
+   "construction": "OBJECT_RELATIVE",
+   "pattern": "that_object_relative",
+   "n": 42,
+   "documents": 31,
+   "pool_words": {
+    "rate": 0.02312,
+    "rate_lo": 0.01528,
+    "rate_hi": 0.03035
+   },
+   "pool_equal": {
+    "rate": 0.0179,
+    "rate_lo": 0.01103,
+    "rate_hi": 0.02508
+   },
+   "sources": {
+    "peps": {
+     "n": 8,
+     "documents": 7,
+     "rate": 0.02805,
+     "rate_lo": 0.01016,
+     "rate_hi": 0.04874
+    },
+    "ietf": {
+     "n": 26,
+     "documents": 17,
+     "rate": 0.02555,
+     "rate_lo": 0.01459,
+     "rate_hi": 0.03496
+    },
+    "rust": {
+     "n": 6,
+     "documents": 5,
+     "rate": 0.02369,
+     "rate_lo": 0.004692,
+     "rate_hi": 0.04506
+    },
+    "riscv": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    },
+    "opentitan": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.01223,
+     "rate_lo": 0.0,
+     "rate_hi": 0.03306
+    }
+   }
+  },
+  {
+   "table": "Rates: pattern",
+   "level": "pattern",
+   "key": "OBJECT_RELATIVE|aux_object_relative",
+   "construction": "OBJECT_RELATIVE",
+   "pattern": "aux_object_relative",
+   "n": 23,
+   "documents": 19,
+   "pool_words": {
+    "rate": 0.01266,
+    "rate_lo": 0.007677,
+    "rate_hi": 0.01765
+   },
+   "pool_equal": {
+    "rate": 0.01436,
+    "rate_lo": 0.007539,
+    "rate_hi": 0.02141
+   },
+   "sources": {
+    "peps": {
+     "n": 1,
+     "documents": 1,
+     "rate": 0.003507,
+     "rate_lo": 0.0,
+     "rate_hi": 0.01179
+    },
+    "ietf": {
+     "n": 12,
+     "documents": 8,
+     "rate": 0.01179,
+     "rate_lo": 0.004555,
+     "rate_hi": 0.01817
+    },
+    "rust": {
+     "n": 6,
+     "documents": 6,
+     "rate": 0.02369,
+     "rate_lo": 0.007462,
+     "rate_hi": 0.04497
+    },
+    "riscv": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.02058,
+     "rate_lo": 0.0,
+     "rate_hi": 0.04326
+    },
+    "opentitan": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.01223,
+     "rate_lo": 0.0,
+     "rate_hi": 0.03194
+    }
+   }
+  },
+  {
+   "table": "Rates: pattern",
+   "level": "pattern",
+   "key": "CORRECTIVE_CONTRAST|cc_cleft",
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_cleft",
+   "n": 23,
+   "documents": 21,
+   "pool_words": {
+    "rate": 0.01266,
+    "rate_lo": 0.007704,
+    "rate_hi": 0.01864
+   },
+   "pool_equal": {
+    "rate": 0.01257,
+    "rate_lo": 0.006737,
+    "rate_hi": 0.01948
+   },
+   "sources": {
+    "peps": {
+     "n": 6,
+     "documents": 5,
+     "rate": 0.02104,
+     "rate_lo": 0.003872,
+     "rate_hi": 0.04194
+    },
+    "ietf": {
+     "n": 10,
+     "documents": 9,
+     "rate": 0.009826,
+     "rate_lo": 0.004106,
+     "rate_hi": 0.01735
+    },
+    "rust": {
+     "n": 5,
+     "documents": 5,
+     "rate": 0.01974,
+     "rate_lo": 0.003968,
+     "rate_hi": 0.03879
+    },
+    "riscv": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    },
+    "opentitan": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.01223,
+     "rate_lo": 0.0,
+     "rate_hi": 0.02988
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "TRICOLON|tricolon|list-like",
+   "construction": "TRICOLON",
+   "pattern": "tricolon",
+   "subtype": "list-like",
+   "n": 2722,
+   "documents": 479,
+   "pool_words": {
+    "rate": 1.498,
+    "rate_lo": 1.409,
+    "rate_hi": 1.598
+   },
+   "pool_equal": {
+    "rate": 1.757,
+    "rate_lo": 1.647,
+    "rate_hi": 1.865
+   },
+   "sources": {
+    "peps": {
+     "n": 464,
+     "documents": 97,
+     "rate": 1.627,
+     "rate_lo": 1.319,
+     "rate_hi": 2.011
+    },
+    "ietf": {
+     "n": 1348,
+     "documents": 162,
+     "rate": 1.325,
+     "rate_lo": 1.217,
+     "rate_hi": 1.419
+    },
+    "rust": {
+     "n": 351,
+     "documents": 111,
+     "rate": 1.386,
+     "rate_lo": 1.199,
+     "rate_hi": 1.591
+    },
+    "riscv": {
+     "n": 246,
+     "documents": 31,
+     "rate": 2.532,
+     "rate_lo": 2.238,
+     "rate_hi": 2.807
+    },
+    "opentitan": {
+     "n": 313,
+     "documents": 78,
+     "rate": 1.914,
+     "rate_lo": 1.717,
+     "rate_hi": 2.181
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "TRICOLON|tricolon|enumeration",
+   "construction": "TRICOLON",
+   "pattern": "tricolon",
+   "subtype": "enumeration",
+   "n": 1366,
+   "documents": 336,
+   "pool_words": {
+    "rate": 0.7519,
+    "rate_lo": 0.6968,
+    "rate_hi": 0.8123
+   },
+   "pool_equal": {
+    "rate": 0.767,
+    "rate_lo": 0.6869,
+    "rate_hi": 0.8451
+   },
+   "sources": {
+    "peps": {
+     "n": 206,
+     "documents": 73,
+     "rate": 0.7224,
+     "rate_lo": 0.5562,
+     "rate_hi": 0.9053
+    },
+    "ietf": {
+     "n": 829,
+     "documents": 143,
+     "rate": 0.8146,
+     "rate_lo": 0.7402,
+     "rate_hi": 0.9038
+    },
+    "rust": {
+     "n": 101,
+     "documents": 61,
+     "rate": 0.3988,
+     "rate_lo": 0.3177,
+     "rate_hi": 0.4838
+    },
+    "riscv": {
+     "n": 118,
+     "documents": 21,
+     "rate": 1.214,
+     "rate_lo": 0.9124,
+     "rate_hi": 1.512
+    },
+    "opentitan": {
+     "n": 112,
+     "documents": 38,
+     "rate": 0.6849,
+     "rate_lo": 0.5421,
+     "rate_hi": 0.8312
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "LLM_DICTION|-|-",
+   "construction": "LLM_DICTION",
+   "pattern": "-",
+   "subtype": "-",
+   "n": 1058,
+   "documents": 301,
+   "pool_words": {
+    "rate": 0.5823,
+    "rate_lo": 0.4671,
+    "rate_hi": 0.7081
+   },
+   "pool_equal": {
+    "rate": 0.6212,
+    "rate_lo": 0.512,
+    "rate_hi": 0.7486
+   },
+   "sources": {
+    "peps": {
+     "n": 228,
+     "documents": 62,
+     "rate": 0.7995,
+     "rate_lo": 0.5254,
+     "rate_hi": 1.107
+    },
+    "ietf": {
+     "n": 546,
+     "documents": 114,
+     "rate": 0.5365,
+     "rate_lo": 0.3818,
+     "rate_hi": 0.7326
+    },
+    "rust": {
+     "n": 133,
+     "documents": 59,
+     "rate": 0.5252,
+     "rate_lo": 0.4022,
+     "rate_hi": 0.6443
+    },
+    "riscv": {
+     "n": 77,
+     "documents": 18,
+     "rate": 0.7924,
+     "rate_lo": 0.4374,
+     "rate_hi": 1.253
+    },
+    "opentitan": {
+     "n": 74,
+     "documents": 48,
+     "rate": 0.4525,
+     "rate_lo": 0.2796,
+     "rate_hi": 0.6644
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "ALTERNATIVE_FRAMING|af_rather_than|rather than",
+   "construction": "ALTERNATIVE_FRAMING",
+   "pattern": "af_rather_than",
+   "subtype": "rather than",
+   "n": 477,
+   "documents": 177,
+   "pool_words": {
+    "rate": 0.2625,
+    "rate_lo": 0.2179,
+    "rate_hi": 0.3168
+   },
+   "pool_equal": {
+    "rate": 0.3244,
+    "rate_lo": 0.2706,
+    "rate_hi": 0.3824
+   },
+   "sources": {
+    "peps": {
+     "n": 198,
+     "documents": 54,
+     "rate": 0.6943,
+     "rate_lo": 0.5025,
+     "rate_hi": 0.9179
+    },
+    "ietf": {
+     "n": 140,
+     "documents": 55,
+     "rate": 0.1376,
+     "rate_lo": 0.1046,
+     "rate_hi": 0.1718
+    },
+    "rust": {
+     "n": 95,
+     "documents": 48,
+     "rate": 0.3751,
+     "rate_lo": 0.2782,
+     "rate_hi": 0.4775
+    },
+    "riscv": {
+     "n": 35,
+     "documents": 14,
+     "rate": 0.3602,
+     "rate_lo": 0.2182,
+     "rate_hi": 0.507
+    },
+    "opentitan": {
+     "n": 9,
+     "documents": 6,
+     "rate": 0.05504,
+     "rate_lo": 0.01302,
+     "rate_hi": 0.1151
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "ALTERNATIVE_FRAMING|af_instead_of|instead of",
+   "construction": "ALTERNATIVE_FRAMING",
+   "pattern": "af_instead_of",
+   "subtype": "instead of",
+   "n": 451,
+   "documents": 223,
+   "pool_words": {
+    "rate": 0.2482,
+    "rate_lo": 0.2109,
+    "rate_hi": 0.2937
+   },
+   "pool_equal": {
+    "rate": 0.3196,
+    "rate_lo": 0.27,
+    "rate_hi": 0.3745
+   },
+   "sources": {
+    "peps": {
+     "n": 135,
+     "documents": 60,
+     "rate": 0.4734,
+     "rate_lo": 0.3711,
+     "rate_hi": 0.5814
+    },
+    "ietf": {
+     "n": 121,
+     "documents": 62,
+     "rate": 0.1189,
+     "rate_lo": 0.09603,
+     "rate_hi": 0.1486
+    },
+    "rust": {
+     "n": 146,
+     "documents": 76,
+     "rate": 0.5765,
+     "rate_lo": 0.4507,
+     "rate_hi": 0.7247
+    },
+    "riscv": {
+     "n": 31,
+     "documents": 13,
+     "rate": 0.319,
+     "rate_lo": 0.1634,
+     "rate_hi": 0.5065
+    },
+    "opentitan": {
+     "n": 18,
+     "documents": 12,
+     "rate": 0.1101,
+     "rate_lo": 0.05246,
+     "rate_hi": 0.1804
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "TRICOLON|tricolon|figure",
+   "construction": "TRICOLON",
+   "pattern": "tricolon",
+   "subtype": "figure",
+   "n": 481,
+   "documents": 219,
+   "pool_words": {
+    "rate": 0.2647,
+    "rate_lo": 0.2343,
+    "rate_hi": 0.2966
+   },
+   "pool_equal": {
+    "rate": 0.3049,
+    "rate_lo": 0.2548,
+    "rate_hi": 0.3569
+   },
+   "sources": {
+    "peps": {
+     "n": 102,
+     "documents": 54,
+     "rate": 0.3577,
+     "rate_lo": 0.2796,
+     "rate_hi": 0.4409
+    },
+    "ietf": {
+     "n": 236,
+     "documents": 89,
+     "rate": 0.2319,
+     "rate_lo": 0.1922,
+     "rate_hi": 0.2681
+    },
+    "rust": {
+     "n": 57,
+     "documents": 35,
+     "rate": 0.2251,
+     "rate_lo": 0.1461,
+     "rate_hi": 0.3112
+    },
+    "riscv": {
+     "n": 44,
+     "documents": 15,
+     "rate": 0.4528,
+     "rate_lo": 0.2545,
+     "rate_hi": 0.6522
+    },
+    "opentitan": {
+     "n": 42,
+     "documents": 26,
+     "rate": 0.2568,
+     "rate_lo": 0.1736,
+     "rate_hi": 0.3575
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "EMPHATIC_REFLEXIVE|emphatic_reflexive|itself",
+   "construction": "EMPHATIC_REFLEXIVE",
+   "pattern": "emphatic_reflexive",
+   "subtype": "itself",
+   "n": 448,
+   "documents": 204,
+   "pool_words": {
+    "rate": 0.2466,
+    "rate_lo": 0.2148,
+    "rate_hi": 0.2825
+   },
+   "pool_equal": {
+    "rate": 0.2421,
+    "rate_lo": 0.2098,
+    "rate_hi": 0.2769
+   },
+   "sources": {
+    "peps": {
+     "n": 83,
+     "documents": 42,
+     "rate": 0.2911,
+     "rate_lo": 0.2129,
+     "rate_hi": 0.374
+    },
+    "ietf": {
+     "n": 232,
+     "documents": 82,
+     "rate": 0.228,
+     "rate_lo": 0.1855,
+     "rate_hi": 0.2845
+    },
+    "rust": {
+     "n": 87,
+     "documents": 54,
+     "rate": 0.3435,
+     "rate_lo": 0.26495,
+     "rate_hi": 0.4246
+    },
+    "riscv": {
+     "n": 16,
+     "documents": 9,
+     "rate": 0.1647,
+     "rate_lo": 0.07075,
+     "rate_hi": 0.2527
+    },
+    "opentitan": {
+     "n": 30,
+     "documents": 17,
+     "rate": 0.1835,
+     "rate_lo": 0.1181,
+     "rate_hi": 0.2549
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "BORROWED_RIGOUR|-|-",
+   "construction": "BORROWED_RIGOUR",
+   "pattern": "-",
+   "subtype": "-",
+   "n": 244,
+   "documents": 118,
+   "pool_words": {
+    "rate": 0.1343,
+    "rate_lo": 0.1018,
+    "rate_hi": 0.1631
+   },
+   "pool_equal": {
+    "rate": 0.1713,
+    "rate_lo": 0.1259,
+    "rate_hi": 0.2272
+   },
+   "sources": {
+    "peps": {
+     "n": 55,
+     "documents": 38,
+     "rate": 0.1929,
+     "rate_lo": 0.1434,
+     "rate_hi": 0.2484
+    },
+    "ietf": {
+     "n": 105,
+     "documents": 32,
+     "rate": 0.1032,
+     "rate_lo": 0.05014,
+     "rate_hi": 0.1501
+    },
+    "rust": {
+     "n": 44,
+     "documents": 31,
+     "rate": 0.1737,
+     "rate_lo": 0.1147,
+     "rate_hi": 0.2411
+    },
+    "riscv": {
+     "n": 34,
+     "documents": 11,
+     "rate": 0.3499,
+     "rate_lo": 0.1625,
+     "rate_hi": 0.6256
+    },
+    "opentitan": {
+     "n": 6,
+     "documents": 6,
+     "rate": 0.03669,
+     "rate_lo": 0.01301,
+     "rate_hi": 0.06368
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "CONSULTANT_REGISTER|-|-",
+   "construction": "CONSULTANT_REGISTER",
+   "pattern": "-",
+   "subtype": "-",
+   "n": 258,
+   "documents": 129,
+   "pool_words": {
+    "rate": 0.142,
+    "rate_lo": 0.1131,
+    "rate_hi": 0.1791
+   },
+   "pool_equal": {
+    "rate": 0.1507,
+    "rate_lo": 0.1205,
+    "rate_hi": 0.1897
+   },
+   "sources": {
+    "peps": {
+     "n": 31,
+     "documents": 20,
+     "rate": 0.1087,
+     "rate_lo": 0.06286,
+     "rate_hi": 0.1691
+    },
+    "ietf": {
+     "n": 138,
+     "documents": 53,
+     "rate": 0.1356,
+     "rate_lo": 0.09434,
+     "rate_hi": 0.1908
+    },
+    "rust": {
+     "n": 49,
+     "documents": 31,
+     "rate": 0.1935,
+     "rate_lo": 0.1268,
+     "rate_hi": 0.2777
+    },
+    "riscv": {
+     "n": 17,
+     "documents": 9,
+     "rate": 0.1749,
+     "rate_lo": 0.07158,
+     "rate_hi": 0.3111
+    },
+    "opentitan": {
+     "n": 23,
+     "documents": 16,
+     "rate": 0.1407,
+     "rate_lo": 0.0787,
+     "rate_hi": 0.2123
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "CORRECTIVE_CONTRAST|cc_coordinated|not X but Y",
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_coordinated",
+   "subtype": "not X but Y",
+   "n": 220,
+   "documents": 147,
+   "pool_words": {
+    "rate": 0.1211,
+    "rate_lo": 0.1049,
+    "rate_hi": 0.1377
+   },
+   "pool_equal": {
+    "rate": 0.1336,
+    "rate_lo": 0.1117,
+    "rate_hi": 0.159
+   },
+   "sources": {
+    "peps": {
+     "n": 56,
+     "documents": 39,
+     "rate": 0.1964,
+     "rate_lo": 0.1446,
+     "rate_hi": 0.2548
+    },
+    "ietf": {
+     "n": 88,
+     "documents": 47,
+     "rate": 0.08647,
+     "rate_lo": 0.06305,
+     "rate_hi": 0.1056
+    },
+    "rust": {
+     "n": 56,
+     "documents": 45,
+     "rate": 0.2211,
+     "rate_lo": 0.1652,
+     "rate_hi": 0.2788
+    },
+    "riscv": {
+     "n": 10,
+     "documents": 8,
+     "rate": 0.1029,
+     "rate_lo": 0.04307,
+     "rate_hi": 0.1892
+    },
+    "opentitan": {
+     "n": 10,
+     "documents": 8,
+     "rate": 0.06115,
+     "rate_lo": 0.023,
+     "rate_hi": 0.1168
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "EMPTY_FRAME|-|-",
+   "construction": "EMPTY_FRAME",
+   "pattern": "-",
+   "subtype": "-",
+   "n": 180,
+   "documents": 110,
+   "pool_words": {
+    "rate": 0.09907,
+    "rate_lo": 0.08151,
+    "rate_hi": 0.1193
+   },
+   "pool_equal": {
+    "rate": 0.1098,
+    "rate_lo": 0.08038,
+    "rate_hi": 0.1471
+   },
+   "sources": {
+    "peps": {
+     "n": 42,
+     "documents": 27,
+     "rate": 0.1473,
+     "rate_lo": 0.092,
+     "rate_hi": 0.2205
+    },
+    "ietf": {
+     "n": 77,
+     "documents": 44,
+     "rate": 0.07566,
+     "rate_lo": 0.0603,
+     "rate_hi": 0.09299
+    },
+    "rust": {
+     "n": 41,
+     "documents": 27,
+     "rate": 0.1619,
+     "rate_lo": 0.1021,
+     "rate_hi": 0.2246
+    },
+    "riscv": {
+     "n": 10,
+     "documents": 4,
+     "rate": 0.1029,
+     "rate_lo": 0.01145,
+     "rate_hi": 0.2593
+    },
+    "opentitan": {
+     "n": 10,
+     "documents": 8,
+     "rate": 0.06115,
+     "rate_lo": 0.02361,
+     "rate_hi": 0.1032
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "EM_DASH|-|single break",
+   "construction": "EM_DASH",
+   "pattern": "-",
+   "subtype": "single break",
+   "n": 93,
+   "documents": 34,
+   "pool_words": {
+    "rate": 0.05119,
+    "rate_lo": 0.03039,
+    "rate_hi": 0.07843
+   },
+   "pool_equal": {
+    "rate": 0.08386,
+    "rate_lo": 0.05274,
+    "rate_hi": 0.1201
+   },
+   "sources": {
+    "peps": {
+     "n": 40,
+     "documents": 14,
+     "rate": 0.1403,
+     "rate_lo": 0.06267,
+     "rate_hi": 0.2343
+    },
+    "ietf": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    },
+    "rust": {
+     "n": 42,
+     "documents": 13,
+     "rate": 0.1658,
+     "rate_lo": 0.05912,
+     "rate_hi": 0.3064
+    },
+    "riscv": {
+     "n": 11,
+     "documents": 7,
+     "rate": 0.1132,
+     "rate_lo": 0.04099,
+     "rate_hi": 0.187
+    },
+    "opentitan": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "CORRECTIVE_CONTRAST|cc_negated_apposition|X, not Y",
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_negated_apposition",
+   "subtype": "X, not Y",
+   "n": 132,
+   "documents": 97,
+   "pool_words": {
+    "rate": 0.07265,
+    "rate_lo": 0.05854,
+    "rate_hi": 0.08853
+   },
+   "pool_equal": {
+    "rate": 0.07747,
+    "rate_lo": 0.06183,
+    "rate_hi": 0.09484
+   },
+   "sources": {
+    "peps": {
+     "n": 48,
+     "documents": 38,
+     "rate": 0.1683,
+     "rate_lo": 0.1191,
+     "rate_hi": 0.2219
+    },
+    "ietf": {
+     "n": 53,
+     "documents": 33,
+     "rate": 0.05208,
+     "rate_lo": 0.03701,
+     "rate_hi": 0.07188
+    },
+    "rust": {
+     "n": 22,
+     "documents": 18,
+     "rate": 0.08687,
+     "rate_lo": 0.0519,
+     "rate_hi": 0.12502
+    },
+    "riscv": {
+     "n": 6,
+     "documents": 5,
+     "rate": 0.06174,
+     "rate_lo": 0.01544,
+     "rate_hi": 0.1118
+    },
+    "opentitan": {
+     "n": 3,
+     "documents": 3,
+     "rate": 0.01835,
+     "rate_lo": 0.0,
+     "rate_hi": 0.03957
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "EMPHATIC_REFLEXIVE|emphatic_reflexive|themselves",
+   "construction": "EMPHATIC_REFLEXIVE",
+   "pattern": "emphatic_reflexive",
+   "subtype": "themselves",
+   "n": 127,
+   "documents": 87,
+   "pool_words": {
+    "rate": 0.0699,
+    "rate_lo": 0.05545,
+    "rate_hi": 0.08516
+   },
+   "pool_equal": {
+    "rate": 0.07399,
+    "rate_lo": 0.05756,
+    "rate_hi": 0.09032
+   },
+   "sources": {
+    "peps": {
+     "n": 34,
+     "documents": 22,
+     "rate": 0.1192,
+     "rate_lo": 0.07222,
+     "rate_hi": 0.1643
+    },
+    "ietf": {
+     "n": 53,
+     "documents": 32,
+     "rate": 0.05208,
+     "rate_lo": 0.03716,
+     "rate_hi": 0.07004
+    },
+    "rust": {
+     "n": 27,
+     "documents": 22,
+     "rate": 0.1066,
+     "rate_lo": 0.06402,
+     "rate_hi": 0.1554
+    },
+    "riscv": {
+     "n": 3,
+     "documents": 3,
+     "rate": 0.03087,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0638
+    },
+    "opentitan": {
+     "n": 10,
+     "documents": 8,
+     "rate": 0.06115,
+     "rate_lo": 0.02445,
+     "rate_hi": 0.1012
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "ABSTRACT_ADVERB|abstract_adverb|potentially",
+   "construction": "ABSTRACT_ADVERB",
+   "pattern": "abstract_adverb",
+   "subtype": "potentially",
+   "n": 131,
+   "documents": 84,
+   "pool_words": {
+    "rate": 0.0721,
+    "rate_lo": 0.05549,
+    "rate_hi": 0.09315
+   },
+   "pool_equal": {
+    "rate": 0.06903,
+    "rate_lo": 0.05302,
+    "rate_hi": 0.0847
+   },
+   "sources": {
+    "peps": {
+     "n": 37,
+     "documents": 23,
+     "rate": 0.1298,
+     "rate_lo": 0.08296,
+     "rate_hi": 0.1793
+    },
+    "ietf": {
+     "n": 64,
+     "documents": 35,
+     "rate": 0.06289,
+     "rate_lo": 0.04049,
+     "rate_hi": 0.09642
+    },
+    "rust": {
+     "n": 22,
+     "documents": 20,
+     "rate": 0.08687,
+     "rate_lo": 0.05408,
+     "rate_hi": 0.1239
+    },
+    "riscv": {
+     "n": 4,
+     "documents": 3,
+     "rate": 0.04116,
+     "rate_lo": 0.0,
+     "rate_hi": 0.07514
+    },
+    "opentitan": {
+     "n": 4,
+     "documents": 3,
+     "rate": 0.02446,
+     "rate_lo": 0.0,
+     "rate_hi": 0.05558
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "ABSTRACT_ADVERB|abstract_adverb|naturally",
+   "construction": "ABSTRACT_ADVERB",
+   "pattern": "abstract_adverb",
+   "subtype": "naturally",
+   "n": 36,
+   "documents": 17,
+   "pool_words": {
+    "rate": 0.01981,
+    "rate_lo": 0.009523,
+    "rate_hi": 0.03355
+   },
+   "pool_equal": {
+    "rate": 0.06757,
+    "rate_lo": 0.03439,
+    "rate_hi": 0.1044
+   },
+   "sources": {
+    "peps": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.007014,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0185
+    },
+    "ietf": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    },
+    "rust": {
+     "n": 3,
+     "documents": 3,
+     "rate": 0.01185,
+     "rate_lo": 0.0,
+     "rate_hi": 0.02577
+    },
+    "riscv": {
+     "n": 31,
+     "documents": 12,
+     "rate": 0.319,
+     "rate_lo": 0.154,
+     "rate_hi": 0.5012
+    },
+    "opentitan": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "VAGUE_QUANTIFIER|-|-",
+   "construction": "VAGUE_QUANTIFIER",
+   "pattern": "-",
+   "subtype": "-",
+   "n": 113,
+   "documents": 75,
+   "pool_words": {
+    "rate": 0.0622,
+    "rate_lo": 0.04734,
+    "rate_hi": 0.07978
+   },
+   "pool_equal": {
+    "rate": 0.06083,
+    "rate_lo": 0.04537,
+    "rate_hi": 0.07822
+   },
+   "sources": {
+    "peps": {
+     "n": 23,
+     "documents": 16,
+     "rate": 0.08066,
+     "rate_lo": 0.04622,
+     "rate_hi": 0.116
+    },
+    "ietf": {
+     "n": 56,
+     "documents": 34,
+     "rate": 0.05503,
+     "rate_lo": 0.03617,
+     "rate_hi": 0.08044
+    },
+    "rust": {
+     "n": 24,
+     "documents": 17,
+     "rate": 0.09477,
+     "rate_lo": 0.0505,
+     "rate_hi": 0.1454
+    },
+    "riscv": {
+     "n": 3,
+     "documents": 3,
+     "rate": 0.03087,
+     "rate_lo": 0.0,
+     "rate_hi": 0.08407
+    },
+    "opentitan": {
+     "n": 7,
+     "documents": 5,
+     "rate": 0.04281,
+     "rate_lo": 0.01258,
+     "rate_hi": 0.07898
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "FRAME_MARKER|-|-",
+   "construction": "FRAME_MARKER",
+   "pattern": "-",
+   "subtype": "-",
+   "n": 106,
+   "documents": 80,
+   "pool_words": {
+    "rate": 0.05834,
+    "rate_lo": 0.04739,
+    "rate_hi": 0.07179
+   },
+   "pool_equal": {
+    "rate": 0.06065,
+    "rate_lo": 0.04665,
+    "rate_hi": 0.0772
+   },
+   "sources": {
+    "peps": {
+     "n": 21,
+     "documents": 17,
+     "rate": 0.07364,
+     "rate_lo": 0.04195,
+     "rate_hi": 0.1099
+    },
+    "ietf": {
+     "n": 48,
+     "documents": 32,
+     "rate": 0.04716,
+     "rate_lo": 0.03395,
+     "rate_hi": 0.06282
+    },
+    "rust": {
+     "n": 26,
+     "documents": 21,
+     "rate": 0.1027,
+     "rate_lo": 0.06344,
+     "rate_hi": 0.1462
+    },
+    "riscv": {
+     "n": 3,
+     "documents": 3,
+     "rate": 0.03087,
+     "rate_lo": 0.0,
+     "rate_hi": 0.07598
+    },
+    "opentitan": {
+     "n": 8,
+     "documents": 7,
+     "rate": 0.04892,
+     "rate_lo": 0.01802,
+     "rate_hi": 0.08814
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|make",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "make",
+   "n": 82,
+   "documents": 61,
+   "pool_words": {
+    "rate": 0.04513,
+    "rate_lo": 0.03545,
+    "rate_hi": 0.05512
+   },
+   "pool_equal": {
+    "rate": 0.05155,
+    "rate_lo": 0.03823,
+    "rate_hi": 0.06758
+   },
+   "sources": {
+    "peps": {
+     "n": 22,
+     "documents": 19,
+     "rate": 0.07715,
+     "rate_lo": 0.04722,
+     "rate_hi": 0.113
+    },
+    "ietf": {
+     "n": 29,
+     "documents": 19,
+     "rate": 0.0285,
+     "rate_lo": 0.01718,
+     "rate_hi": 0.03818
+    },
+    "rust": {
+     "n": 25,
+     "documents": 18,
+     "rate": 0.09871,
+     "rate_lo": 0.05665,
+     "rate_hi": 0.144
+    },
+    "riscv": {
+     "n": 4,
+     "documents": 3,
+     "rate": 0.04116,
+     "rate_lo": 0.0,
+     "rate_hi": 0.09569
+    },
+    "opentitan": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.01223,
+     "rate_lo": 0.0,
+     "rate_hi": 0.02796
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|allow",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "allow",
+   "n": 90,
+   "documents": 59,
+   "pool_words": {
+    "rate": 0.04954,
+    "rate_lo": 0.03546,
+    "rate_hi": 0.06253
+   },
+   "pool_equal": {
+    "rate": 0.0491,
+    "rate_lo": 0.03552,
+    "rate_hi": 0.06357
+   },
+   "sources": {
+    "peps": {
+     "n": 20,
+     "documents": 13,
+     "rate": 0.07014,
+     "rate_lo": 0.03312,
+     "rate_hi": 0.1166
+    },
+    "ietf": {
+     "n": 42,
+     "documents": 21,
+     "rate": 0.04127,
+     "rate_lo": 0.01982,
+     "rate_hi": 0.05811
+    },
+    "rust": {
+     "n": 21,
+     "documents": 18,
+     "rate": 0.08292,
+     "rate_lo": 0.04876,
+     "rate_hi": 0.124
+    },
+    "riscv": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.02058,
+     "rate_lo": 0.0,
+     "rate_hi": 0.05089
+    },
+    "opentitan": {
+     "n": 5,
+     "documents": 5,
+     "rate": 0.03058,
+     "rate_lo": 0.007388,
+     "rate_hi": 0.05458
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|use",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "use",
+   "n": 123,
+   "documents": 85,
+   "pool_words": {
+    "rate": 0.0677,
+    "rate_lo": 0.05459,
+    "rate_hi": 0.08036
+   },
+   "pool_equal": {
+    "rate": 0.0488,
+    "rate_lo": 0.03801,
+    "rate_hi": 0.05947
+   },
+   "sources": {
+    "peps": {
+     "n": 14,
+     "documents": 14,
+     "rate": 0.0491,
+     "rate_lo": 0.02812,
+     "rate_hi": 0.07418
+    },
+    "ietf": {
+     "n": 88,
+     "documents": 51,
+     "rate": 0.08647,
+     "rate_lo": 0.06778,
+     "rate_hi": 0.1075
+    },
+    "rust": {
+     "n": 15,
+     "documents": 14,
+     "rate": 0.05923,
+     "rate_lo": 0.03138,
+     "rate_hi": 0.08934
+    },
+    "riscv": {
+     "n": 3,
+     "documents": 3,
+     "rate": 0.03087,
+     "rate_lo": 0.0,
+     "rate_hi": 0.05715
+    },
+    "opentitan": {
+     "n": 3,
+     "documents": 3,
+     "rate": 0.01835,
+     "rate_lo": 0.0,
+     "rate_hi": 0.03976
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "HEDGE_STACK|-|-",
+   "construction": "HEDGE_STACK",
+   "pattern": "-",
+   "subtype": "-",
+   "n": 79,
+   "documents": 55,
+   "pool_words": {
+    "rate": 0.04348,
+    "rate_lo": 0.03213,
+    "rate_hi": 0.057
+   },
+   "pool_equal": {
+    "rate": 0.04594,
+    "rate_lo": 0.03096,
+    "rate_hi": 0.06274
+   },
+   "sources": {
+    "peps": {
+     "n": 9,
+     "documents": 9,
+     "rate": 0.03156,
+     "rate_lo": 0.01472,
+     "rate_hi": 0.05146
+    },
+    "ietf": {
+     "n": 40,
+     "documents": 25,
+     "rate": 0.0393,
+     "rate_lo": 0.02617,
+     "rate_hi": 0.05709
+    },
+    "rust": {
+     "n": 21,
+     "documents": 14,
+     "rate": 0.08292,
+     "rate_lo": 0.03695,
+     "rate_hi": 0.1344
+    },
+    "riscv": {
+     "n": 5,
+     "documents": 4,
+     "rate": 0.05145,
+     "rate_lo": 0.01058,
+     "rate_hi": 0.1037
+    },
+    "opentitan": {
+     "n": 4,
+     "documents": 3,
+     "rate": 0.02446,
+     "rate_lo": 0.0,
+     "rate_hi": 0.05823
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|mean",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "mean",
+   "n": 49,
+   "documents": 40,
+   "pool_words": {
+    "rate": 0.02697,
+    "rate_lo": 0.0188,
+    "rate_hi": 0.03692
+   },
+   "pool_equal": {
+    "rate": 0.04118,
+    "rate_lo": 0.02786,
+    "rate_hi": 0.05642
+   },
+   "sources": {
+    "peps": {
+     "n": 7,
+     "documents": 7,
+     "rate": 0.02455,
+     "rate_lo": 0.008896,
+     "rate_hi": 0.04562
+    },
+    "ietf": {
+     "n": 10,
+     "documents": 8,
+     "rate": 0.009826,
+     "rate_lo": 0.00404,
+     "rate_hi": 0.01771
+    },
+    "rust": {
+     "n": 15,
+     "documents": 13,
+     "rate": 0.05923,
+     "rate_lo": 0.02997,
+     "rate_hi": 0.09219
+    },
+    "riscv": {
+     "n": 2,
+     "documents": 1,
+     "rate": 0.02058,
+     "rate_lo": 0.0,
+     "rate_hi": 0.07621
+    },
+    "opentitan": {
+     "n": 15,
+     "documents": 11,
+     "rate": 0.09173,
+     "rate_lo": 0.045004,
+     "rate_hi": 0.1407
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "HOLLOW_BOOSTER|-|-",
+   "construction": "HOLLOW_BOOSTER",
+   "pattern": "-",
+   "subtype": "-",
+   "n": 51,
+   "documents": 42,
+   "pool_words": {
+    "rate": 0.02807,
+    "rate_lo": 0.01871,
+    "rate_hi": 0.03937
+   },
+   "pool_equal": {
+    "rate": 0.03875,
+    "rate_lo": 0.02524,
+    "rate_hi": 0.05199
+   },
+   "sources": {
+    "peps": {
+     "n": 21,
+     "documents": 17,
+     "rate": 0.07364,
+     "rate_lo": 0.04123,
+     "rate_hi": 0.1085
+    },
+    "ietf": {
+     "n": 8,
+     "documents": 8,
+     "rate": 0.007861,
+     "rate_lo": 0.002824,
+     "rate_hi": 0.01477
+    },
+    "rust": {
+     "n": 18,
+     "documents": 14,
+     "rate": 0.07107,
+     "rate_lo": 0.03448,
+     "rate_hi": 0.1126
+    },
+    "riscv": {
+     "n": 4,
+     "documents": 3,
+     "rate": 0.04116,
+     "rate_lo": 0.0,
+     "rate_hi": 0.08622
+    },
+    "opentitan": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "CORRECTIVE_CONTRAST|cc_additive|not only X but also Y",
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_additive",
+   "subtype": "not only X but also Y",
+   "n": 61,
+   "documents": 46,
+   "pool_words": {
+    "rate": 0.03358,
+    "rate_lo": 0.02305,
+    "rate_hi": 0.04813
+   },
+   "pool_equal": {
+    "rate": 0.03785,
+    "rate_lo": 0.02413,
+    "rate_hi": 0.05274
+   },
+   "sources": {
+    "peps": {
+     "n": 26,
+     "documents": 14,
+     "rate": 0.09118,
+     "rate_lo": 0.04336,
+     "rate_hi": 0.1524
+    },
+    "ietf": {
+     "n": 20,
+     "documents": 19,
+     "rate": 0.01965,
+     "rate_lo": 0.01095,
+     "rate_hi": 0.03144
+    },
+    "rust": {
+     "n": 10,
+     "documents": 9,
+     "rate": 0.03949,
+     "rate_lo": 0.01582,
+     "rate_hi": 0.06723
+    },
+    "riscv": {
+     "n": 2,
+     "documents": 1,
+     "rate": 0.02058,
+     "rate_lo": 0.0,
+     "rate_hi": 0.05354
+    },
+    "opentitan": {
+     "n": 3,
+     "documents": 3,
+     "rate": 0.01835,
+     "rate_lo": 0.0,
+     "rate_hi": 0.03994
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "ABSTRACT_ADVERB|abstract_adverb|specifically",
+   "construction": "ABSTRACT_ADVERB",
+   "pattern": "abstract_adverb",
+   "subtype": "specifically",
+   "n": 74,
+   "documents": 56,
+   "pool_words": {
+    "rate": 0.04073,
+    "rate_lo": 0.03104,
+    "rate_hi": 0.05241
+   },
+   "pool_equal": {
+    "rate": 0.03575,
+    "rate_lo": 0.02426,
+    "rate_hi": 0.04939
+   },
+   "sources": {
+    "peps": {
+     "n": 11,
+     "documents": 9,
+     "rate": 0.03857,
+     "rate_lo": 0.0152,
+     "rate_hi": 0.06527
+    },
+    "ietf": {
+     "n": 46,
+     "documents": 32,
+     "rate": 0.0452,
+     "rate_lo": 0.03105,
+     "rate_hi": 0.06329
+    },
+    "rust": {
+     "n": 8,
+     "documents": 8,
+     "rate": 0.03159,
+     "rate_lo": 0.01181,
+     "rate_hi": 0.05423
+    },
+    "riscv": {
+     "n": 2,
+     "documents": 1,
+     "rate": 0.02058,
+     "rate_lo": 0.0,
+     "rate_hi": 0.06
+    },
+    "opentitan": {
+     "n": 7,
+     "documents": 6,
+     "rate": 0.04281,
+     "rate_lo": 0.01305,
+     "rate_hi": 0.08172
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "EM_DASH|-|paired aside",
+   "construction": "EM_DASH",
+   "pattern": "-",
+   "subtype": "paired aside",
+   "n": 35,
+   "documents": 13,
+   "pool_words": {
+    "rate": 0.01926,
+    "rate_lo": 0.008881,
+    "rate_hi": 0.0318
+   },
+   "pool_equal": {
+    "rate": 0.0344,
+    "rate_lo": 0.01502,
+    "rate_hi": 0.05786
+   },
+   "sources": {
+    "peps": {
+     "n": 24,
+     "documents": 8,
+     "rate": 0.08416,
+     "rate_lo": 0.02967,
+     "rate_hi": 0.1501
+    },
+    "ietf": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    },
+    "rust": {
+     "n": 4,
+     "documents": 2,
+     "rate": 0.01579,
+     "rate_lo": 0.0,
+     "rate_hi": 0.04046
+    },
+    "riscv": {
+     "n": 7,
+     "documents": 3,
+     "rate": 0.07204,
+     "rate_lo": 0.0,
+     "rate_hi": 0.1736
+    },
+    "opentitan": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "ABSTRACT_ADVERB|abstract_adverb|additionally",
+   "construction": "ABSTRACT_ADVERB",
+   "pattern": "abstract_adverb",
+   "subtype": "additionally",
+   "n": 45,
+   "documents": 38,
+   "pool_words": {
+    "rate": 0.02477,
+    "rate_lo": 0.01683,
+    "rate_hi": 0.03432
+   },
+   "pool_equal": {
+    "rate": 0.03381,
+    "rate_lo": 0.02252,
+    "rate_hi": 0.04633
+   },
+   "sources": {
+    "peps": {
+     "n": 12,
+     "documents": 10,
+     "rate": 0.04208,
+     "rate_lo": 0.0184,
+     "rate_hi": 0.07433
+    },
+    "ietf": {
+     "n": 14,
+     "documents": 11,
+     "rate": 0.01376,
+     "rate_lo": 0.006197,
+     "rate_hi": 0.02387
+    },
+    "rust": {
+     "n": 11,
+     "documents": 11,
+     "rate": 0.04343,
+     "rate_lo": 0.02114,
+     "rate_hi": 0.06965
+    },
+    "riscv": {
+     "n": 5,
+     "documents": 4,
+     "rate": 0.05145,
+     "rate_lo": 0.01093,
+     "rate_hi": 0.09817
+    },
+    "opentitan": {
+     "n": 3,
+     "documents": 2,
+     "rate": 0.01835,
+     "rate_lo": 0.0,
+     "rate_hi": 0.04742
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "CLOSER|-|-",
+   "construction": "CLOSER",
+   "pattern": "-",
+   "subtype": "-",
+   "n": 56,
+   "documents": 49,
+   "pool_words": {
+    "rate": 0.03082,
+    "rate_lo": 0.02268,
+    "rate_hi": 0.04019
+   },
+   "pool_equal": {
+    "rate": 0.03148,
+    "rate_lo": 0.02206,
+    "rate_hi": 0.04286
+   },
+   "sources": {
+    "peps": {
+     "n": 14,
+     "documents": 13,
+     "rate": 0.0491,
+     "rate_lo": 0.0267,
+     "rate_hi": 0.07598
+    },
+    "ietf": {
+     "n": 23,
+     "documents": 20,
+     "rate": 0.0226,
+     "rate_lo": 0.01436,
+     "rate_hi": 0.0334
+    },
+    "rust": {
+     "n": 16,
+     "documents": 14,
+     "rate": 0.06318,
+     "rate_lo": 0.03289,
+     "rate_hi": 0.09683
+    },
+    "riscv": {
+     "n": 1,
+     "documents": 1,
+     "rate": 0.01029,
+     "rate_lo": 0.0,
+     "rate_hi": 0.04013
+    },
+    "opentitan": {
+     "n": 2,
+     "documents": 1,
+     "rate": 0.01223,
+     "rate_lo": 0.0,
+     "rate_hi": 0.04243
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "ABSTRACT_ADVERB|abstract_adverb|mutually",
+   "construction": "ABSTRACT_ADVERB",
+   "pattern": "abstract_adverb",
+   "subtype": "mutually",
+   "n": 46,
+   "documents": 26,
+   "pool_words": {
+    "rate": 0.02532,
+    "rate_lo": 0.01516,
+    "rate_hi": 0.03592
+   },
+   "pool_equal": {
+    "rate": 0.02986,
+    "rate_lo": 0.01611,
+    "rate_hi": 0.0432
+   },
+   "sources": {
+    "peps": {
+     "n": 15,
+     "documents": 7,
+     "rate": 0.0526,
+     "rate_lo": 0.01306,
+     "rate_hi": 0.1028
+    },
+    "ietf": {
+     "n": 18,
+     "documents": 10,
+     "rate": 0.01769,
+     "rate_lo": 0.00674,
+     "rate_hi": 0.027
+    },
+    "rust": {
+     "n": 6,
+     "documents": 4,
+     "rate": 0.02369,
+     "rate_lo": 0.003911,
+     "rate_hi": 0.04843
+    },
+    "riscv": {
+     "n": 3,
+     "documents": 2,
+     "rate": 0.03087,
+     "rate_lo": 0.0,
+     "rate_hi": 0.06127
+    },
+    "opentitan": {
+     "n": 4,
+     "documents": 3,
+     "rate": 0.02446,
+     "rate_lo": 0.0,
+     "rate_hi": 0.05812
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "ABSTRACT_ADVERB|abstract_adverb|partially",
+   "construction": "ABSTRACT_ADVERB",
+   "pattern": "abstract_adverb",
+   "subtype": "partially",
+   "n": 38,
+   "documents": 29,
+   "pool_words": {
+    "rate": 0.02092,
+    "rate_lo": 0.01388,
+    "rate_hi": 0.02926
+   },
+   "pool_equal": {
+    "rate": 0.0286,
+    "rate_lo": 0.01665,
+    "rate_hi": 0.04308
+   },
+   "sources": {
+    "peps": {
+     "n": 3,
+     "documents": 2,
+     "rate": 0.01052,
+     "rate_lo": 0.0,
+     "rate_hi": 0.02909
+    },
+    "ietf": {
+     "n": 12,
+     "documents": 9,
+     "rate": 0.01179,
+     "rate_lo": 0.005448,
+     "rate_hi": 0.01884
+    },
+    "rust": {
+     "n": 15,
+     "documents": 12,
+     "rate": 0.05923,
+     "rate_lo": 0.02592,
+     "rate_hi": 0.09974
+    },
+    "riscv": {
+     "n": 3,
+     "documents": 3,
+     "rate": 0.03087,
+     "rate_lo": 0.0,
+     "rate_hi": 0.08025
+    },
+    "opentitan": {
+     "n": 5,
+     "documents": 3,
+     "rate": 0.03058,
+     "rate_lo": 0.0,
+     "rate_hi": 0.06761
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "CORRECTIVE_CONTRAST|cc_parallel_sibling|X, not Y",
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_parallel_sibling",
+   "subtype": "X, not Y",
+   "n": 33,
+   "documents": 29,
+   "pool_words": {
+    "rate": 0.01816,
+    "rate_lo": 0.01197,
+    "rate_hi": 0.02572
+   },
+   "pool_equal": {
+    "rate": 0.02777,
+    "rate_lo": 0.01655,
+    "rate_hi": 0.04022
+   },
+   "sources": {
+    "peps": {
+     "n": 17,
+     "documents": 14,
+     "rate": 0.05962,
+     "rate_lo": 0.03106,
+     "rate_hi": 0.09308
+    },
+    "ietf": {
+     "n": 6,
+     "documents": 6,
+     "rate": 0.005896,
+     "rate_lo": 0.002126,
+     "rate_hi": 0.01065
+    },
+    "rust": {
+     "n": 4,
+     "documents": 4,
+     "rate": 0.01579,
+     "rate_lo": 0.00368,
+     "rate_hi": 0.0324
+    },
+    "riscv": {
+     "n": 5,
+     "documents": 4,
+     "rate": 0.05145,
+     "rate_lo": 0.009531,
+     "rate_hi": 0.1047
+    },
+    "opentitan": {
+     "n": 1,
+     "documents": 1,
+     "rate": 0.006115,
+     "rate_lo": 0.0,
+     "rate_hi": 0.01892
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "ABSTRACT_ADVERB|abstract_adverb|semantically",
+   "construction": "ABSTRACT_ADVERB",
+   "pattern": "abstract_adverb",
+   "subtype": "semantically",
+   "n": 37,
+   "documents": 21,
+   "pool_words": {
+    "rate": 0.02037,
+    "rate_lo": 0.01173,
+    "rate_hi": 0.03143
+   },
+   "pool_equal": {
+    "rate": 0.02342,
+    "rate_lo": 0.01154,
+    "rate_hi": 0.04014
+   },
+   "sources": {
+    "peps": {
+     "n": 8,
+     "documents": 7,
+     "rate": 0.02805,
+     "rate_lo": 0.008181,
+     "rate_hi": 0.05098
+    },
+    "ietf": {
+     "n": 15,
+     "documents": 6,
+     "rate": 0.01474,
+     "rate_lo": 0.00358,
+     "rate_hi": 0.0298
+    },
+    "rust": {
+     "n": 11,
+     "documents": 7,
+     "rate": 0.04343,
+     "rate_lo": 0.01276,
+     "rate_hi": 0.08159
+    },
+    "riscv": {
+     "n": 3,
+     "documents": 1,
+     "rate": 0.03087,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0984
+    },
+    "opentitan": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "ABSTRACT_ADVERB|abstract_adverb|intentionally",
+   "construction": "ABSTRACT_ADVERB",
+   "pattern": "abstract_adverb",
+   "subtype": "intentionally",
+   "n": 34,
+   "documents": 27,
+   "pool_words": {
+    "rate": 0.01871,
+    "rate_lo": 0.0113,
+    "rate_hi": 0.02828
+   },
+   "pool_equal": {
+    "rate": 0.02046,
+    "rate_lo": 0.01104,
+    "rate_hi": 0.03227
+   },
+   "sources": {
+    "peps": {
+     "n": 8,
+     "documents": 7,
+     "rate": 0.02805,
+     "rate_lo": 0.008932,
+     "rate_hi": 0.05051
+    },
+    "ietf": {
+     "n": 16,
+     "documents": 11,
+     "rate": 0.01572,
+     "rate_lo": 0.006001,
+     "rate_hi": 0.03085
+    },
+    "rust": {
+     "n": 7,
+     "documents": 7,
+     "rate": 0.02764,
+     "rate_lo": 0.008546,
+     "rate_hi": 0.04823
+    },
+    "riscv": {
+     "n": 3,
+     "documents": 2,
+     "rate": 0.03087,
+     "rate_lo": 0.0,
+     "rate_hi": 0.08325
+    },
+    "opentitan": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "GAPPED_ANTITHESIS|gapped_antithesis|opposed verbs",
+   "construction": "GAPPED_ANTITHESIS",
+   "pattern": "gapped_antithesis",
+   "subtype": "opposed verbs",
+   "n": 29,
+   "documents": 18,
+   "pool_words": {
+    "rate": 0.01596,
+    "rate_lo": 0.008039,
+    "rate_hi": 0.02491
+   },
+   "pool_equal": {
+    "rate": 0.01973,
+    "rate_lo": 0.008325,
+    "rate_hi": 0.03537
+   },
+   "sources": {
+    "peps": {
+     "n": 5,
+     "documents": 5,
+     "rate": 0.01753,
+     "rate_lo": 0.003798,
+     "rate_hi": 0.03203
+    },
+    "ietf": {
+     "n": 14,
+     "documents": 7,
+     "rate": 0.01376,
+     "rate_lo": 0.004081,
+     "rate_hi": 0.02602
+    },
+    "rust": {
+     "n": 1,
+     "documents": 1,
+     "rate": 0.003949,
+     "rate_lo": 0.0,
+     "rate_hi": 0.01257
+    },
+    "riscv": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.02058,
+     "rate_lo": 0.0,
+     "rate_hi": 0.04287
+    },
+    "opentitan": {
+     "n": 7,
+     "documents": 3,
+     "rate": 0.04281,
+     "rate_lo": 0.0,
+     "rate_hi": 0.1174
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|indicate",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "indicate",
+   "n": 33,
+   "documents": 21,
+   "pool_words": {
+    "rate": 0.01816,
+    "rate_lo": 0.01022,
+    "rate_hi": 0.02896
+   },
+   "pool_equal": {
+    "rate": 0.01821,
+    "rate_lo": 0.008774,
+    "rate_hi": 0.02799
+   },
+   "sources": {
+    "peps": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.007014,
+     "rate_lo": 0.0,
+     "rate_hi": 0.01736
+    },
+    "ietf": {
+     "n": 23,
+     "documents": 12,
+     "rate": 0.0226,
+     "rate_lo": 0.01004,
+     "rate_hi": 0.0404
+    },
+    "rust": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    },
+    "riscv": {
+     "n": 3,
+     "documents": 2,
+     "rate": 0.03087,
+     "rate_lo": 0.0,
+     "rate_hi": 0.06328
+    },
+    "opentitan": {
+     "n": 5,
+     "documents": 5,
+     "rate": 0.03058,
+     "rate_lo": 0.006505,
+     "rate_hi": 0.06198
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|require",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "require",
+   "n": 22,
+   "documents": 21,
+   "pool_words": {
+    "rate": 0.01211,
+    "rate_lo": 0.007403,
+    "rate_hi": 0.01767
+   },
+   "pool_equal": {
+    "rate": 0.0177,
+    "rate_lo": 0.009882,
+    "rate_hi": 0.02601
+   },
+   "sources": {
+    "peps": {
+     "n": 4,
+     "documents": 4,
+     "rate": 0.01403,
+     "rate_lo": 0.003246,
+     "rate_hi": 0.02875
+    },
+    "ietf": {
+     "n": 6,
+     "documents": 5,
+     "rate": 0.005896,
+     "rate_lo": 0.00121,
+     "rate_hi": 0.0117
+    },
+    "rust": {
+     "n": 8,
+     "documents": 8,
+     "rate": 0.03159,
+     "rate_lo": 0.01206,
+     "rate_hi": 0.05467
+    },
+    "riscv": {
+     "n": 3,
+     "documents": 3,
+     "rate": 0.03087,
+     "rate_lo": 0.0,
+     "rate_hi": 0.06021
+    },
+    "opentitan": {
+     "n": 1,
+     "documents": 1,
+     "rate": 0.006115,
+     "rate_lo": 0.0,
+     "rate_hi": 0.02061
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|lead",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "lead",
+   "n": 24,
+   "documents": 19,
+   "pool_words": {
+    "rate": 0.01321,
+    "rate_lo": 0.007978,
+    "rate_hi": 0.01871
+   },
+   "pool_equal": {
+    "rate": 0.01749,
+    "rate_lo": 0.008398,
+    "rate_hi": 0.02877
+   },
+   "sources": {
+    "peps": {
+     "n": 9,
+     "documents": 8,
+     "rate": 0.03156,
+     "rate_lo": 0.01223,
+     "rate_hi": 0.05364
+    },
+    "ietf": {
+     "n": 9,
+     "documents": 6,
+     "rate": 0.008843,
+     "rate_lo": 0.002453,
+     "rate_hi": 0.01526
+    },
+    "rust": {
+     "n": 1,
+     "documents": 1,
+     "rate": 0.003949,
+     "rate_lo": 0.0,
+     "rate_hi": 0.01253
+    },
+    "riscv": {
+     "n": 3,
+     "documents": 2,
+     "rate": 0.03087,
+     "rate_lo": 0.0,
+     "rate_hi": 0.07925
+    },
+    "opentitan": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.01223,
+     "rate_lo": 0.0,
+     "rate_hi": 0.02873
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|result",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "result",
+   "n": 34,
+   "documents": 21,
+   "pool_words": {
+    "rate": 0.01871,
+    "rate_lo": 0.01079,
+    "rate_hi": 0.02878
+   },
+   "pool_equal": {
+    "rate": 0.01672,
+    "rate_lo": 0.007845,
+    "rate_hi": 0.0285
+   },
+   "sources": {
+    "peps": {
+     "n": 4,
+     "documents": 4,
+     "rate": 0.01403,
+     "rate_lo": 0.00342,
+     "rate_hi": 0.02771
+    },
+    "ietf": {
+     "n": 23,
+     "documents": 13,
+     "rate": 0.0226,
+     "rate_lo": 0.01053,
+     "rate_hi": 0.04001
+    },
+    "rust": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    },
+    "riscv": {
+     "n": 1,
+     "documents": 1,
+     "rate": 0.01029,
+     "rate_lo": 0.0,
+     "rate_hi": 0.03615
+    },
+    "opentitan": {
+     "n": 6,
+     "documents": 3,
+     "rate": 0.03669,
+     "rate_lo": 0.0,
+     "rate_hi": 0.08683
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "ABSTRACT_ADVERB|abstract_adverb|logically",
+   "construction": "ABSTRACT_ADVERB",
+   "pattern": "abstract_adverb",
+   "subtype": "logically",
+   "n": 20,
+   "documents": 15,
+   "pool_words": {
+    "rate": 0.01101,
+    "rate_lo": 0.005828,
+    "rate_hi": 0.01638
+   },
+   "pool_equal": {
+    "rate": 0.01663,
+    "rate_lo": 0.007117,
+    "rate_hi": 0.02698
+   },
+   "sources": {
+    "peps": {
+     "n": 2,
+     "documents": 1,
+     "rate": 0.007014,
+     "rate_lo": 0.0,
+     "rate_hi": 0.02338
+    },
+    "ietf": {
+     "n": 7,
+     "documents": 6,
+     "rate": 0.006878,
+     "rate_lo": 0.002187,
+     "rate_hi": 0.01141
+    },
+    "rust": {
+     "n": 1,
+     "documents": 1,
+     "rate": 0.003949,
+     "rate_lo": 0.0,
+     "rate_hi": 0.01286
+    },
+    "riscv": {
+     "n": 1,
+     "documents": 1,
+     "rate": 0.01029,
+     "rate_lo": 0.0,
+     "rate_hi": 0.03887
+    },
+    "opentitan": {
+     "n": 9,
+     "documents": 6,
+     "rate": 0.05504,
+     "rate_lo": 0.01488,
+     "rate_hi": 0.09616
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "ABSTRACT_ADVERB|abstract_adverb|technically",
+   "construction": "ABSTRACT_ADVERB",
+   "pattern": "abstract_adverb",
+   "subtype": "technically",
+   "n": 25,
+   "documents": 19,
+   "pool_words": {
+    "rate": 0.01376,
+    "rate_lo": 0.007224,
+    "rate_hi": 0.02093
+   },
+   "pool_equal": {
+    "rate": 0.01657,
+    "rate_lo": 0.008979,
+    "rate_hi": 0.02448
+   },
+   "sources": {
+    "peps": {
+     "n": 9,
+     "documents": 6,
+     "rate": 0.03156,
+     "rate_lo": 0.007975,
+     "rate_hi": 0.05688
+    },
+    "ietf": {
+     "n": 4,
+     "documents": 3,
+     "rate": 0.00393,
+     "rate_lo": 0.0,
+     "rate_hi": 0.009712
+    },
+    "rust": {
+     "n": 12,
+     "documents": 10,
+     "rate": 0.04738,
+     "rate_lo": 0.02042,
+     "rate_hi": 0.07853
+    },
+    "riscv": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    },
+    "opentitan": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|leave",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "leave",
+   "n": 23,
+   "documents": 17,
+   "pool_words": {
+    "rate": 0.01266,
+    "rate_lo": 0.007051,
+    "rate_hi": 0.01935
+   },
+   "pool_equal": {
+    "rate": 0.01653,
+    "rate_lo": 0.007287,
+    "rate_hi": 0.02893
+   },
+   "sources": {
+    "peps": {
+     "n": 3,
+     "documents": 3,
+     "rate": 0.01052,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0229
+    },
+    "ietf": {
+     "n": 13,
+     "documents": 8,
+     "rate": 0.01277,
+     "rate_lo": 0.005019,
+     "rate_hi": 0.02292
+    },
+    "rust": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.007897,
+     "rate_lo": 0.0,
+     "rate_hi": 0.02071
+    },
+    "riscv": {
+     "n": 5,
+     "documents": 4,
+     "rate": 0.05145,
+     "rate_lo": 0.01029,
+     "rate_hi": 0.1118
+    },
+    "opentitan": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "ABSTRACT_ADVERB|abstract_adverb|formally",
+   "construction": "ABSTRACT_ADVERB",
+   "pattern": "abstract_adverb",
+   "subtype": "formally",
+   "n": 24,
+   "documents": 17,
+   "pool_words": {
+    "rate": 0.01321,
+    "rate_lo": 0.006895,
+    "rate_hi": 0.02112
+   },
+   "pool_equal": {
+    "rate": 0.01547,
+    "rate_lo": 0.007766,
+    "rate_hi": 0.02437
+   },
+   "sources": {
+    "peps": {
+     "n": 9,
+     "documents": 4,
+     "rate": 0.03156,
+     "rate_lo": 0.003839,
+     "rate_hi": 0.06538
+    },
+    "ietf": {
+     "n": 6,
+     "documents": 5,
+     "rate": 0.005896,
+     "rate_lo": 0.001227,
+     "rate_hi": 0.01254
+    },
+    "rust": {
+     "n": 7,
+     "documents": 6,
+     "rate": 0.02764,
+     "rate_lo": 0.007879,
+     "rate_hi": 0.05203
+    },
+    "riscv": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    },
+    "opentitan": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.01223,
+     "rate_lo": 0.0,
+     "rate_hi": 0.03125
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "OBJECT_RELATIVE|zero_object_relative|load 2",
+   "construction": "OBJECT_RELATIVE",
+   "pattern": "zero_object_relative",
+   "subtype": "load 2",
+   "n": 21,
+   "documents": 21,
+   "pool_words": {
+    "rate": 0.01156,
+    "rate_lo": 0.007234,
+    "rate_hi": 0.01675
+   },
+   "pool_equal": {
+    "rate": 0.01284,
+    "rate_lo": 0.006471,
+    "rate_hi": 0.02044
+   },
+   "sources": {
+    "peps": {
+     "n": 4,
+     "documents": 4,
+     "rate": 0.01403,
+     "rate_lo": 0.003186,
+     "rate_hi": 0.02973
+    },
+    "ietf": {
+     "n": 10,
+     "documents": 10,
+     "rate": 0.009826,
+     "rate_lo": 0.004907,
+     "rate_hi": 0.01672
+    },
+    "rust": {
+     "n": 5,
+     "documents": 5,
+     "rate": 0.01974,
+     "rate_lo": 0.004132,
+     "rate_hi": 0.03677
+    },
+    "riscv": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.02058,
+     "rate_lo": 0.0,
+     "rate_hi": 0.05071
+    },
+    "opentitan": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "ABSTRACT_ADVERB|abstract_adverb|historically",
+   "construction": "ABSTRACT_ADVERB",
+   "pattern": "abstract_adverb",
+   "subtype": "historically",
+   "n": 20,
+   "documents": 17,
+   "pool_words": {
+    "rate": 0.01101,
+    "rate_lo": 0.006485,
+    "rate_hi": 0.01578
+   },
+   "pool_equal": {
+    "rate": 0.01203,
+    "rate_lo": 0.006623,
+    "rate_hi": 0.0179
+   },
+   "sources": {
+    "peps": {
+     "n": 9,
+     "documents": 9,
+     "rate": 0.03156,
+     "rate_lo": 0.01313,
+     "rate_hi": 0.05325
+    },
+    "ietf": {
+     "n": 5,
+     "documents": 3,
+     "rate": 0.004913,
+     "rate_lo": 0.0,
+     "rate_hi": 0.00926
+    },
+    "rust": {
+     "n": 6,
+     "documents": 5,
+     "rate": 0.02369,
+     "rate_lo": 0.004231,
+     "rate_hi": 0.04618
+    },
+    "riscv": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    },
+    "opentitan": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|cause",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "cause",
+   "n": 21,
+   "documents": 16,
+   "pool_words": {
+    "rate": 0.01156,
+    "rate_lo": 0.006122,
+    "rate_hi": 0.01825
+   },
+   "pool_equal": {
+    "rate": 0.009996,
+    "rate_lo": 0.004321,
+    "rate_hi": 0.01737
+   },
+   "sources": {
+    "peps": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.007014,
+     "rate_lo": 0.0,
+     "rate_hi": 0.01905
+    },
+    "ietf": {
+     "n": 13,
+     "documents": 9,
+     "rate": 0.01277,
+     "rate_lo": 0.005047,
+     "rate_hi": 0.02345
+    },
+    "rust": {
+     "n": 3,
+     "documents": 3,
+     "rate": 0.01185,
+     "rate_lo": 0.0,
+     "rate_hi": 0.02702
+    },
+    "riscv": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    },
+    "opentitan": {
+     "n": 3,
+     "documents": 2,
+     "rate": 0.01835,
+     "rate_lo": 0.0,
+     "rate_hi": 0.04735
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "ABSTRACT_ADVERB|abstract_adverb|cryptographically",
+   "construction": "ABSTRACT_ADVERB",
+   "pattern": "abstract_adverb",
+   "subtype": "cryptographically",
+   "n": 24,
+   "documents": 17,
+   "pool_words": {
+    "rate": 0.01321,
+    "rate_lo": 0.006698,
+    "rate_hi": 0.02203
+   },
+   "pool_equal": {
+    "rate": 0.008823,
+    "rate_lo": 0.003669,
+    "rate_hi": 0.0158
+   },
+   "sources": {
+    "peps": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    },
+    "ietf": {
+     "n": 20,
+     "documents": 14,
+     "rate": 0.01965,
+     "rate_lo": 0.008559,
+     "rate_hi": 0.0363
+    },
+    "rust": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    },
+    "riscv": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    },
+    "opentitan": {
+     "n": 4,
+     "documents": 3,
+     "rate": 0.02446,
+     "rate_lo": 0.0,
+     "rate_hi": 0.05493
+    }
+   }
+  },
+  {
+   "table": "Rates: subtype",
+   "level": "subtype",
+   "key": "PARTICIPIAL_TAIL|participial_tail|provide",
+   "construction": "PARTICIPIAL_TAIL",
+   "pattern": "participial_tail",
+   "subtype": "provide",
+   "n": 20,
+   "documents": 16,
+   "pool_words": {
+    "rate": 0.01101,
+    "rate_lo": 0.005913,
+    "rate_hi": 0.01675
+   },
+   "pool_equal": {
+    "rate": 0.008756,
+    "rate_lo": 0.004392,
+    "rate_hi": 0.01389
+   },
+   "sources": {
+    "peps": {
+     "n": 4,
+     "documents": 4,
+     "rate": 0.01403,
+     "rate_lo": 0.003109,
+     "rate_hi": 0.02987
+    },
+    "ietf": {
+     "n": 12,
+     "documents": 8,
+     "rate": 0.01179,
+     "rate_lo": 0.004627,
+     "rate_hi": 0.02088
+    },
+    "rust": {
+     "n": 3,
+     "documents": 3,
+     "rate": 0.01185,
+     "rate_lo": 0.0,
+     "rate_hi": 0.02655
+    },
+    "riscv": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    },
+    "opentitan": {
+     "n": 1,
+     "documents": 1,
+     "rate": 0.006115,
+     "rate_lo": 0.0,
+     "rate_hi": 0.02135
+    }
+   }
+  },
+  {
+   "table": "Rates: phrase",
+   "level": "phrase",
+   "key": "LLM_DICTION|significant",
+   "construction": "LLM_DICTION",
+   "phrase": "significant",
+   "n": 330,
+   "documents": 151,
+   "pool_words": {
+    "rate": 0.1816,
+    "rate_lo": 0.1452,
+    "rate_hi": 0.2249
+   },
+   "pool_equal": {
+    "rate": 0.2236,
+    "rate_lo": 0.1721,
+    "rate_hi": 0.2841
+   },
+   "sources": {
+    "peps": {
+     "n": 49,
+     "documents": 27,
+     "rate": 0.1718,
+     "rate_lo": 0.1093,
+     "rate_hi": 0.2365
+    },
+    "ietf": {
+     "n": 159,
+     "documents": 67,
+     "rate": 0.1562,
+     "rate_lo": 0.1122,
+     "rate_hi": 0.2196
+    },
+    "rust": {
+     "n": 53,
+     "documents": 34,
+     "rate": 0.2093,
+     "rate_lo": 0.1433,
+     "rate_hi": 0.2755
+    },
+    "riscv": {
+     "n": 38,
+     "documents": 12,
+     "rate": 0.3911,
+     "rate_lo": 0.2128,
+     "rate_hi": 0.5984
+    },
+    "opentitan": {
+     "n": 31,
+     "documents": 11,
+     "rate": 0.1896,
+     "rate_lo": 0.05781,
+     "rate_hi": 0.365003
+    }
+   }
+  },
+  {
+   "table": "Rates: phrase",
+   "level": "phrase",
+   "key": "LLM_DICTION|dynamic",
+   "construction": "LLM_DICTION",
+   "phrase": "dynamic",
+   "n": 353,
+   "documents": 123,
+   "pool_words": {
+    "rate": 0.1943,
+    "rate_lo": 0.1284,
+    "rate_hi": 0.2834
+   },
+   "pool_equal": {
+    "rate": 0.2187,
+    "rate_lo": 0.1483,
+    "rate_hi": 0.303
+   },
+   "sources": {
+    "peps": {
+     "n": 89,
+     "documents": 18,
+     "rate": 0.3121,
+     "rate_lo": 0.09626,
+     "rate_hi": 0.5631
+    },
+    "ietf": {
+     "n": 182,
+     "documents": 48,
+     "rate": 0.1788,
+     "rate_lo": 0.0928,
+     "rate_hi": 0.3185
+    },
+    "rust": {
+     "n": 15,
+     "documents": 12,
+     "rate": 0.05923,
+     "rate_lo": 0.0276,
+     "rate_hi": 0.09401
+    },
+    "riscv": {
+     "n": 32,
+     "documents": 10,
+     "rate": 0.3293,
+     "rate_lo": 0.1262,
+     "rate_hi": 0.6396
+    },
+    "opentitan": {
+     "n": 35,
+     "documents": 35,
+     "rate": 0.214,
+     "rate_lo": 0.1422,
+     "rate_hi": 0.3241
+    }
+   }
+  },
+  {
+   "table": "Rates: phrase",
+   "level": "phrase",
+   "key": "EMPTY_FRAME|in other words",
+   "construction": "EMPTY_FRAME",
+   "phrase": "in other words",
+   "n": 111,
+   "documents": 73,
+   "pool_words": {
+    "rate": 0.0611,
+    "rate_lo": 0.04722,
+    "rate_hi": 0.07722
+   },
+   "pool_equal": {
+    "rate": 0.06817,
+    "rate_lo": 0.04579,
+    "rate_hi": 0.09612
+   },
+   "sources": {
+    "peps": {
+     "n": 30,
+     "documents": 19,
+     "rate": 0.1052,
+     "rate_lo": 0.05693,
+     "rate_hi": 0.1704
+    },
+    "ietf": {
+     "n": 47,
+     "documents": 30,
+     "rate": 0.04618,
+     "rate_lo": 0.03269,
+     "rate_hi": 0.06144
+    },
+    "rust": {
+     "n": 22,
+     "documents": 18,
+     "rate": 0.08687,
+     "rate_lo": 0.04913,
+     "rate_hi": 0.1279
+    },
+    "riscv": {
+     "n": 7,
+     "documents": 3,
+     "rate": 0.07204,
+     "rate_lo": 0.0,
+     "rate_hi": 0.1825
+    },
+    "opentitan": {
+     "n": 5,
+     "documents": 3,
+     "rate": 0.03058,
+     "rate_lo": 0.0,
+     "rate_hi": 0.06935
+    }
+   }
+  },
+  {
+   "table": "Rates: phrase",
+   "level": "phrase",
+   "key": "BORROWED_RIGOUR|canonical",
+   "construction": "BORROWED_RIGOUR",
+   "phrase": "canonical",
+   "n": 57,
+   "documents": 30,
+   "pool_words": {
+    "rate": 0.03137,
+    "rate_lo": 0.01806,
+    "rate_hi": 0.04912
+   },
+   "pool_equal": {
+    "rate": 0.05972,
+    "rate_lo": 0.02885,
+    "rate_hi": 0.1131
+   },
+   "sources": {
+    "peps": {
+     "n": 19,
+     "documents": 13,
+     "rate": 0.06663,
+     "rate_lo": 0.03097,
+     "rate_hi": 0.1112
+    },
+    "ietf": {
+     "n": 13,
+     "documents": 5,
+     "rate": 0.01277,
+     "rate_lo": 0.001301,
+     "rate_hi": 0.0348
+    },
+    "rust": {
+     "n": 6,
+     "documents": 5,
+     "rate": 0.02369,
+     "rate_lo": 0.004138,
+     "rate_hi": 0.04841
+    },
+    "riscv": {
+     "n": 19,
+     "documents": 7,
+     "rate": 0.1955,
+     "rate_lo": 0.04699,
+     "rate_hi": 0.4656
+    },
+    "opentitan": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    }
+   }
+  },
+  {
+   "table": "Rates: phrase",
+   "level": "phrase",
+   "key": "LLM_DICTION|underscore",
+   "construction": "LLM_DICTION",
+   "phrase": "underscore",
+   "n": 50,
+   "documents": 23,
+   "pool_words": {
+    "rate": 0.02752,
+    "rate_lo": 0.01513,
+    "rate_hi": 0.04314
+   },
+   "pool_equal": {
+    "rate": 0.03885,
+    "rate_lo": 0.01996,
+    "rate_hi": 0.06444
+   },
+   "sources": {
+    "peps": {
+     "n": 31,
+     "documents": 14,
+     "rate": 0.1087,
+     "rate_lo": 0.05052,
+     "rate_hi": 0.1752
+    },
+    "ietf": {
+     "n": 5,
+     "documents": 3,
+     "rate": 0.004913,
+     "rate_lo": 0.0,
+     "rate_hi": 0.01191
+    },
+    "rust": {
+     "n": 10,
+     "documents": 5,
+     "rate": 0.03949,
+     "rate_lo": 0.00829,
+     "rate_hi": 0.07831
+    },
+    "riscv": {
+     "n": 4,
+     "documents": 1,
+     "rate": 0.04116,
+     "rate_lo": 0.0,
+     "rate_hi": 0.1511
+    },
+    "opentitan": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    }
+   }
+  },
+  {
+   "table": "Rates: phrase",
+   "level": "phrase",
+   "key": "CONSULTANT_REGISTER|optimized",
+   "construction": "CONSULTANT_REGISTER",
+   "phrase": "optimized",
+   "n": 51,
+   "documents": 32,
+   "pool_words": {
+    "rate": 0.02807,
+    "rate_lo": 0.01761,
+    "rate_hi": 0.04153
+   },
+   "pool_equal": {
+    "rate": 0.03559,
+    "rate_lo": 0.0185,
+    "rate_hi": 0.05718
+   },
+   "sources": {
+    "peps": {
+     "n": 4,
+     "documents": 4,
+     "rate": 0.01403,
+     "rate_lo": 0.003223,
+     "rate_hi": 0.03029
+    },
+    "ietf": {
+     "n": 23,
+     "documents": 13,
+     "rate": 0.0226,
+     "rate_lo": 0.01029,
+     "rate_hi": 0.03999
+    },
+    "rust": {
+     "n": 16,
+     "documents": 11,
+     "rate": 0.06318,
+     "rate_lo": 0.02705,
+     "rate_hi": 0.1098
+    },
+    "riscv": {
+     "n": 7,
+     "documents": 3,
+     "rate": 0.07204,
+     "rate_lo": 0.0,
+     "rate_hi": 0.1769
+    },
+    "opentitan": {
+     "n": 1,
+     "documents": 1,
+     "rate": 0.006115,
+     "rate_lo": 0.0,
+     "rate_hi": 0.01947
+    }
+   }
+  },
+  {
+   "table": "Rates: phrase",
+   "level": "phrase",
+   "key": "CONSULTANT_REGISTER|optimize",
+   "construction": "CONSULTANT_REGISTER",
+   "phrase": "optimize",
+   "n": 59,
+   "documents": 44,
+   "pool_words": {
+    "rate": 0.03247,
+    "rate_lo": 0.02383,
+    "rate_hi": 0.04194
+   },
+   "pool_equal": {
+    "rate": 0.03412,
+    "rate_lo": 0.02299,
+    "rate_hi": 0.04604
+   },
+   "sources": {
+    "peps": {
+     "n": 7,
+     "documents": 6,
+     "rate": 0.02455,
+     "rate_lo": 0.006934,
+     "rate_hi": 0.04959
+    },
+    "ietf": {
+     "n": 30,
+     "documents": 19,
+     "rate": 0.02948,
+     "rate_lo": 0.0182,
+     "rate_hi": 0.0421
+    },
+    "rust": {
+     "n": 16,
+     "documents": 13,
+     "rate": 0.06318,
+     "rate_lo": 0.03177,
+     "rate_hi": 0.1008
+    },
+    "riscv": {
+     "n": 4,
+     "documents": 4,
+     "rate": 0.04116,
+     "rate_lo": 0.00956,
+     "rate_hi": 0.08187
+    },
+    "opentitan": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.01223,
+     "rate_lo": 0.0,
+     "rate_hi": 0.02923
+    }
+   }
+  },
+  {
+   "table": "Rates: phrase",
+   "level": "phrase",
+   "key": "FRAME_MARKER|it is important to",
+   "construction": "FRAME_MARKER",
+   "phrase": "it is important to",
+   "n": 62,
+   "documents": 43,
+   "pool_words": {
+    "rate": 0.03413,
+    "rate_lo": 0.02507,
+    "rate_hi": 0.04362
+   },
+   "pool_equal": {
+    "rate": 0.0327,
+    "rate_lo": 0.0216,
+    "rate_hi": 0.04553
+   },
+   "sources": {
+    "peps": {
+     "n": 10,
+     "documents": 7,
+     "rate": 0.03507,
+     "rate_lo": 0.01119,
+     "rate_hi": 0.06738
+    },
+    "ietf": {
+     "n": 36,
+     "documents": 22,
+     "rate": 0.03537,
+     "rate_lo": 0.02298,
+     "rate_hi": 0.04897
+    },
+    "rust": {
+     "n": 8,
+     "documents": 7,
+     "rate": 0.03159,
+     "rate_lo": 0.01105,
+     "rate_hi": 0.05631
+    },
+    "riscv": {
+     "n": 3,
+     "documents": 3,
+     "rate": 0.03087,
+     "rate_lo": 0.0,
+     "rate_hi": 0.07598
+    },
+    "opentitan": {
+     "n": 5,
+     "documents": 4,
+     "rate": 0.03058,
+     "rate_lo": 0.005994,
+     "rate_hi": 0.06452
+    }
+   }
+  },
+  {
+   "table": "Rates: phrase",
+   "level": "phrase",
+   "key": "HEDGE_STACK|may or may not",
+   "construction": "HEDGE_STACK",
+   "phrase": "may or may not",
+   "n": 52,
+   "documents": 35,
+   "pool_words": {
+    "rate": 0.02862,
+    "rate_lo": 0.01904,
+    "rate_hi": 0.04041
+   },
+   "pool_equal": {
+    "rate": 0.03126,
+    "rate_lo": 0.01821,
+    "rate_hi": 0.04724
+   },
+   "sources": {
+    "peps": {
+     "n": 1,
+     "documents": 1,
+     "rate": 0.003507,
+     "rate_lo": 0.0,
+     "rate_hi": 0.01214
+    },
+    "ietf": {
+     "n": 30,
+     "documents": 20,
+     "rate": 0.02948,
+     "rate_lo": 0.01747,
+     "rate_hi": 0.04567
+    },
+    "rust": {
+     "n": 12,
+     "documents": 7,
+     "rate": 0.04738,
+     "rate_lo": 0.01205,
+     "rate_hi": 0.09401
+    },
+    "riscv": {
+     "n": 5,
+     "documents": 4,
+     "rate": 0.05145,
+     "rate_lo": 0.01058,
+     "rate_hi": 0.1037
+    },
+    "opentitan": {
+     "n": 4,
+     "documents": 3,
+     "rate": 0.02446,
+     "rate_lo": 0.0,
+     "rate_hi": 0.05823
+    }
+   }
+  },
+  {
+   "table": "Rates: phrase",
+   "level": "phrase",
+   "key": "LLM_DICTION|robust",
+   "construction": "LLM_DICTION",
+   "phrase": "robust",
+   "n": 57,
+   "documents": 39,
+   "pool_words": {
+    "rate": 0.03137,
+    "rate_lo": 0.0208,
+    "rate_hi": 0.04422
+   },
+   "pool_equal": {
+    "rate": 0.02913,
+    "rate_lo": 0.01653,
+    "rate_hi": 0.04426
+   },
+   "sources": {
+    "peps": {
+     "n": 15,
+     "documents": 10,
+     "rate": 0.0526,
+     "rate_lo": 0.01889,
+     "rate_hi": 0.0973
+    },
+    "ietf": {
+     "n": 26,
+     "documents": 20,
+     "rate": 0.02555,
+     "rate_lo": 0.01642,
+     "rate_hi": 0.03686
+    },
+    "rust": {
+     "n": 14,
+     "documents": 7,
+     "rate": 0.05528,
+     "rate_lo": 0.01159,
+     "rate_hi": 0.1196
+    },
+    "riscv": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    },
+    "opentitan": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.01223,
+     "rate_lo": 0.0,
+     "rate_hi": 0.03043
+    }
+   }
+  },
+  {
+   "table": "Rates: phrase",
+   "level": "phrase",
+   "key": "BORROWED_RIGOUR|idempotent",
+   "construction": "BORROWED_RIGOUR",
+   "phrase": "idempotent",
+   "n": 55,
+   "documents": 5,
+   "pool_words": {
+    "rate": 0.03027,
+    "rate_lo": 0.001253,
+    "rate_hi": 0.06685
+   },
+   "pool_equal": {
+    "rate": 0.02857,
+    "rate_lo": 0.001768,
+    "rate_hi": 0.05604
+   },
+   "sources": {
+    "peps": {
+     "n": 2,
+     "documents": 1,
+     "rate": 0.007014,
+     "rate_lo": 0.0,
+     "rate_hi": 0.02332
+    },
+    "ietf": {
+     "n": 44,
+     "documents": 2,
+     "rate": 0.04323,
+     "rate_lo": 0.0,
+     "rate_hi": 0.09597
+    },
+    "rust": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    },
+    "riscv": {
+     "n": 9,
+     "documents": 2,
+     "rate": 0.09262,
+     "rate_lo": 0.0,
+     "rate_hi": 0.2249
+    },
+    "opentitan": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    }
+   }
+  },
+  {
+   "table": "Rates: phrase",
+   "level": "phrase",
+   "key": "BORROWED_RIGOUR|well-defined",
+   "construction": "BORROWED_RIGOUR",
+   "phrase": "well-defined",
+   "n": 38,
+   "documents": 27,
+   "pool_words": {
+    "rate": 0.02092,
+    "rate_lo": 0.01212,
+    "rate_hi": 0.03115
+   },
+   "pool_equal": {
+    "rate": 0.02523,
+    "rate_lo": 0.01386,
+    "rate_hi": 0.03813
+   },
+   "sources": {
+    "peps": {
+     "n": 9,
+     "documents": 8,
+     "rate": 0.03156,
+     "rate_lo": 0.01147,
+     "rate_hi": 0.05445
+    },
+    "ietf": {
+     "n": 11,
+     "documents": 8,
+     "rate": 0.01081,
+     "rate_lo": 0.003687,
+     "rate_hi": 0.01986
+    },
+    "rust": {
+     "n": 16,
+     "documents": 9,
+     "rate": 0.06318,
+     "rate_lo": 0.01958,
+     "rate_hi": 0.1242
+    },
+    "riscv": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.02058,
+     "rate_lo": 0.0,
+     "rate_hi": 0.04287
+    },
+    "opentitan": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    }
+   }
+  },
+  {
+   "table": "Rates: phrase",
+   "level": "phrase",
+   "key": "LLM_DICTION|essential",
+   "construction": "LLM_DICTION",
+   "phrase": "essential",
+   "n": 43,
+   "documents": 32,
+   "pool_words": {
+    "rate": 0.02367,
+    "rate_lo": 0.01557,
+    "rate_hi": 0.03243
+   },
+   "pool_equal": {
+    "rate": 0.02089,
+    "rate_lo": 0.01221,
+    "rate_hi": 0.03058
+   },
+   "sources": {
+    "peps": {
+     "n": 7,
+     "documents": 5,
+     "rate": 0.02455,
+     "rate_lo": 0.006441,
+     "rate_hi": 0.04709
+    },
+    "ietf": {
+     "n": 26,
+     "documents": 18,
+     "rate": 0.02555,
+     "rate_lo": 0.0144,
+     "rate_hi": 0.04065
+    },
+    "rust": {
+     "n": 7,
+     "documents": 6,
+     "rate": 0.02764,
+     "rate_lo": 0.007856,
+     "rate_hi": 0.05086
+    },
+    "riscv": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.02058,
+     "rate_lo": 0.0,
+     "rate_hi": 0.05655
+    },
+    "opentitan": {
+     "n": 1,
+     "documents": 1,
+     "rate": 0.006115,
+     "rate_lo": 0.0,
+     "rate_hi": 0.02
+    }
+   }
+  },
+  {
+   "table": "Rates: phrase",
+   "level": "phrase",
+   "key": "VAGUE_QUANTIFIER|a variety of",
+   "construction": "VAGUE_QUANTIFIER",
+   "phrase": "a variety of",
+   "n": 38,
+   "documents": 31,
+   "pool_words": {
+    "rate": 0.02092,
+    "rate_lo": 0.01432,
+    "rate_hi": 0.02864
+   },
+   "pool_equal": {
+    "rate": 0.02083,
+    "rate_lo": 0.01247,
+    "rate_hi": 0.02964
+   },
+   "sources": {
+    "peps": {
+     "n": 4,
+     "documents": 4,
+     "rate": 0.01403,
+     "rate_lo": 0.003382,
+     "rate_hi": 0.02633
+    },
+    "ietf": {
+     "n": 20,
+     "documents": 16,
+     "rate": 0.01965,
+     "rate_lo": 0.01151,
+     "rate_hi": 0.03064
+    },
+    "rust": {
+     "n": 7,
+     "documents": 6,
+     "rate": 0.02764,
+     "rate_lo": 0.008123,
+     "rate_hi": 0.05186
+    },
+    "riscv": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    },
+    "opentitan": {
+     "n": 7,
+     "documents": 5,
+     "rate": 0.04281,
+     "rate_lo": 0.01258,
+     "rate_hi": 0.07898
+    }
+   }
+  },
+  {
+   "table": "Rates: phrase",
+   "level": "phrase",
+   "key": "BORROWED_RIGOUR|non-trivial",
+   "construction": "BORROWED_RIGOUR",
+   "phrase": "non-trivial",
+   "n": 23,
+   "documents": 19,
+   "pool_words": {
+    "rate": 0.01266,
+    "rate_lo": 0.007079,
+    "rate_hi": 0.01938
+   },
+   "pool_equal": {
+    "rate": 0.02057,
+    "rate_lo": 0.01054,
+    "rate_hi": 0.03209
+   },
+   "sources": {
+    "peps": {
+     "n": 14,
+     "documents": 12,
+     "rate": 0.0491,
+     "rate_lo": 0.02495,
+     "rate_hi": 0.07605
+    },
+    "ietf": {
+     "n": 1,
+     "documents": 1,
+     "rate": 0.0009826,
+     "rate_lo": 0.0,
+     "rate_hi": 0.003564
+    },
+    "rust": {
+     "n": 4,
+     "documents": 3,
+     "rate": 0.01579,
+     "rate_lo": 0.0,
+     "rate_hi": 0.03629
+    },
+    "riscv": {
+     "n": 3,
+     "documents": 2,
+     "rate": 0.03087,
+     "rate_lo": 0.0,
+     "rate_hi": 0.07937
+    },
+    "opentitan": {
+     "n": 1,
+     "documents": 1,
+     "rate": 0.006115,
+     "rate_lo": 0.0,
+     "rate_hi": 0.01791
+    }
+   }
+  },
+  {
+   "table": "Rates: phrase",
+   "level": "phrase",
+   "key": "HOLLOW_BOOSTER|notably,",
+   "construction": "HOLLOW_BOOSTER",
+   "phrase": "notably,",
+   "n": 25,
+   "documents": 22,
+   "pool_words": {
+    "rate": 0.01376,
+    "rate_lo": 0.00809,
+    "rate_hi": 0.02052
+   },
+   "pool_equal": {
+    "rate": 0.02047,
+    "rate_lo": 0.01086,
+    "rate_hi": 0.03013
+   },
+   "sources": {
+    "peps": {
+     "n": 8,
+     "documents": 7,
+     "rate": 0.02805,
+     "rate_lo": 0.01065,
+     "rate_hi": 0.04799
+    },
+    "ietf": {
+     "n": 4,
+     "documents": 4,
+     "rate": 0.00393,
+     "rate_lo": 0.0008186,
+     "rate_hi": 0.009021
+    },
+    "rust": {
+     "n": 10,
+     "documents": 9,
+     "rate": 0.03949,
+     "rate_lo": 0.01595,
+     "rate_hi": 0.06605
+    },
+    "riscv": {
+     "n": 3,
+     "documents": 2,
+     "rate": 0.03087,
+     "rate_lo": 0.0,
+     "rate_hi": 0.07343
+    },
+    "opentitan": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    }
+   }
+  },
+  {
+   "table": "Rates: phrase",
+   "level": "phrase",
+   "key": "VAGUE_QUANTIFIER|numerous",
+   "construction": "VAGUE_QUANTIFIER",
+   "phrase": "numerous",
+   "n": 30,
+   "documents": 22,
+   "pool_words": {
+    "rate": 0.01651,
+    "rate_lo": 0.01009,
+    "rate_hi": 0.02439
+   },
+   "pool_equal": {
+    "rate": 0.01656,
+    "rate_lo": 0.008648,
+    "rate_hi": 0.02754
+   },
+   "sources": {
+    "peps": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.007014,
+     "rate_lo": 0.0,
+     "rate_hi": 0.01736
+    },
+    "ietf": {
+     "n": 16,
+     "documents": 11,
+     "rate": 0.01572,
+     "rate_lo": 0.007379,
+     "rate_hi": 0.02729
+    },
+    "rust": {
+     "n": 10,
+     "documents": 7,
+     "rate": 0.03949,
+     "rate_lo": 0.01157,
+     "rate_hi": 0.07207
+    },
+    "riscv": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.02058,
+     "rate_lo": 0.0,
+     "rate_hi": 0.06305
+    },
+    "opentitan": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    }
+   }
+  },
+  {
+   "table": "Rates: phrase",
+   "level": "phrase",
+   "key": "LLM_DICTION|comprehensive",
+   "construction": "LLM_DICTION",
+   "phrase": "comprehensive",
+   "n": 28,
+   "documents": 23,
+   "pool_words": {
+    "rate": 0.01541,
+    "rate_lo": 0.008352,
+    "rate_hi": 0.02404
+   },
+   "pool_equal": {
+    "rate": 0.0155,
+    "rate_lo": 0.007424,
+    "rate_hi": 0.02497
+   },
+   "sources": {
+    "peps": {
+     "n": 9,
+     "documents": 5,
+     "rate": 0.03156,
+     "rate_lo": 0.003969,
+     "rate_hi": 0.06678
+    },
+    "ietf": {
+     "n": 12,
+     "documents": 12,
+     "rate": 0.01179,
+     "rate_lo": 0.005233,
+     "rate_hi": 0.02086
+    },
+    "rust": {
+     "n": 4,
+     "documents": 3,
+     "rate": 0.01579,
+     "rate_lo": 0.0,
+     "rate_hi": 0.03635
+    },
+    "riscv": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    },
+    "opentitan": {
+     "n": 3,
+     "documents": 3,
+     "rate": 0.01835,
+     "rate_lo": 0.0,
+     "rate_hi": 0.04471
+    }
+   }
+  },
+  {
+   "table": "Rates: phrase",
+   "level": "phrase",
+   "key": "CONSULTANT_REGISTER|leverage",
+   "construction": "CONSULTANT_REGISTER",
+   "phrase": "leverage",
+   "n": 33,
+   "documents": 29,
+   "pool_words": {
+    "rate": 0.01816,
+    "rate_lo": 0.01186,
+    "rate_hi": 0.02599
+   },
+   "pool_equal": {
+    "rate": 0.01462,
+    "rate_lo": 0.008172,
+    "rate_hi": 0.02245
+   },
+   "sources": {
+    "peps": {
+     "n": 6,
+     "documents": 6,
+     "rate": 0.02104,
+     "rate_lo": 0.006506,
+     "rate_hi": 0.04026
+    },
+    "ietf": {
+     "n": 22,
+     "documents": 18,
+     "rate": 0.02162,
+     "rate_lo": 0.01225,
+     "rate_hi": 0.03455
+    },
+    "rust": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.007897,
+     "rate_lo": 0.0,
+     "rate_hi": 0.01975
+    },
+    "riscv": {
+     "n": 1,
+     "documents": 1,
+     "rate": 0.01029,
+     "rate_lo": 0.0,
+     "rate_hi": 0.03837
+    },
+    "opentitan": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.01223,
+     "rate_lo": 0.0,
+     "rate_hi": 0.03064
+    }
+   }
+  },
+  {
+   "table": "Rates: phrase",
+   "level": "phrase",
+   "key": "CONSULTANT_REGISTER|leverages",
+   "construction": "CONSULTANT_REGISTER",
+   "phrase": "leverages",
+   "n": 34,
+   "documents": 21,
+   "pool_words": {
+    "rate": 0.01871,
+    "rate_lo": 0.01003,
+    "rate_hi": 0.02986
+   },
+   "pool_equal": {
+    "rate": 0.01401,
+    "rate_lo": 0.007118,
+    "rate_hi": 0.02334
+   },
+   "sources": {
+    "peps": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.007014,
+     "rate_lo": 0.0,
+     "rate_hi": 0.01712
+    },
+    "ietf": {
+     "n": 25,
+     "documents": 13,
+     "rate": 0.02457,
+     "rate_lo": 0.0106,
+     "rate_hi": 0.04437
+    },
+    "rust": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.007897,
+     "rate_lo": 0.0,
+     "rate_hi": 0.02073
+    },
+    "riscv": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    },
+    "opentitan": {
+     "n": 5,
+     "documents": 4,
+     "rate": 0.03058,
+     "rate_lo": 0.005676,
+     "rate_hi": 0.07034
+    }
+   }
+  },
+  {
+   "table": "Rates: phrase",
+   "level": "phrase",
+   "key": "LLM_DICTION|crucial",
+   "construction": "LLM_DICTION",
+   "phrase": "crucial",
+   "n": 20,
+   "documents": 18,
+   "pool_words": {
+    "rate": 0.01101,
+    "rate_lo": 0.006545,
+    "rate_hi": 0.01627
+   },
+   "pool_equal": {
+    "rate": 0.008323,
+    "rate_lo": 0.004377,
+    "rate_hi": 0.01313
+   },
+   "sources": {
+    "peps": {
+     "n": 4,
+     "documents": 4,
+     "rate": 0.01403,
+     "rate_lo": 0.003232,
+     "rate_hi": 0.02932
+    },
+    "ietf": {
+     "n": 12,
+     "documents": 10,
+     "rate": 0.01179,
+     "rate_lo": 0.005735,
+     "rate_hi": 0.01962
+    },
+    "rust": {
+     "n": 4,
+     "documents": 4,
+     "rate": 0.01579,
+     "rate_lo": 0.00366,
+     "rate_hi": 0.03255
+    },
+    "riscv": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    },
+    "opentitan": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    }
+   }
+  },
+  {
+   "table": "Rates: phrase",
+   "level": "phrase",
+   "key": "LLM_DICTION|seamless",
+   "construction": "LLM_DICTION",
+   "phrase": "seamless",
+   "n": 24,
+   "documents": 8,
+   "pool_words": {
+    "rate": 0.01321,
+    "rate_lo": 0.001866,
+    "rate_hi": 0.0343
+   },
+   "pool_equal": {
+    "rate": 0.006248,
+    "rate_lo": 0.0009581,
+    "rate_hi": 0.0146
+   },
+   "sources": {
+    "peps": {
+     "n": 1,
+     "documents": 1,
+     "rate": 0.003507,
+     "rate_lo": 0.0,
+     "rate_hi": 0.01042
+    },
+    "ietf": {
+     "n": 22,
+     "documents": 6,
+     "rate": 0.02162,
+     "rate_lo": 0.002083,
+     "rate_hi": 0.06372
+    },
+    "rust": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    },
+    "riscv": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    },
+    "opentitan": {
+     "n": 1,
+     "documents": 1,
+     "rate": 0.006115,
+     "rate_lo": 0.0,
+     "rate_hi": 0.01791
+    }
+   }
+  },
+  {
+   "table": "Pool against arXiv pre-window bodies (H2)",
+   "level": "construction",
+   "key": "HEDGE_STACK",
+   "construction": "HEDGE_STACK",
+   "first": {
+    "name": "pool",
+    "n": 79,
+    "rate": 0.04594,
+    "rate_lo": 0.03096,
+    "rate_hi": 0.06274
+   },
+   "second": {
+    "name": "arXiv",
+    "n": 62,
+    "rate": 0.01246,
+    "rate_lo": 0.008387,
+    "rate_hi": 0.01743
+   },
+   "ratio": {
+    "value": 3.687,
+    "lo": 2.164,
+    "hi": 6.172
+   },
+   "interval": "above 1"
+  },
+  {
+   "table": "Pool against arXiv pre-window bodies (H2)",
+   "level": "construction",
+   "key": "EMPHATIC_REFLEXIVE",
+   "construction": "EMPHATIC_REFLEXIVE",
+   "first": {
+    "name": "pool",
+    "n": 576,
+    "rate": 0.3168,
+    "rate_lo": 0.2777,
+    "rate_hi": 0.357
+   },
+   "second": {
+    "name": "arXiv",
+    "n": 592,
+    "rate": 0.119,
+    "rate_lo": 0.1042,
+    "rate_hi": 0.134
+   },
+   "ratio": {
+    "value": 2.663,
+    "lo": 2.236,
+    "hi": 3.166
+   },
+   "interval": "above 1"
+  },
+  {
+   "table": "Pool against arXiv pre-window bodies (H2)",
+   "level": "construction",
+   "key": "ALTERNATIVE_FRAMING",
+   "construction": "ALTERNATIVE_FRAMING",
+   "first": {
+    "name": "pool",
+    "n": 934,
+    "rate": 0.6474,
+    "rate_lo": 0.5822,
+    "rate_hi": 0.7155
+   },
+   "second": {
+    "name": "arXiv",
+    "n": 1491,
+    "rate": 0.2997,
+    "rate_lo": 0.2795,
+    "rate_hi": 0.3224
+   },
+   "ratio": {
+    "value": 2.16,
+    "lo": 1.906,
+    "hi": 2.444
+   },
+   "interval": "above 1"
+  },
+  {
+   "table": "Pool against arXiv pre-window bodies (H2)",
+   "level": "construction",
+   "key": "CORRECTIVE_CONTRAST",
+   "construction": "CORRECTIVE_CONTRAST",
+   "first": {
+    "name": "pool",
+    "n": 473,
+    "rate": 0.2912,
+    "rate_lo": 0.2568,
+    "rate_hi": 0.33
+   },
+   "second": {
+    "name": "arXiv",
+    "n": 749,
+    "rate": 0.1505,
+    "rate_lo": 0.1359,
+    "rate_hi": 0.1648
+   },
+   "ratio": {
+    "value": 1.934,
+    "lo": 1.647,
+    "hi": 2.247
+   },
+   "interval": "above 1"
+  },
+  {
+   "table": "Pool against arXiv pre-window bodies (H2)",
+   "level": "construction",
+   "key": "GAPPED_ANTITHESIS",
+   "construction": "GAPPED_ANTITHESIS",
+   "first": {
+    "name": "pool",
+    "n": 36,
+    "rate": 0.02425,
+    "rate_lo": 0.01178,
+    "rate_hi": 0.03989
+   },
+   "second": {
+    "name": "arXiv",
+    "n": 81,
+    "rate": 0.01628,
+    "rate_lo": 0.01278,
+    "rate_hi": 0.01985
+   },
+   "ratio": {
+    "value": 1.49,
+    "lo": 0.6961,
+    "hi": 2.5546
+   },
+   "interval": "spans 1"
+  },
+  {
+   "table": "Pool against arXiv pre-window bodies (H2)",
+   "level": "construction",
+   "key": "EMPTY_FRAME",
+   "construction": "EMPTY_FRAME",
+   "first": {
+    "name": "pool",
+    "n": 180,
+    "rate": 0.1098,
+    "rate_lo": 0.08038,
+    "rate_hi": 0.1471
+   },
+   "second": {
+    "name": "arXiv",
+    "n": 436,
+    "rate": 0.08763,
+    "rate_lo": 0.07655,
+    "rate_hi": 0.1003
+   },
+   "ratio": {
+    "value": 1.253,
+    "lo": 0.8951,
+    "hi": 1.716
+   },
+   "interval": "spans 1"
+  },
+  {
+   "table": "Pool against arXiv pre-window bodies (H2)",
+   "level": "construction",
+   "key": "ABSTRACT_ADVERB",
+   "construction": "ABSTRACT_ADVERB",
+   "first": {
+    "name": "pool",
+    "n": 947,
+    "rate": 0.6315,
+    "rate_lo": 0.5578,
+    "rate_hi": 0.7026
+   },
+   "second": {
+    "name": "arXiv",
+    "n": 2662,
+    "rate": 0.535,
+    "rate_lo": 0.5027,
+    "rate_hi": 0.5703
+   },
+   "ratio": {
+    "value": 1.18,
+    "lo": 1.027,
+    "hi": 1.34
+   },
+   "interval": "above 1"
+  },
+  {
+   "table": "Pool against arXiv pre-window bodies (H2)",
+   "level": "construction",
+   "key": "FRAME_MARKER",
+   "construction": "FRAME_MARKER",
+   "first": {
+    "name": "pool",
+    "n": 106,
+    "rate": 0.06065,
+    "rate_lo": 0.04665,
+    "rate_hi": 0.0772
+   },
+   "second": {
+    "name": "arXiv",
+    "n": 335,
+    "rate": 0.06733,
+    "rate_lo": 0.05837,
+    "rate_hi": 0.07747
+   },
+   "ratio": {
+    "value": 0.9009,
+    "lo": 0.6701,
+    "hi": 1.189
+   },
+   "interval": "spans 1"
+  },
+  {
+   "table": "Pool against arXiv pre-window bodies (H2)",
+   "level": "construction",
+   "key": "TRICOLON",
+   "construction": "TRICOLON",
+   "first": {
+    "name": "pool",
+    "n": 4575,
+    "rate": 2.83,
+    "rate_lo": 2.666,
+    "rate_hi": 2.993
+   },
+   "second": {
+    "name": "arXiv",
+    "n": 16114,
+    "rate": 3.239,
+    "rate_lo": 3.123,
+    "rate_hi": 3.366
+   },
+   "ratio": {
+    "value": 0.8739,
+    "lo": 0.8123,
+    "hi": 0.9332
+   },
+   "interval": "below 1"
+  },
+  {
+   "table": "Pool against arXiv pre-window bodies (H2)",
+   "level": "construction",
+   "key": "EM_DASH",
+   "construction": "EM_DASH",
+   "first": {
+    "name": "pool",
+    "n": 139,
+    "rate": 0.1275,
+    "rate_lo": 0.0842,
+    "rate_hi": 0.1773
+   },
+   "second": {
+    "name": "arXiv",
+    "n": 771,
+    "rate": 0.155,
+    "rate_lo": 0.1144,
+    "rate_hi": 0.2051
+   },
+   "ratio": {
+    "value": 0.8229,
+    "lo": 0.501,
+    "hi": 1.292
+   },
+   "interval": "spans 1"
+  },
+  {
+   "table": "Pool against arXiv pre-window bodies (H2)",
+   "level": "construction",
+   "key": "HOLLOW_BOOSTER",
+   "construction": "HOLLOW_BOOSTER",
+   "first": {
+    "name": "pool",
+    "n": 51,
+    "rate": 0.03875,
+    "rate_lo": 0.02524,
+    "rate_hi": 0.05199
+   },
+   "second": {
+    "name": "arXiv",
+    "n": 240,
+    "rate": 0.04823,
+    "rate_lo": 0.03995,
+    "rate_hi": 0.05738
+   },
+   "ratio": {
+    "value": 0.8033,
+    "lo": 0.5192,
+    "hi": 1.137
+   },
+   "interval": "spans 1"
+  },
+  {
+   "table": "Pool against arXiv pre-window bodies (H2)",
+   "level": "construction",
+   "key": "BORROWED_RIGOUR",
+   "construction": "BORROWED_RIGOUR",
+   "first": {
+    "name": "pool",
+    "n": 244,
+    "rate": 0.1713,
+    "rate_lo": 0.1259,
+    "rate_hi": 0.2272
+   },
+   "second": {
+    "name": "arXiv",
+    "n": 1270,
+    "rate": 0.2552,
+    "rate_lo": 0.226,
+    "rate_hi": 0.2878
+   },
+   "ratio": {
+    "value": 0.671,
+    "lo": 0.4893,
+    "hi": 0.9019
+   },
+   "interval": "below 1"
+  },
+  {
+   "table": "Pool against arXiv pre-window bodies (H2)",
+   "level": "construction",
+   "key": "PARTICIPIAL_TAIL",
+   "construction": "PARTICIPIAL_TAIL",
+   "first": {
+    "name": "pool",
+    "n": 1182,
+    "rate": 0.7121,
+    "rate_lo": 0.6414,
+    "rate_hi": 0.7908
+   },
+   "second": {
+    "name": "arXiv",
+    "n": 6297,
+    "rate": 1.266,
+    "rate_lo": 1.177,
+    "rate_hi": 1.36
+   },
+   "ratio": {
+    "value": 0.5626,
+    "lo": 0.495,
+    "hi": 0.6389
+   },
+   "interval": "below 1"
+  },
+  {
+   "table": "Pool against arXiv pre-window bodies (H2)",
+   "level": "construction",
+   "key": "OBJECT_RELATIVE",
+   "construction": "OBJECT_RELATIVE",
+   "first": {
+    "name": "pool",
+    "n": 125,
+    "rate": 0.0668,
+    "rate_lo": 0.05228,
+    "rate_hi": 0.08085
+   },
+   "second": {
+    "name": "arXiv",
+    "n": 629,
+    "rate": 0.1264,
+    "rate_lo": 0.1143,
+    "rate_hi": 0.1385
+   },
+   "ratio": {
+    "value": 0.5285,
+    "lo": 0.4069,
+    "hi": 0.6604
+   },
+   "interval": "below 1"
+  },
+  {
+   "table": "Pool against arXiv pre-window bodies (H2)",
+   "level": "construction",
+   "key": "CLOSER",
+   "construction": "CLOSER",
+   "first": {
+    "name": "pool",
+    "n": 56,
+    "rate": 0.03148,
+    "rate_lo": 0.02206,
+    "rate_hi": 0.04286
+   },
+   "second": {
+    "name": "arXiv",
+    "n": 346,
+    "rate": 0.06954,
+    "rate_lo": 0.05987,
+    "rate_hi": 0.08012
+   },
+   "ratio": {
+    "value": 0.4527,
+    "lo": 0.3101,
+    "hi": 0.6402
+   },
+   "interval": "below 1"
+  },
+  {
+   "table": "Pool against arXiv pre-window bodies (H2)",
+   "level": "construction",
+   "key": "LLM_DICTION",
+   "construction": "LLM_DICTION",
+   "first": {
+    "name": "pool",
+    "n": 1058,
+    "rate": 0.6212,
+    "rate_lo": 0.512,
+    "rate_hi": 0.7486
+   },
+   "second": {
+    "name": "arXiv",
+    "n": 7283,
+    "rate": 1.464,
+    "rate_lo": 1.369,
+    "rate_hi": 1.557
+   },
+   "ratio": {
+    "value": 0.4244,
+    "lo": 0.3463,
+    "hi": 0.5145
+   },
+   "interval": "below 1"
+  },
+  {
+   "table": "Pool against arXiv pre-window bodies (H2)",
+   "level": "construction",
+   "key": "VAGUE_QUANTIFIER",
+   "construction": "VAGUE_QUANTIFIER",
+   "first": {
+    "name": "pool",
+    "n": 113,
+    "rate": 0.06083,
+    "rate_lo": 0.04537,
+    "rate_hi": 0.07822
+   },
+   "second": {
+    "name": "arXiv",
+    "n": 1203,
+    "rate": 0.2418,
+    "rate_lo": 0.2209,
+    "rate_hi": 0.2635
+   },
+   "ratio": {
+    "value": 0.2516,
+    "lo": 0.1857,
+    "hi": 0.3308
+   },
+   "interval": "below 1"
+  },
+  {
+   "table": "Pool against arXiv pre-window bodies (H2)",
+   "level": "construction",
+   "key": "CONSULTANT_REGISTER",
+   "construction": "CONSULTANT_REGISTER",
+   "first": {
+    "name": "pool",
+    "n": 258,
+    "rate": 0.1507,
+    "rate_lo": 0.1205,
+    "rate_hi": 0.1897
+   },
+   "second": {
+    "name": "arXiv",
+    "n": 4267,
+    "rate": 0.8576,
+    "rate_lo": 0.7835,
+    "rate_hi": 0.936
+   },
+   "ratio": {
+    "value": 0.1757,
+    "lo": 0.1379,
+    "hi": 0.2229
+   },
+   "interval": "below 1"
+  },
+  {
+   "table": "Pool against arXiv pre-window bodies (H2)",
+   "level": "pattern",
+   "key": "CORRECTIVE_CONTRAST|cc_negated_apposition",
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_negated_apposition",
+   "first": {
+    "name": "pool",
+    "n": 132,
+    "rate": 0.07747,
+    "rate_lo": 0.06183,
+    "rate_hi": 0.09484
+   },
+   "second": {
+    "name": "arXiv",
+    "n": 78,
+    "rate": 0.01568,
+    "rate_lo": 0.01183,
+    "rate_hi": 0.01992
+   },
+   "ratio": {
+    "value": 4.942,
+    "lo": 3.565,
+    "hi": 7.058
+   },
+   "interval": "above 1"
+  },
+  {
+   "table": "Pool against arXiv pre-window bodies (H2)",
+   "level": "pattern",
+   "key": "CORRECTIVE_CONTRAST|cc_parallel_sibling",
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_parallel_sibling",
+   "first": {
+    "name": "pool",
+    "n": 37,
+    "rate": 0.02966,
+    "rate_lo": 0.01824,
+    "rate_hi": 0.04219
+   },
+   "second": {
+    "name": "arXiv",
+    "n": 44,
+    "rate": 0.008843,
+    "rate_lo": 0.006465,
+    "rate_hi": 0.01156
+   },
+   "ratio": {
+    "value": 3.354,
+    "lo": 1.894,
+    "hi": 5.399
+   },
+   "interval": "above 1"
+  },
+  {
+   "table": "Pool against arXiv pre-window bodies (H2)",
+   "level": "pattern",
+   "key": "ALTERNATIVE_FRAMING|af_rather_than",
+   "construction": "ALTERNATIVE_FRAMING",
+   "pattern": "af_rather_than",
+   "first": {
+    "name": "pool",
+    "n": 477,
+    "rate": 0.3244,
+    "rate_lo": 0.2706,
+    "rate_hi": 0.3824
+   },
+   "second": {
+    "name": "arXiv",
+    "n": 509,
+    "rate": 0.1023,
+    "rate_lo": 0.08919,
+    "rate_hi": 0.117
+   },
+   "ratio": {
+    "value": 3.172,
+    "lo": 2.548,
+    "hi": 3.9
+   },
+   "interval": "above 1"
+  },
+  {
+   "table": "Pool against arXiv pre-window bodies (H2)",
+   "level": "pattern",
+   "key": "CORRECTIVE_CONTRAST|cc_coordinated",
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_coordinated",
+   "first": {
+    "name": "pool",
+    "n": 220,
+    "rate": 0.1336,
+    "rate_lo": 0.1117,
+    "rate_hi": 0.159
+   },
+   "second": {
+    "name": "arXiv",
+    "n": 256,
+    "rate": 0.05145,
+    "rate_lo": 0.04422,
+    "rate_hi": 0.05896
+   },
+   "ratio": {
+    "value": 2.597,
+    "lo": 2.078,
+    "hi": 3.239
+   },
+   "interval": "above 1"
+  },
+  {
+   "table": "Pool against arXiv pre-window bodies (H2)",
+   "level": "pattern",
+   "key": "ALTERNATIVE_FRAMING|af_instead_of",
+   "construction": "ALTERNATIVE_FRAMING",
+   "pattern": "af_instead_of",
+   "first": {
+    "name": "pool",
+    "n": 451,
+    "rate": 0.3196,
+    "rate_lo": 0.27,
+    "rate_hi": 0.3745
+   },
+   "second": {
+    "name": "arXiv",
+    "n": 976,
+    "rate": 0.1962,
+    "rate_lo": 0.1799,
+    "rate_hi": 0.2139
+   },
+   "ratio": {
+    "value": 1.629,
+    "lo": 1.333,
+    "hi": 1.962
+   },
+   "interval": "above 1"
+  },
+  {
+   "table": "Pool against arXiv pre-window bodies (H2)",
+   "level": "pattern",
+   "key": "OBJECT_RELATIVE|aux_object_relative",
+   "construction": "OBJECT_RELATIVE",
+   "pattern": "aux_object_relative",
+   "first": {
+    "name": "pool",
+    "n": 23,
+    "rate": 0.01436,
+    "rate_lo": 0.007539,
+    "rate_hi": 0.02141
+   },
+   "second": {
+    "name": "arXiv",
+    "n": 57,
+    "rate": 0.01146,
+    "rate_lo": 0.008277,
+    "rate_hi": 0.0149
+   },
+   "ratio": {
+    "value": 1.254,
+    "lo": 0.6467,
+    "hi": 2.051
+   },
+   "interval": "spans 1"
+  },
+  {
+   "table": "Pool against arXiv pre-window bodies (H2)",
+   "level": "pattern",
+   "key": "TRICOLON|tricolon",
+   "construction": "TRICOLON",
+   "pattern": "tricolon",
+   "first": {
+    "name": "pool",
+    "n": 4569,
+    "rate": 2.829,
+    "rate_lo": 2.664,
+    "rate_hi": 2.991
+   },
+   "second": {
+    "name": "arXiv",
+    "n": 16111,
+    "rate": 3.238,
+    "rate_lo": 3.122,
+    "rate_hi": 3.366
+   },
+   "ratio": {
+    "value": 0.8736,
+    "lo": 0.8119,
+    "hi": 0.9331
+   },
+   "interval": "below 1"
+  },
+  {
+   "table": "Pool against arXiv pre-window bodies (H2)",
+   "level": "pattern",
+   "key": "OBJECT_RELATIVE|that_object_relative",
+   "construction": "OBJECT_RELATIVE",
+   "pattern": "that_object_relative",
+   "first": {
+    "name": "pool",
+    "n": 42,
+    "rate": 0.0179,
+    "rate_lo": 0.01103,
+    "rate_hi": 0.02508
+   },
+   "second": {
+    "name": "arXiv",
+    "n": 142,
+    "rate": 0.02854,
+    "rate_lo": 0.02318,
+    "rate_hi": 0.03399
+   },
+   "ratio": {
+    "value": 0.6274,
+    "lo": 0.3828,
+    "hi": 0.9532
+   },
+   "interval": "below 1"
+  },
+  {
+   "table": "Pool against arXiv pre-window bodies (H2)",
+   "level": "pattern",
+   "key": "CORRECTIVE_CONTRAST|cc_additive",
+   "construction": "CORRECTIVE_CONTRAST",
+   "pattern": "cc_additive",
+   "first": {
+    "name": "pool",
+    "n": 61,
+    "rate": 0.03785,
+    "rate_lo": 0.02413,
+    "rate_hi": 0.05274
+   },
+   "second": {
+    "name": "arXiv",
+    "n": 363,
+    "rate": 0.07295,
+    "rate_lo": 0.06294,
+    "rate_hi": 0.08268
+   },
+   "ratio": {
+    "value": 0.5188,
+    "lo": 0.3227,
+    "hi": 0.7424
+   },
+   "interval": "below 1"
+  },
+  {
+   "table": "Pool against arXiv pre-window bodies (H2)",
+   "level": "pattern",
+   "key": "OBJECT_RELATIVE|zero_object_relative",
+   "construction": "OBJECT_RELATIVE",
+   "pattern": "zero_object_relative",
+   "first": {
+    "name": "pool",
+    "n": 57,
+    "rate": 0.03344,
+    "rate_lo": 0.02286,
+    "rate_hi": 0.04494
+   },
+   "second": {
+    "name": "arXiv",
+    "n": 411,
+    "rate": 0.0826,
+    "rate_lo": 0.07359,
+    "rate_hi": 0.09219
+   },
+   "ratio": {
+    "value": 0.4049,
+    "lo": 0.2748,
+    "hi": 0.5611
+   },
+   "interval": "below 1"
+  },
+  {
+   "table": "Author against pool (H3)",
+   "level": "construction",
+   "key": "EM_DASH",
+   "construction": "EM_DASH",
+   "first": {
+    "name": "author",
+    "n": 133,
+    "rate": 1.646,
+    "rate_lo": 0.5368,
+    "rate_hi": 2.745
+   },
+   "second": {
+    "name": "pool",
+    "n": 139,
+    "rate": 0.1275,
+    "rate_lo": 0.0842,
+    "rate_hi": 0.1773
+   },
+   "ratio": {
+    "value": 12.91,
+    "lo": 3.915,
+    "hi": 25.57
+   },
+   "interval": "above 1"
+  },
+  {
+   "table": "Author against pool (H3)",
+   "level": "construction",
+   "key": "TRICOLON",
+   "construction": "TRICOLON",
+   "first": {
+    "name": "author",
+    "n": 272,
+    "rate": 3.367,
+    "rate_lo": 2.762,
+    "rate_hi": 3.969
+   },
+   "second": {
+    "name": "pool",
+    "n": 4575,
+    "rate": 2.83,
+    "rate_lo": 2.666,
+    "rate_hi": 2.993
+   },
+   "ratio": {
+    "value": 1.19,
+    "lo": 0.9696,
+    "hi": 1.419
+   },
+   "interval": "spans 1"
+  },
+  {
+   "table": "Author against pool (H3)",
+   "level": "construction",
+   "key": "PARTICIPIAL_TAIL",
+   "construction": "PARTICIPIAL_TAIL",
+   "first": {
+    "name": "author",
+    "n": 65,
+    "rate": 0.8046,
+    "rate_lo": 0.5359,
+    "rate_hi": 1.249
+   },
+   "second": {
+    "name": "pool",
+    "n": 1182,
+    "rate": 0.7121,
+    "rate_lo": 0.6414,
+    "rate_hi": 0.7908
+   },
+   "ratio": {
+    "value": 1.13,
+    "lo": 0.7336,
+    "hi": 1.784
+   },
+   "interval": "spans 1"
+  },
+  {
+   "table": "Author against pool (H3)",
+   "level": "construction",
+   "key": "LLM_DICTION",
+   "construction": "LLM_DICTION",
+   "first": {
+    "name": "author",
+    "n": 36,
+    "rate": 0.4456,
+    "rate_lo": 0.1819,
+    "rate_hi": 0.8541
+   },
+   "second": {
+    "name": "pool",
+    "n": 1058,
+    "rate": 0.6212,
+    "rate_lo": 0.512,
+    "rate_hi": 0.7486
+   },
+   "ratio": {
+    "value": 0.7173,
+    "lo": 0.2868,
+    "hi": 1.432
+   },
+   "interval": "spans 1"
+  },
+  {
+   "table": "Author against pool (H3)",
+   "level": "construction",
+   "key": "ABSTRACT_ADVERB",
+   "construction": "ABSTRACT_ADVERB",
+   "first": {
+    "name": "author",
+    "n": 33,
+    "rate": 0.4085,
+    "rate_lo": 0.2407,
+    "rate_hi": 0.6213
+   },
+   "second": {
+    "name": "pool",
+    "n": 947,
+    "rate": 0.6315,
+    "rate_lo": 0.5578,
+    "rate_hi": 0.7026
+   },
+   "ratio": {
+    "value": 0.6469,
+    "lo": 0.37497,
+    "hi": 0.996
+   },
+   "interval": "below 1"
+  },
+  {
+   "table": "Author against pool (H3)",
+   "level": "construction",
+   "key": "ALTERNATIVE_FRAMING",
+   "construction": "ALTERNATIVE_FRAMING",
+   "first": {
+    "name": "author",
+    "n": 20,
+    "rate": 0.2476,
+    "rate_lo": 0.1333,
+    "rate_hi": 0.3711
+   },
+   "second": {
+    "name": "pool",
+    "n": 934,
+    "rate": 0.6474,
+    "rate_lo": 0.5822,
+    "rate_hi": 0.7155
+   },
+   "ratio": {
+    "value": 0.3824,
+    "lo": 0.2037,
+    "hi": 0.5824
+   },
+   "interval": "below 1"
+  },
+  {
+   "table": "Author against pool (H3)",
+   "level": "pattern",
+   "key": "TRICOLON|tricolon",
+   "construction": "TRICOLON",
+   "pattern": "tricolon",
+   "first": {
+    "name": "author",
+    "n": 272,
+    "rate": 3.367,
+    "rate_lo": 2.762,
+    "rate_hi": 3.969
+   },
+   "second": {
+    "name": "pool",
+    "n": 4569,
+    "rate": 2.829,
+    "rate_lo": 2.664,
+    "rate_hi": 2.991
+   },
+   "ratio": {
+    "value": 1.19,
+    "lo": 0.9706,
+    "hi": 1.419
+   },
+   "interval": "spans 1"
+  },
+  {
+   "table": "Sources against the pool (H4)",
+   "level": "construction",
+   "key": "ABSTRACT_ADVERB",
+   "construction": "ABSTRACT_ADVERB",
+   "pool_equal": {
+    "rate": 0.6315,
+    "rate_lo": 0.5578,
+    "rate_hi": 0.7026
+   },
+   "sources": {
+    "peps": {
+     "n": 207,
+     "rate": 0.7259,
+     "rate_lo": 0.5643,
+     "rate_hi": 0.8858
+    },
+    "ietf": {
+     "n": 391,
+     "rate": 0.3842,
+     "rate_lo": 0.3234,
+     "rate_hi": 0.4705
+    },
+    "rust": {
+     "n": 204,
+     "rate": 0.8055,
+     "rate_lo": 0.6729,
+     "rate_hi": 0.9523
+    },
+    "riscv": {
+     "n": 85,
+     "rate": 0.8747,
+     "rate_lo": 0.6179,
+     "rate_hi": 1.124
+    },
+    "opentitan": {
+     "n": 60,
+     "rate": 0.3669,
+     "rate_lo": 0.2544,
+     "rate_hi": 0.4758
+    }
+   },
+   "outside": [
+    "ietf",
+    "rust",
+    "opentitan"
+   ]
+  },
+  {
+   "table": "Sources against the pool (H4)",
+   "level": "construction",
+   "key": "ALTERNATIVE_FRAMING",
+   "construction": "ALTERNATIVE_FRAMING",
+   "pool_equal": {
+    "rate": 0.6474,
+    "rate_lo": 0.5822,
+    "rate_hi": 0.7155
+   },
+   "sources": {
+    "peps": {
+     "n": 335,
+     "rate": 1.1748,
+     "rate_lo": 0.9804,
+     "rate_hi": 1.416
+    },
+    "ietf": {
+     "n": 263,
+     "rate": 0.2584,
+     "rate_lo": 0.2178,
+     "rate_hi": 0.3009
+    },
+    "rust": {
+     "n": 243,
+     "rate": 0.9595,
+     "rate_lo": 0.8131,
+     "rate_hi": 1.122
+    },
+    "riscv": {
+     "n": 66,
+     "rate": 0.6792,
+     "rate_lo": 0.5234,
+     "rate_hi": 0.8758
+    },
+    "opentitan": {
+     "n": 27,
+     "rate": 0.1651,
+     "rate_lo": 0.08941,
+     "rate_hi": 0.2441
+    }
+   },
+   "outside": [
+    "peps",
+    "ietf",
+    "rust",
+    "opentitan"
+   ]
+  },
+  {
+   "table": "Sources against the pool (H4)",
+   "level": "construction",
+   "key": "LLM_DICTION",
+   "construction": "LLM_DICTION",
+   "pool_equal": {
+    "rate": 0.6212,
+    "rate_lo": 0.512,
+    "rate_hi": 0.7486
+   },
+   "sources": {
+    "peps": {
+     "n": 228,
+     "rate": 0.7995,
+     "rate_lo": 0.5254,
+     "rate_hi": 1.107
+    },
+    "ietf": {
+     "n": 546,
+     "rate": 0.5365,
+     "rate_lo": 0.3818,
+     "rate_hi": 0.7326
+    },
+    "rust": {
+     "n": 133,
+     "rate": 0.5252,
+     "rate_lo": 0.4022,
+     "rate_hi": 0.6443
+    },
+    "riscv": {
+     "n": 77,
+     "rate": 0.7924,
+     "rate_lo": 0.4374,
+     "rate_hi": 1.253
+    },
+    "opentitan": {
+     "n": 74,
+     "rate": 0.4525,
+     "rate_lo": 0.2796,
+     "rate_hi": 0.6644
+    }
+   },
+   "outside": []
+  },
+  {
+   "table": "Sources against the pool (H4)",
+   "level": "construction",
+   "key": "PARTICIPIAL_TAIL",
+   "construction": "PARTICIPIAL_TAIL",
+   "pool_equal": {
+    "rate": 0.7121,
+    "rate_lo": 0.6414,
+    "rate_hi": 0.7908
+   },
+   "sources": {
+    "peps": {
+     "n": 237,
+     "rate": 0.8311,
+     "rate_lo": 0.6979,
+     "rate_hi": 0.9493
+    },
+    "ietf": {
+     "n": 568,
+     "rate": 0.5581,
+     "rate_lo": 0.4934,
+     "rate_hi": 0.6353
+    },
+    "rust": {
+     "n": 195,
+     "rate": 0.77,
+     "rate_lo": 0.6386,
+     "rate_hi": 0.9006
+    },
+    "riscv": {
+     "n": 69,
+     "rate": 0.7101,
+     "rate_lo": 0.5188,
+     "rate_hi": 0.9833
+    },
+    "opentitan": {
+     "n": 113,
+     "rate": 0.691,
+     "rate_lo": 0.4874,
+     "rate_hi": 0.8954
+    }
+   },
+   "outside": [
+    "ietf"
+   ]
+  },
+  {
+   "table": "Sources against the pool (H4)",
+   "level": "construction",
+   "key": "TRICOLON",
+   "construction": "TRICOLON",
+   "pool_equal": {
+    "rate": 2.83,
+    "rate_lo": 2.666,
+    "rate_hi": 2.993
+   },
+   "sources": {
+    "peps": {
+     "n": 772,
+     "rate": 2.707,
+     "rate_lo": 2.29,
+     "rate_hi": 3.264
+    },
+    "ietf": {
+     "n": 2418,
+     "rate": 2.376,
+     "rate_lo": 2.231,
+     "rate_hi": 2.529
+    },
+    "rust": {
+     "n": 510,
+     "rate": 2.014,
+     "rate_lo": 1.753,
+     "rate_hi": 2.298
+    },
+    "riscv": {
+     "n": 408,
+     "rate": 4.199,
+     "rate_lo": 3.667,
+     "rate_hi": 4.67
+    },
+    "opentitan": {
+     "n": 467,
+     "rate": 2.856,
+     "rate_lo": 2.607,
+     "rate_hi": 3.153
+    }
+   },
+   "outside": [
+    "ietf",
+    "rust",
+    "riscv"
+   ]
+  },
+  {
+   "table": "Rates: object relatives and light verbs",
+   "level": "construction",
+   "key": "OBJECT_RELATIVE",
+   "construction": "OBJECT_RELATIVE",
+   "n": 125,
+   "documents": 87,
+   "pool_words": {
+    "rate": 0.0688,
+    "rate_lo": 0.05472,
+    "rate_hi": 0.08086
+   },
+   "pool_equal": {
+    "rate": 0.0668,
+    "rate_lo": 0.05228,
+    "rate_hi": 0.08085
+   },
+   "sources": {
+    "peps": {
+     "n": 22,
+     "documents": 17,
+     "rate": 0.07715,
+     "rate_lo": 0.04374,
+     "rate_hi": 0.1145
+    },
+    "ietf": {
+     "n": 67,
+     "documents": 39,
+     "rate": 0.06583,
+     "rate_lo": 0.04563,
+     "rate_hi": 0.08147
+    },
+    "rust": {
+     "n": 25,
+     "documents": 20,
+     "rate": 0.09871,
+     "rate_lo": 0.06001,
+     "rate_hi": 0.14
+    },
+    "riscv": {
+     "n": 6,
+     "documents": 6,
+     "rate": 0.06174,
+     "rate_lo": 0.02705,
+     "rate_hi": 0.1001
+    },
+    "opentitan": {
+     "n": 5,
+     "documents": 5,
+     "rate": 0.03058,
+     "rate_lo": 0.006596,
+     "rate_hi": 0.05921
+    }
+   }
+  },
+  {
+   "table": "Rates: object relatives and light verbs",
+   "level": "pattern",
+   "key": "OBJECT_RELATIVE|zero_object_relative",
+   "construction": "OBJECT_RELATIVE",
+   "pattern": "zero_object_relative",
+   "n": 57,
+   "documents": 45,
+   "pool_words": {
+    "rate": 0.03137,
+    "rate_lo": 0.02321,
+    "rate_hi": 0.03943
+   },
+   "pool_equal": {
+    "rate": 0.03344,
+    "rate_lo": 0.02286,
+    "rate_hi": 0.04494
+   },
+   "sources": {
+    "peps": {
+     "n": 12,
+     "documents": 11,
+     "rate": 0.04208,
+     "rate_lo": 0.0202,
+     "rate_hi": 0.06817
+    },
+    "ietf": {
+     "n": 27,
+     "documents": 18,
+     "rate": 0.02653,
+     "rate_lo": 0.01564,
+     "rate_hi": 0.03586
+    },
+    "rust": {
+     "n": 13,
+     "documents": 11,
+     "rate": 0.05133,
+     "rate_lo": 0.02463,
+     "rate_hi": 0.08228
+    },
+    "riscv": {
+     "n": 4,
+     "documents": 4,
+     "rate": 0.04116,
+     "rate_lo": 0.01014,
+     "rate_hi": 0.08202
+    },
+    "opentitan": {
+     "n": 1,
+     "documents": 1,
+     "rate": 0.006115,
+     "rate_lo": 0.0,
+     "rate_hi": 0.02021
+    }
+   }
+  },
+  {
+   "table": "Rates: object relatives and light verbs",
+   "level": "pattern",
+   "key": "OBJECT_RELATIVE|that_object_relative",
+   "construction": "OBJECT_RELATIVE",
+   "pattern": "that_object_relative",
+   "n": 42,
+   "documents": 31,
+   "pool_words": {
+    "rate": 0.02312,
+    "rate_lo": 0.01528,
+    "rate_hi": 0.03035
+   },
+   "pool_equal": {
+    "rate": 0.0179,
+    "rate_lo": 0.01103,
+    "rate_hi": 0.02508
+   },
+   "sources": {
+    "peps": {
+     "n": 8,
+     "documents": 7,
+     "rate": 0.02805,
+     "rate_lo": 0.01016,
+     "rate_hi": 0.04874
+    },
+    "ietf": {
+     "n": 26,
+     "documents": 17,
+     "rate": 0.02555,
+     "rate_lo": 0.01459,
+     "rate_hi": 0.03496
+    },
+    "rust": {
+     "n": 6,
+     "documents": 5,
+     "rate": 0.02369,
+     "rate_lo": 0.004692,
+     "rate_hi": 0.04506
+    },
+    "riscv": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    },
+    "opentitan": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.01223,
+     "rate_lo": 0.0,
+     "rate_hi": 0.03306
+    }
+   }
+  },
+  {
+   "table": "Rates: object relatives and light verbs",
+   "level": "pattern",
+   "key": "OBJECT_RELATIVE|aux_object_relative",
+   "construction": "OBJECT_RELATIVE",
+   "pattern": "aux_object_relative",
+   "n": 23,
+   "documents": 19,
+   "pool_words": {
+    "rate": 0.01266,
+    "rate_lo": 0.007677,
+    "rate_hi": 0.01765
+   },
+   "pool_equal": {
+    "rate": 0.01436,
+    "rate_lo": 0.007539,
+    "rate_hi": 0.02141
+   },
+   "sources": {
+    "peps": {
+     "n": 1,
+     "documents": 1,
+     "rate": 0.003507,
+     "rate_lo": 0.0,
+     "rate_hi": 0.01179
+    },
+    "ietf": {
+     "n": 12,
+     "documents": 8,
+     "rate": 0.01179,
+     "rate_lo": 0.004555,
+     "rate_hi": 0.01817
+    },
+    "rust": {
+     "n": 6,
+     "documents": 6,
+     "rate": 0.02369,
+     "rate_lo": 0.007462,
+     "rate_hi": 0.04497
+    },
+    "riscv": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.02058,
+     "rate_lo": 0.0,
+     "rate_hi": 0.04326
+    },
+    "opentitan": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.01223,
+     "rate_lo": 0.0,
+     "rate_hi": 0.03194
+    }
+   }
+  },
+  {
+   "table": "Rates: object relatives and light verbs",
+   "level": "pattern",
+   "key": "OBJECT_RELATIVE|as_parenthetical",
+   "construction": "OBJECT_RELATIVE",
+   "pattern": "as_parenthetical",
+   "n": 3,
+   "documents": 3,
+   "pool_words": {
+    "rate": 0.001651,
+    "rate_lo": 0.0,
+    "rate_hi": 0.003757
+   },
+   "pool_equal": {
+    "rate": 0.001094,
+    "rate_lo": 0.0,
+    "rate_hi": 0.002782
+   },
+   "sources": {
+    "peps": {
+     "n": 1,
+     "documents": 1,
+     "rate": 0.003507,
+     "rate_lo": 0.0,
+     "rate_hi": 0.01153
+    },
+    "ietf": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.001965,
+     "rate_lo": 0.0,
+     "rate_hi": 0.005284
+    },
+    "rust": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    },
+    "riscv": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    },
+    "opentitan": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    }
+   }
+  },
+  {
+   "table": "Rates: object relatives and light verbs",
+   "level": "subtype",
+   "key": "OBJECT_RELATIVE|zero_object_relative|load 0-1",
+   "construction": "OBJECT_RELATIVE",
+   "pattern": "zero_object_relative",
+   "subtype": "load 0-1",
+   "n": 33,
+   "documents": 25,
+   "pool_words": {
+    "rate": 0.01816,
+    "rate_lo": 0.01125,
+    "rate_hi": 0.0248
+   },
+   "pool_equal": {
+    "rate": 0.01706,
+    "rate_lo": 0.009729,
+    "rate_hi": 0.02517
+   },
+   "sources": {
+    "peps": {
+     "n": 7,
+     "documents": 6,
+     "rate": 0.02455,
+     "rate_lo": 0.007519,
+     "rate_hi": 0.04708
+    },
+    "ietf": {
+     "n": 17,
+     "documents": 10,
+     "rate": 0.0167,
+     "rate_lo": 0.006275,
+     "rate_hi": 0.02555
+    },
+    "rust": {
+     "n": 7,
+     "documents": 7,
+     "rate": 0.02764,
+     "rate_lo": 0.01078,
+     "rate_hi": 0.04853
+    },
+    "riscv": {
+     "n": 1,
+     "documents": 1,
+     "rate": 0.01029,
+     "rate_lo": 0.0,
+     "rate_hi": 0.03837
+    },
+    "opentitan": {
+     "n": 1,
+     "documents": 1,
+     "rate": 0.006115,
+     "rate_lo": 0.0,
+     "rate_hi": 0.02021
+    }
+   }
+  },
+  {
+   "table": "Rates: object relatives and light verbs",
+   "level": "subtype",
+   "key": "OBJECT_RELATIVE|zero_object_relative|load 2+",
+   "construction": "OBJECT_RELATIVE",
+   "pattern": "zero_object_relative",
+   "subtype": "load 2+",
+   "n": 24,
+   "documents": 24,
+   "pool_words": {
+    "rate": 0.01321,
+    "rate_lo": 0.008612,
+    "rate_hi": 0.01893
+   },
+   "pool_equal": {
+    "rate": 0.01638,
+    "rate_lo": 0.009039,
+    "rate_hi": 0.02476
+   },
+   "sources": {
+    "peps": {
+     "n": 5,
+     "documents": 5,
+     "rate": 0.01753,
+     "rate_lo": 0.003823,
+     "rate_hi": 0.03531
+    },
+    "ietf": {
+     "n": 10,
+     "documents": 10,
+     "rate": 0.009826,
+     "rate_lo": 0.004907,
+     "rate_hi": 0.01672
+    },
+    "rust": {
+     "n": 6,
+     "documents": 6,
+     "rate": 0.02369,
+     "rate_lo": 0.007761,
+     "rate_hi": 0.04281
+    },
+    "riscv": {
+     "n": 3,
+     "documents": 3,
+     "rate": 0.03087,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0638
+    },
+    "opentitan": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    }
+   }
+  },
+  {
+   "table": "Rates: object relatives and light verbs",
+   "level": "construction",
+   "key": "TRAILING_LIGHT_VERB",
+   "construction": "TRAILING_LIGHT_VERB",
+   "n": 5,
+   "documents": 5,
+   "pool_words": {
+    "rate": 0.002752,
+    "rate_lo": 0.0006199,
+    "rate_hi": 0.005202
+   },
+   "pool_equal": {
+    "rate": 0.002674,
+    "rate_lo": 0.0004149,
+    "rate_hi": 0.005646
+   },
+   "sources": {
+    "peps": {
+     "n": 1,
+     "documents": 1,
+     "rate": 0.003507,
+     "rate_lo": 0.0,
+     "rate_hi": 0.01155
+    },
+    "ietf": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.001965,
+     "rate_lo": 0.0,
+     "rate_hi": 0.004268
+    },
+    "rust": {
+     "n": 2,
+     "documents": 2,
+     "rate": 0.007897,
+     "rate_lo": 0.0,
+     "rate_hi": 0.02053
+    },
+    "riscv": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    },
+    "opentitan": {
+     "n": 0,
+     "documents": 0,
+     "rate": 0.0,
+     "rate_lo": 0.0,
+     "rate_hi": 0.0
+    }
+   }
+  },
+  {
+   "table": "Zero to that ratio",
+   "corpus": "pool, equal-weight",
+   "zero_n": 57,
+   "that_n": 42,
+   "ratio": {
+    "value": 1.868,
+    "lo": 1.162,
+    "hi": 3.204
+   },
+   "interval": "above 1"
+  },
+  {
+   "table": "Zero to that ratio",
+   "corpus": "PEPs",
+   "zero_n": 12,
+   "that_n": 8,
+   "ratio": null,
+   "interval": null
+  },
+  {
+   "table": "Zero to that ratio",
+   "corpus": "IETF RFCs",
+   "zero_n": 27,
+   "that_n": 26,
+   "ratio": {
+    "value": 1.038,
+    "lo": 0.5833,
+    "hi": 1.833
+   },
+   "interval": "spans 1"
+  },
+  {
+   "table": "Zero to that ratio",
+   "corpus": "Rust RFCs",
+   "zero_n": 13,
+   "that_n": 6,
+   "ratio": null,
+   "interval": null
+  },
+  {
+   "table": "Zero to that ratio",
+   "corpus": "RISC-V",
+   "zero_n": 4,
+   "that_n": 0,
+   "ratio": null,
+   "interval": null
+  },
+  {
+   "table": "Zero to that ratio",
+   "corpus": "OpenTitan",
+   "zero_n": 1,
+   "that_n": 2,
+   "ratio": null,
+   "interval": null
+  },
+  {
+   "table": "Zero to that ratio",
+   "corpus": "author",
+   "zero_n": 4,
+   "that_n": 2,
+   "ratio": null,
+   "interval": null
+  }
+ ]
+}

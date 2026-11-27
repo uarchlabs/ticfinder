@@ -17,12 +17,14 @@ TF-012).
                table. --json PATH also writes every report row as JSON.
                --sample KEY prints random LLM-corpus findings (console only).
 
-The human side is pinned: the TF-010 spec and author tables in
-private/specs-tf010/ and the TF-010 arXiv full tables in
-private/arxiv/bodies-tf010/, both written by ticfinder 494e4dd (sha256
-f0fc55a44f37). The pool bootstrap is rebuilt exactly as spec_baseline.py
+The human side is pinned: the TF-015 spec and author tables in
+private/specs/ and the TF-015 arXiv full tables in private/arxiv/bodies/,
+both written by ticfinder 22cf4fa (sha256 0aa23656bb24). TF-012 read the
+TF-010 tables (private/specs-tf010/, private/arxiv/bodies-tf010/, ticfinder
+494e4dd, sha256 f0fc55a44f37); its own LLM tables are kept in
+private/llm-specs-tf015/. The pool bootstrap is rebuilt exactly as spec_baseline.py
 builds it (seed 9009, the same groups in the same order), so its rates and
-intervals equal the TF-010 report; the arXiv bootstrap is arxiv_bodies.py's
+intervals equal the spec report it pins; the arXiv bootstrap is arxiv_bodies.py's
 (seed 8008). The LLM corpus resamples its documents with seed 12012.
 
 Nothing this script writes outside private/ holds document text.
@@ -80,14 +82,16 @@ PLACEHOLDER_DIRS = tuple(f"docs/{d}/" for d in (
 WANT_KEPT = (70, 234_602)        # files, raw words (wc -w) at the pin
 
 LLM_SEED = 12012
-POOL_TABLES = AR.ROOT / "private" / "specs-tf010"
-ARXIV_TABLES = AR.ROOT / "private" / "arxiv" / "bodies-tf010"
-ARXIV_SHA = "f0fc55a44f37"
+# TF-015: the tables the TF-015 reruns wrote (TF-012: specs-tf010,
+# bodies-tf010 and f0fc55a44f37)
+POOL_TABLES = AR.ROOT / "private" / "specs"
+ARXIV_TABLES = AR.ROOT / "private" / "arxiv" / "bodies"
+ARXIV_SHA = "0aa23656bb24"
 POOL_SEED, ARXIV_SEED, DRAWS = 9009, 8008, 2000
 MIN_N = SB.MIN_N
 LR_LEVELS = ("construction", "pattern")
-SPEC_JSON = AR.HERE / "spec-baseline-2026-11-25.json"
-ARXIV_JSON = AR.HERE / "arxiv-bodies-full-2026-11-25.json"
+SPEC_JSON = AR.HERE / "spec-baseline-2026-11-27.json"     # TF-015
+ARXIV_JSON = AR.HERE / "arxiv-bodies-full-2026-11-27.json"
 FLAGGED = "CORRECTIVE_CONTRAST"   # 49% real in the pool (TF-010, TF-011)
 SMALL_N = 50
 
@@ -453,7 +457,8 @@ class LBoot:
 
     def stat(self, lvl, key):
         np = self.np
-        c = np.array([r["counts"].get(lvl, {}).get(key, 0)
+        keys = key if isinstance(key, tuple) else (key,)  # TF-015: sums
+        c = np.array([sum(r["counts"].get(lvl, {}).get(k, 0) for k in keys)
                       for r in self.rows], dtype=float)
         d = c[self.idx].sum(axis=1) / self.Wd * 1000
         return {"n": int(c.sum()), "docs": int((c > 0).sum()),
@@ -470,7 +475,8 @@ def logvar(d):
 
 
 def pin_checks(MB, AX, keys):
-    """The rebuilt pool and arXiv bootstraps against the TF-010 JSON."""
+    """The rebuilt pool and arXiv bootstraps against the JSON of the
+    reports they pin (TF-015: the 2026-11-27 reruns)."""
     out = []
     sj = json.loads(SPEC_JSON.read_text(encoding="utf-8"))
     ok = bad = 0
@@ -481,8 +487,8 @@ def pin_checks(MB, AX, keys):
         got = AB.sig4({"rate": float(P["rate"]), "rate_lo": float(P["ci"][0]),
                        "rate_hi": float(P["ci"][1])})
         ok, bad = (ok + 1, bad) if got == r["pool_equal"] else (ok, bad + 1)
-    out.append(f"pool equal-weight rows equal to TF-010 JSON: {ok} of "
-               f"{ok + bad}")
+    out.append(f"pool equal-weight rows equal to {SPEC_JSON.name}: {ok} "
+               f"of {ok + bad}")
     aj = json.loads(ARXIV_JSON.read_text(encoding="utf-8"))
     ok = bad = 0
     for r in aj["rows"]:
@@ -495,8 +501,8 @@ def pin_checks(MB, AX, keys):
                        "hi": float(s["ratio_ci"][1])})
         want = {"ratio": r["ratio"], "lo": r["ratio_lo"], "hi": r["ratio_hi"]}
         ok, bad = (ok + 1, bad) if got == want else (ok, bad + 1)
-    out.append(f"arXiv all-section ratio rows equal to TF-010 JSON: {ok} of "
-               f"{ok + bad}")
+    out.append(f"arXiv all-section ratio rows equal to {ARXIV_JSON.name}: "
+               f"{ok} of {ok + bad}")
     return out
 
 
@@ -562,8 +568,56 @@ def build_rows():
                            ax_var=logvar(a["ratio_draws"]))
             rows.append(row)
     shrink(rows)
+    build_rows.orc = orc_rows(MB, AX, LB)
     return ver, rows, MB, AX, len(llm), int(LB.W.sum()), pin_checks(MB, AX,
                                                                      keys)
+
+
+def orc_rows(MB, AX, LB):
+    """TF-015: LRs for object relatives and light verbs, every row whatever
+    its count, with the set C band; and the zero to `that` ratio of the
+    LLM corpus, the pool and the arXiv windows, with the LLM over pool and
+    arXiv post over pre ratios of ratios. Draws pair by index, as the LR
+    rows do."""
+    C = next(b for b in BANDS if b[0] == "C")
+    out = []
+    for name, lvl, k in AB.ORC_ROWS:
+        L = LB.stat(lvl, k)
+        P = MB.stat(lvl, k)["pool"]
+        P = {"n": P["n"], **P[SB.POOL]}
+        row = {"level": lvl, "key": name, "llm": L, "pool": P}
+        if L["n"] >= MIN_N and P["n"] >= MIN_N:
+            row["lr"], row["lr_ci"] = SB.ratio(L["rate"], P["rate"],
+                                               L["draws"], P["draws"])
+            row["band_c"] = band(row, *C[1:])
+        a = AX.stat("all", lvl, k)
+        row["ax_n"] = (a["o"]["pre"]["n"], a["o"]["post"]["n"])
+        if min(row["ax_n"]) >= MIN_N:
+            row["ax"], row["ax_ci"] = a["ratio"], a["ratio_ci"]
+        out.append(row)
+    Lz, Lt = LB.stat("pattern", AB.ORC_ZERO), LB.stat("pattern", AB.ORC_THAT)
+    Pz = MB.stat("pattern", AB.ORC_ZERO)["pool"]
+    Pt = MB.stat("pattern", AB.ORC_THAT)["pool"]
+    Az, At = (AX.stat("all", "pattern", AB.ORC_ZERO),
+              AX.stat("all", "pattern", AB.ORC_THAT))
+    sides = {"LLM": (Lz["n"], Lz, Lt["n"], Lt),
+             "pool, equal-weight": (Pz["n"], Pz[SB.POOL], Pt["n"],
+                                    Pt[SB.POOL])}
+    for w in ("pre", "post"):
+        sides[f"arXiv {w}, all"] = (Az["o"][w]["n"], Az["o"][w],
+                                    At["o"][w]["n"], At["o"][w])
+    zt, ratios = [], {}
+    for name, (zn, zs, tn, ts) in sides.items():
+        r, d, ci = AB.ratio_draws(zs["rate"], ts["rate"], zs["draws"],
+                                  ts["draws"])
+        ratios[name] = (min(zn, tn), r, d)
+        zt.append(AB.zt_row(name, zn, tn, r, ci))
+    for a_, b_ in (("LLM", "pool, equal-weight"),
+                   ("arXiv post, all", "arXiv pre, all")):
+        (na, ra, da), (nb, rb, db) = ratios[a_], ratios[b_]
+        r, _, ci = AB.ratio_draws(ra, rb, da, db)
+        zt.append(AB.ror_row(a_, b_, r, ci, min(na, nb) >= MIN_N))
+    return out, zt
 
 
 def shrink(rows):
@@ -696,6 +750,14 @@ def cmd_analyse(args):
           f"log offset {shrink.info['mean_offset']:.3f}")
     print_table(rows)
     print_checks(rows)
+    orc, zt = build_rows.orc
+    print("\nTF-015 rows (LR over the pool, set C band):")
+    for r in orc:
+        print(f"  {r['key'][:52]:52s} LLM {r['llm']['n']:4d} pool "
+              f"{r['pool']['n']:4d} LR {lr_cell(r):>22} "
+              f"{r.get('band_c', 'too few'):>7}")
+    for j in zt:
+        print("  " + AB.zt_line(j))
     if args.report:
         write_report(args, ver, rows, nfiles, words, checks)
 
@@ -794,6 +856,8 @@ SANITY = {
 VOCAB = {"BORROWED_RIGOUR", "ABSTRACT_ADVERB", "LLM_DICTION"}
 # Current level of each banded unit, from tools/ticfinder.py and the phrase
 # file at 494e4dd, with the per-finding levels that differ from it.
+# TF-015: TRICOLON and EMPHATIC_REFLEXIVE moved to their TF-013 levels, and
+# the TF-014/TF-015 constructions added at low.
 CURRENT = {
     "CORRECTIVE_CONTRAST": ("high", ""),
     "CORRECTIVE_CONTRAST|cc_negated_apposition": ("high", ""),
@@ -801,12 +865,18 @@ CURRENT = {
     "BORROWED_RIGOUR": ("med", ""),
     "ALTERNATIVE_FRAMING": ("low", ""),
     "ALTERNATIVE_FRAMING|af_rather_than": ("med", "per finding"),
-    "TRICOLON": ("low", "figures med"),
-    "TRICOLON|tricolon": ("low", "figures med"),
-    "EMPHATIC_REFLEXIVE": ("med", ""),
+    "TRICOLON": ("med", ""),
+    "TRICOLON|tricolon": ("med", ""),
+    "EMPHATIC_REFLEXIVE": ("low", ""),
     "PARTICIPIAL_TAIL": ("high", "lemma use med"),
     "ABSTRACT_ADVERB": ("high", ""),
     "LLM_DICTION": ("low", "three forms med"),
+    "OBJECT_RELATIVE": ("low", ""),
+    "OBJECT_RELATIVE|zero_object_relative": ("low", ""),
+    "OBJECT_RELATIVE|that_object_relative": ("low", ""),
+    "OBJECT_RELATIVE|aux_object_relative": ("low", ""),
+    "OBJECT_RELATIVE|as_parenthetical": ("low", ""),
+    "TRAILING_LIGHT_VERB": ("low", ""),
 }
 # Candidate cut sets over the raw LR (the user chose raw over shrunk).
 # (name, statistic, med from, high from); below med is low.
@@ -867,10 +937,11 @@ def write_report(args, ver, rows, nfiles, words, checks):
     p(f"| ticfinder | `tools/ticfinder.py` at {ver['commit']} (sha256 "
       f"{ver['sha256']}); defaults: `en_core_web_md`, code masker on, "
       "`ticfinder-phrases.json` |")
-    p("| human side | the TF-010 tables: the equal-weight pool of five "
-      "sources (`private/specs-tf010/`), the author's 36 specification "
+    p(f"| human side | the tables the spec and arXiv reports pin "
+      f"({SPEC_JSON.name}, {ARXIV_JSON.name}): the equal-weight pool of "
+      "five sources (`private/specs/`), the author's 36 specification "
       "files, and the arXiv `cs.AR` full-run bodies, all sections "
-      "(`private/arxiv/bodies-tf010/`) |")
+      f"(`private/arxiv/bodies/`, sha256 {ARXIV_SHA}) |")
     p(f"| bootstrap | {DRAWS} draws over documents: the LLM files with seed "
       f"{LLM_SEED}; the pool and the author's files rebuilt as "
       f"`spec_baseline.py` draws them (seed {POOL_SEED}); arXiv as "
@@ -1038,7 +1109,7 @@ def write_report(args, ver, rows, nfiles, words, checks):
     p("|---|---|---|" + "---|" * len(BANDS) + "---|")
     changes = {b[0]: [] for b in BANDS}
     for r in sorted(lr_rows, key=lambda r: (-r["lr"], r["key"])):
-        cur, note = CURRENT[r["key"]]
+        cur, note = CURRENT.get(r["key"], ("?", "not in CURRENT"))
         got = {b[0]: band(r, *b[1:]) for b in BANDS}
         fl = flag_of(r)
         if not fl:
@@ -1059,6 +1130,7 @@ def write_report(args, ver, rows, nfiles, words, checks):
           + (": " + ", ".join(f"`{k.replace('|', ' / ')}` {a} to {v}"
                               for k, a, v in ch) if ch else "") + ".")
         p("")
+    orc_report(p, J)
     out_path.write_text("\n".join(L), encoding="utf-8")
     print(f"wrote {out_path}", file=sys.stderr)
     if args.json:
@@ -1115,6 +1187,76 @@ def render_lr(j):
             f"{j['interval']} | {ax} | {fmtj(j['lr_shrunk'])} | "
             f"{fmtj(j['w'])} | {j['author']['n']} | {ci3(j, 'lr_author')} | "
             f"{j['flag'] or '-'} |")
+
+
+def orc_report(p, J):
+    """TF-015: the object relative and light verb LRs, and the zero to
+    `that` ratios."""
+    orc, zt = build_rows.orc
+    p("## Object relatives and light verbs")
+    p("")
+    p("TF-015 rows: `OBJECT_RELATIVE`, its four patterns, the zero form by "
+      "load group (the sum of its subtype counts) and "
+      "`TRAILING_LIGHT_VERB`, listed whatever their counts. An LR needs "
+      f"{MIN_N} findings on both sides (`too few` otherwise), and so does "
+      "the arXiv ratio. The last column is the band set C would give; no "
+      "level changes in this task.")
+    p("")
+    p("| row | LLM n | LLM rate (95% CI) | pool n | pool rate (95% CI) | "
+      "LR (95% CI) | interval | arXiv post over pre (95% CI) | set C |")
+    p("|---|---|---|---|---|---|---|---|---|")
+    for r in orc:
+        L_, P_ = r["llm"], r["pool"]
+        J.append({"table": "Object relatives and light verbs: LRs",
+                  "level": r["level"], "key": r["key"],
+                  **AR.split_key(r["level"], r["key"]),
+                  "llm": SB.jrate(L_["rate"], L_["ci"], n=L_["n"],
+                                  documents=L_["docs"]),
+                  "pool": SB.jrate(P_["rate"], P_["ci"], n=P_["n"]),
+                  "lr": AR.jnum(r.get("lr")),
+                  "lr_lo": AR.jnum(r["lr_ci"][0]) if "lr" in r else None,
+                  "lr_hi": AR.jnum(r["lr_ci"][1]) if "lr" in r else None,
+                  "interval": interval(r["lr_ci"]) if "lr" in r else None,
+                  "arxiv": {"pre_n": r["ax_n"][0], "post_n": r["ax_n"][1],
+                            "ratio": AR.jnum(r.get("ax")),
+                            "lo": AR.jnum(r["ax_ci"][0]) if "ax" in r
+                            else None,
+                            "hi": AR.jnum(r["ax_ci"][1]) if "ax" in r
+                            else None},
+                  "band_c": r.get("band_c")})
+        p(render_orc(J[-1]))
+    p("")
+    p("## Zero to that ratio")
+    p("")
+    p(AB.ZT_NOTE + " The pool is the equal-weight pool (the mean of the "
+      "source rates, for each form); arXiv is all sections.")
+    p("")
+    for line in AB.ZT_HEAD:
+        p(line)
+    for j in zt:
+        if j["table"] == "Zero to that ratio":
+            J.append(j)
+            p(AB.zt_line(j))
+    p("")
+    for line in AB.ROR_HEAD:
+        p(line)
+    for j in zt:
+        if j["table"] != "Zero to that ratio":
+            J.append(j)
+            p(AB.zt_line(j))
+    p("")
+
+
+def render_orc(j):
+    """One TF-015 LR row; jsoncheck.py renders the same way."""
+    k = j["key"].replace("|", " / ")
+    a = j["arxiv"]
+    ax = ("-" if a["ratio"] is None else
+          f"{fmtj(a['ratio'])} ({fmtj(a['lo'])} to {fmtj(a['hi'])})")
+    lr = "too few" if j["lr"] is None else ci3(j, "lr")
+    return (f"| `{k}` | {j['llm']['n']} | {rate3(j['llm'])} | "
+            f"{j['pool']['n']} | {rate3(j['pool'])} | {lr} | "
+            f"{j['interval'] or '-'} | {ax} | {j['band_c'] or '-'} |")
 
 
 def render_band(j):
