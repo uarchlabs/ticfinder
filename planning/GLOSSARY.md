@@ -2,7 +2,7 @@
 
 Terms used in the ticfinder roadmap, task files and notes, grouped by
 where they come from. Table 1 holds standard terms. Table 2 holds
-ticfinder's own terms, often an ordinary word with a stretched meaning. Table 3 holds terms coined in TF-003 to TF-012, which have no
+ticfinder's own terms, often an ordinary word with a stretched meaning. Table 3 holds terms coined in TF-003 to TF-014, which have no
 meaning outside this project.
 
 ## Table 1. Standard terms, used in their usual sense
@@ -37,6 +37,13 @@ meaning outside this project.
 | empirical Bayes, shrinkage | estimating a prior from the data across many rows, then pulling each row's estimate toward it by how uncertain the row is |
 | method of moments | estimating a parameter by matching an average in the data to its expected value; here the prior variance from the spread of rows around the prior |
 | lookbehind | a match condition on the text before the match; spaCy's Matcher has none, so a pattern can only test tokens inside its own span |
+| object relative clause | a clause that describes a noun which is the object of the clause's own verb, so the verb comes after the clause's subject: "every variable (that) the loops assign" |
+| zero relative, reduced relative | a relative clause with no `that` or `which`: "the file you sent" |
+| subject relative clause | a relative clause whose noun is the subject of its verb, so the verb comes first: "the loop that assigns every variable" |
+| nominalization | a verb used as a noun, which hides the action: "a write", "a pop" |
+| light verb | an empty verb that carries an action turned into a noun: "made" in "the write the primitive made" |
+| reduced passive | a passive participle phrase after a noun: "every variable assigned by the loops"; it turns an object relative into a subject relative |
+| complement clause | a `that` clause that gives the content of a noun or verb ("the rule that a defect found is fixed"); it has no gap, so it is not a relative clause |
 
 ## Table 2. Project terms: borrowed words with a ticfinder meaning, defined in CLAUDE.md or the roadmap
 
@@ -60,7 +67,7 @@ meaning outside this project.
 | waiver, stale waiver | a fingerprint the editor marked as acceptable; stale when no current finding matches it | a detector fix can make a waiver stale without invalidating it; `--prune-stale` removes it |
 | all sections, body sections | in TF-005, all four section types together, against the `body` section type alone | the TF-005 `HOLLOW_BOOSTER` ratio 3.31 is body sections; all sections give 2.98 |
 
-## Table 3. Terms from TF-003 to TF-012 with no outside standing
+## Table 3. Terms from TF-003 to TF-014 with no outside standing
 
 | term | meaning | where |
 |---|---|---|
@@ -137,3 +144,9 @@ meaning outside this project.
 | set C | the cut set the user chose after TF-012: `med` when the LR interval's lower end is above 1, `high` when it is 3 or more, `low` otherwise | TF-012 phase 3, TF-013 |
 | label LR | the LR of one `tricolon` label (`enumeration`, `list-like`, `figure`) from the stored subtype counts, with the joint bootstrap; there is none against the author's specs, because the TF-010 author table has no subtype counts | TF-013 phase 1 |
 | recorded exception | a level the user kept against its band, with the reason written in the roadmap and not in code; `PARTICIPIAL_TAIL` stays at `high` | TF-013 |
+| span bound | the first and last token of a finding's span; since TF-014 `emphatic_reflexive` and `af_less_than` keep both inside one sentence | TF-014 phase 1 |
+| context sentence | the sentence a finding shows and hashes, taken from the span's first token; a span that starts in the sentence before takes that sentence instead | TF-014 phase 1 |
+| migrated waiver copy | a copy of `$PACINO/waivers` in the scratchpad, rekeyed with `--migrate-waivers`, that harvest reads; the pacino originals are not migrated | TF-010 to TF-014 |
+| load | the 0 to 4 score in an `OBJECT_RELATIVE` label, one point each for a noun after a preposition, a stacked or verb-like noun, a subject of three or more words, and a verb that ends the clause | TF-014 phase 2 |
+| suggestion | a rewrite ticfinder offers for an `OBJECT_RELATIVE` finding (`try: ...`, `suggestion` in `--json`), made with the optional `lemminflect`; never part of the fingerprint | TF-014 phase 2 |
+| rewritten share | rewritten over rewritten plus open; used where no finding is waived, so there is no prec*; open findings stand in for findings left in place by the editor | TF-014 phase 3 |

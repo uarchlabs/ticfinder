@@ -391,8 +391,9 @@ Tidied after TF-004. Step numbers are kept stable because task files
 cite them, so they do not give the order of work. The order is listed
 after the steps.
 
-Done: steps 1 to 11, 14, 16 and 17. Planned: steps 12, 13 and 15. The
-list stays in step order, so the numbers render as written.
+Done: steps 1 to 11, 14, 16 and 17, and step 15 items 1 to 3. Planned:
+steps 12 and 13, and step 15 items 4 to 6. The list stays in step
+order, so the numbers render as written.
 
 1. Drop `harvest.py` into `ticfinder/eval/`, run it, and confirm the
    baseline numbers (TF-001, section 8).
@@ -506,10 +507,11 @@ list stays in step order, so the numbers render as written.
     candidate for `med`. `GAPPED_ANTITHESIS` and `NEG_ESCALATION` read
     poorly in papers. The reports and their JSON summaries are inputs
     for step 8.
-15. **Object relatives and trailing verbs.** Planned. The design, the
-    vocabulary and the evidence are in `notes/ticfinder-orc-context.md`, with
-    a patch, `notes/adv1-object-relative.patch`, built against c0d95d4. The
-    target is a verb that ends its phrase after the clause's own
+15. **Object relatives and trailing verbs.** Items 1 to 3 done
+    (TF-014); items 4 to 6 left for TF-015. The design, the vocabulary
+    and the evidence are in `notes/ticfinder-orc-context.md`, with a
+    patch, `notes/adv1-object-relative.patch`, built against c0d95d4.
+    The target is a verb that ends its phrase after the clause's own
     subject: "every variable the loops assign", "the array write the
     last primitive made". Clark, Martin and Mahowald (2026,
     arXiv:2610.29162) find that frontier models overuse reduced object
@@ -517,15 +519,21 @@ list stays in step order, so the numbers render as written.
     `TRAILING_LIGHT_VERB` and `OBJECT_RELATIVE`, with the patterns
     `zero_object_relative` and `that_object_relative`, and matches POS
     sequences because spaCy misparses these sentences. Work, in order:
-    1. Regenerate the patch against current `adv1` and run
-       `make regress`. Check `eval/jsoncheck.py` against the new
-       `suggestion` field in `--json`.
-    2. Start both constructions at `low`. The patch's `med` levels were
-       set by judgement, so step 8's LRs set them instead.
-    3. Run harvest on the pacino blogs and report `prec*` for each
-       pattern and each load level. The design's precision check counted
-       real object relatives in this repo's prose, which bears on the
-       human rate, and gave no precision.
+    1. Done (TF-014 phase 2). The patch was rebuilt on main after a
+       span fix in phase 1, with rewrite suggestions and the optional
+       `lemminflect`. All 40 of its test rows pass in the full suite,
+       and every existing finding is unchanged. `eval/jsoncheck.py`
+       gives MATCH on every committed report; it does not read
+       ticfinder's `--json`, where `suggestion` is a new string field.
+    2. Done (TF-014 phase 2). Both constructions and every load report
+       at `low`; the label keeps the load.
+    3. Done (TF-014 phase 3). The 7 harvested blogs give 18 labels for
+       the new constructions and no accepted ones, too few to tell
+       whether load predicts rewriting (H3). In a reading of the blogs,
+       16 of 20 `zero_object_relative` findings, 2 of 5
+       `that_object_relative` findings and 2 of 2 `TRAILING_LIGHT_VERB`
+       findings are real. The `that` pattern mostly finds complement
+       clauses after a noun ("the rule that a defect found is fixed").
     4. One combined corpus pass at a pinned version: arXiv bodies, the
        spec baseline and the `pacino` specs. It reports rates and LRs
        for the three patterns and the zero:that ratio, which needs a row
@@ -537,15 +545,12 @@ list stays in step order, so the numbers render as written.
        an auxiliary ("a pop the p3 type does not have") and
        as-parentheticals ("as the planning documents use").
 
-    Three items in the design stay out of this step: the surprisal
-    prototype (minicons and a GPT-2 class model, too heavy for
-    `ticfinder.py`, so it would live in `eval/`), a checker for comments
-    in source code, and new entries in the CLAUDE.md used for
-    generation. Whether rewrite suggestions (`try: ...`) and the
-    optional `lemminflect` dependency belong in the tool is the user's
-    decision. Harvest can recover rewritten findings from old drafts,
-    but only waivers mark findings as accepted, so blogs edited before
-    this step lands give rewritten labels and no accepted ones.
+    Left for TF-015: items 4 to 6; complement-clause negative rows for
+    `that_object_relative` before its LR is read, since the reading
+    found 3 of 5 findings were complement clauses; and accepted labels,
+    which come only from blogs edited and waived after this step. The
+    surprisal prototype, a checker for comments in source code, and new
+    entries in the CLAUDE.md used for generation stay out of this step.
 16. **Precision fixes for the spec register** (TF-010). Done.
     `cc_coordinated` needs the negation in the first conjunct, and the
     additive `not only X but also Y` is now its own pattern,
@@ -584,8 +589,10 @@ reports 16 reran, at one ticfinder version. 17 goes after 16 and before 8; it
 changed no code, so 8 reads the TF-010 reports. Both parts of 8 are done,
 so 15 can start at levels set from measured LRs. 12 needs new labels from blog editing, so
 it goes when they exist. 13 comes after 8. 15 comes after 8, so its
-levels come from measured LRs. It can go before 13, or during 12's blog
-editing at `low` to collect accepted labels. Step 13's mining can also
+levels come from measured LRs. Its items 1 to 3 are done (TF-014), at
+`low`. Items 4 to 6 (TF-015) can go before 13, or during 12's blog
+editing, which also collects accepted labels for the new
+constructions. Step 13's mining can also
 check whether it finds reduced object relatives without being told, since its
 corpora do not depend on the detector, as long as the miner is not tuned
 toward them.
@@ -2997,3 +3004,68 @@ in turn, twice, at nice 19. The first pair (100.0 s and 71.1 s)
 includes a cold start under a load average near 24. The second pair
 took 68.13 s and 68.07 s, about 1,425 words a second for both. The two
 constructions cost nothing that this machine can measure.
+
+### Phase 3: blog measurement and records
+
+ticfinder is at 67a2ce3 (sha256 c435667005e1), the phase 2 commit.
+
+**Harvest.** On the migrated copy, with `--by-subtype`, harvest gives
+132 accepted, 54 rewritten, 302 deleted and 9 open. Every row of an
+existing construction equals the phase 1 harvest: the same 479 labels
+and fingerprints, and the same pattern and subtype rows. The new rows
+add 2 rewritten, 10 deleted and 6 open. No waiver names a new
+construction, so none is accepted and there is no prec*. The rewritten
+share is rewritten over rewritten plus open. Open findings stand in
+for findings left in place by the editor.
+
+| pattern | label | rewritten | deleted | open | rewritten share |
+|---|---|---|---|---|---|
+| `zero_object_relative` | load 0 | 0 | 1 | 1 | 0.00 (0 / 1) |
+| `zero_object_relative` | load 1 | 2 | 5 | 3 | 0.40 (2 / 5) |
+| `zero_object_relative` | load 2 | 0 | 3 | 2 | 0.00 (0 / 2) |
+| `zero_object_relative` | load 3 | 0 | 0 | 0 | - |
+| `that_object_relative` | any | 0 | 0 | 0 | - |
+| `TRAILING_LIGHT_VERB` | `make` | 0 | 1 | 0 | - |
+
+**H3: too few findings to tell.** At load 2 or more the rewritten
+share is 0 of 2; below it, 2 of 6 (0.33). The direction is the
+reverse of H3. Only 8 findings have a rewritten or open label, too few
+to separate the two groups. The deleted
+findings, 4 at load 2 or more and 6 below, give no evidence either
+way. Only 7 of the 33 blogs have waiver files and an edit history that
+harvest reads. A test of H3 needs blogs edited after this step, with
+waivers that mark which findings were kept.
+
+**Reading.** On the console, 20 random blog findings of
+`zero_object_relative` (seed 14014, of 28) and all 5
+`that_object_relative` and all 2 `TRAILING_LIGHT_VERB` findings. Counts
+only.
+
+| pattern | real | not real |
+|---|---|---|
+| `zero_object_relative` | 16 / 20 | an embedded question (1), a fronted phrase before a main clause (2), a broken span (1) |
+| `that_object_relative` | 2 / 5 | complement clauses after a noun (3) |
+| `TRAILING_LIGHT_VERB` | 2 / 2 | |
+
+Both `TRAILING_LIGHT_VERB` findings have a pronoun subject and one is a
+collocate (`decision`). Of the 20 suggestions in the reading, 13 read
+as a fair rewrite. The 7 that do not are on findings that are not real
+object relatives, or on a `whose` head ("a block whose end placed by
+the FTB"). `zero_object_relative` has 28 findings in the blogs (0.29 per 1,000
+words), 2 in `notes/` and none in the README.
+
+**README.** The construction table has both rows, a passage says what
+they report and at what level, and the install section documents the
+suggestions and the optional `lemminflect`. `make` reports the same 22
+findings as before and 2 new ones, both kept: `TRICOLON` on the list
+of the four load points, and `CORRECTIVE_CONTRAST` on "Use `md`, not
+`sm`", an older sentence that now parses as one because of the new
+paragraph above it, and which names a real choice. A participial tail
+in the new passage was rewritten. The example in it is now in
+backticks, which stops the new detector firing on it.
+
+**Verdict.** H1 holds; the `af_less_than` overrun was a second cause
+outside it, fixed at the user's choice. H2 holds. H3 cannot be tested
+on the current blogs. The new detectors read about 4 in 5 real for
+the zero form and 2 in 5 for the `that` form in this LLM text, and
+both stay at `low` until step 15 item 4 measures their LRs.

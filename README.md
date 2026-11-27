@@ -12,7 +12,21 @@ generated prose, and the clustering is what breaks reader flow.
 ```bash
 pip install spacy
 python3 -m spacy download en_core_web_md
+pip install lemminflect      # optional: rewrite suggestions
 ```
+
+With `lemminflect` installed, many `OBJECT_RELATIVE` findings carry a
+suggested rewrite as a reduced passive, which puts the verb next to its
+noun: `try: every variable assigned by the loops`. The suggestion is
+printed under the finding, shown on its HTML card, and written as
+`suggestion` in `--json` (an empty string when there is none). It is
+not part of the fingerprint, so waivers are unaffected. No suggestion
+is made when the verb ends in a preposition (`the file the logger
+writes to`), when it has no natural passive (`has`, `contains`), or
+when the `by` phrase would be long. Without `lemminflect` the findings
+still report, with no suggestions. A suggestion is a starting point:
+when the finding is not a real object relative, the suggestion reads
+wrong too.
 
 Use `md`, not `sm`. On `a bug wrapped in an excuse trenchcoat`, the small model
 attaches `trenchcoat` as `advmod` of `excuse`; `md` gets the compound right.
@@ -55,6 +69,8 @@ Structural (dependency parse):
 | `PARTICIPIAL_TAIL` | `, making it easier to…` tacked on the end |
 | `TRICOLON` | coordination of three or more |
 | `DISGUISE_METAPHOR` | X wrapped in / wearing / masquerading as Y |
+| `TRAILING_LIGHT_VERB` | the array write the last primitive made |
+| `OBJECT_RELATIVE` | every variable (that) the loops assign |
 
 Phrasal (token patterns, built in):
 
@@ -186,6 +202,32 @@ rhetorical miscalibration found tricolon to be the strongest single
 differentiator between LLM and human writing (p < 0.001), at 7.13 per document
 against 3.73 for human experts, and characterised it as structural filler
 deployed independently of argumentative occasion.
+
+`OBJECT_RELATIVE` and `TRAILING_LIGHT_VERB` report a verb that comes
+at the end of its phrase, after the phrase's own subject, so the reader
+holds a noun until the verb arrives. In "every variable the loops
+assign", `variable` is what gets assigned, and `assign` comes after
+`the loops`. This is an object relative clause: the noun it describes
+is the object of the clause's verb. `zero_object_relative` finds the
+form with no `that`, which frontier models use more than human writers
+do (Clark et al. 2026, arXiv:2610.29162).
+`that_object_relative` finds the form with `that` or `which`. Adding
+`that` leaves the verb at the end, so it does not help the reader much.
+`TRAILING_LIGHT_VERB` finds a phrase whose real action has become a
+noun and whose last word is a light verb, an empty verb such as `made`
+or `did`: `the array write the last primitive made`.
+
+Each `OBJECT_RELATIVE` label carries a load from 0 to 4, one point for
+each of: the noun follows a preposition, the noun is stacked on another
+noun or is a verb used as a noun, the clause's subject is three or more
+words, and the verb ends the clause. A short one with a pronoun subject
+("the file you sent") is ordinary English and is not reported.
+
+Both constructions report at low confidence, every load included, until
+they are measured against human and LLM corpora. In a reading of the
+pacino blogs, 16 of 20 `zero_object_relative` findings were real object
+relatives and 2 of 5 `that_object_relative` findings were; the others
+were mostly `that` clauses after a noun such as `rule` or `hypothesis`.
 
 ## Working through a document
 
