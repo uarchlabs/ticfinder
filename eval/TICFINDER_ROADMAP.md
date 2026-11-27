@@ -607,6 +607,12 @@ check whether it finds reduced object relatives without being told, since its
 corpora do not depend on the detector, as long as the miner is not tuned
 toward them.
 
+Technical debt outside the steps is in `planning/PROJECT_STATUS.md`.
+Item 4 comes from TF-015: whether `en_core_web_trf` raises precision
+on real text, and whether it needs a GPU. Its first part, a CPU parse
+of the TF-015 readings, can go with the zero form's precision fix. A
+GPU option waits until `trf` would parse whole documents.
+
 ## 8. TF-001 results (2026-11-17)
 
 **Step 1.** `harvest.py` reproduces the baseline. Every per-pattern row
