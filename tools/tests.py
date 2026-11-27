@@ -68,7 +68,8 @@ EXPECTED = {
     "TRICOLON": ["tricolon", "tricolon_parataxis"],
     "DISGUISE_METAPHOR": ["disguise_metaphor"],
     "TRAILING_LIGHT_VERB": ["trailing_light_verb"],
-    "OBJECT_RELATIVE": ["zero_object_relative", "that_object_relative"],
+    "OBJECT_RELATIVE": ["zero_object_relative", "that_object_relative",
+                        "aux_object_relative", "as_parenthetical"],
 }
 
 EXPECTED_PHRASE = ["FRAME_MARKER", "HOLLOW_BOOSTER", "CLOSER", "HEDGE_STACK"]
@@ -469,6 +470,11 @@ PATTERN_CASES = [
      {"trailing_light_verb": "low"}),
     ("TRAILING_LIGHT_VERB", "The decision the team made was final.",
      {"trailing_light_verb": "low"}),                          # collocate
+    # TF-015: the two gap patterns start at low too
+    ("OBJECT_RELATIVE", "Drop every entry the cache does not hold.",
+     {"aux_object_relative": "low"}),
+    ("OBJECT_RELATIVE", "The fields are named as the planning documents "
+                        "use.", {"as_parenthetical": "low"}),
 ]
 
 # Rewrite suggestions (OBJECT_RELATIVE). Need lemminflect; skipped without.
@@ -482,6 +488,8 @@ SUGGESTION_CASES = [
     # no suggestion: stranded preposition, and a verb with no passive
     ("Close the file the logger writes to.", ""),
     ("Count the bits the status field has.", ""),
+    # TF-015: a 'whose' head gives 'a block whose end placed by the FTB'
+    ("Mark a block whose end the fetch unit placed.", ""),
 ]
 
 
@@ -838,6 +846,109 @@ PATTERN_ROWS = [
      "The option either SHOULD NOT or MUST NOT be used."),
     ("NEG_ESCALATION", "neg_escalation", False,
      "The flag need not, or must not, be set, depending on the mode."),
+
+    # -- that_object_relative: complement clauses (TF-015). The TF-014
+    # blog reading found 3 of 5 findings were a 'that' clause giving the
+    # content of a noun after a main verb, where the matched noun and
+    # verb are the subject of a longer clause. Synthetic forms of each.
+    # A finite verb right after the matched verb:
+    ("OBJECT_RELATIVE", "that_object_relative", False,
+     "Each plan now states the rule that a fault found is logged at "
+     "once."),
+    # an adverb and a phrase before the clause's own verb:
+    ("OBJECT_RELATIVE", "that_object_relative", False,
+     "The trace supported the claim that the bug class found earlier in "
+     "the fetch path spread to decode."),
+    # a passive participle with 'by', after a noun in a phrase:
+    ("OBJECT_RELATIVE", "that_object_relative", False,
+     "The review led to a note by the lead that the cache rules used by "
+     "the tool were unusual."),
+    # real object relatives the guard must keep: a second verb after
+    # 'and', a clause ended by a comma, the head as the sentence subject,
+    # and the head as subject of a clause after 'that'
+    ("OBJECT_RELATIVE", "that_object_relative", True,
+     "The first draft had a gap that the reviewer identified and "
+     "documented."),
+    ("OBJECT_RELATIVE", "that_object_relative", True,
+     "The case is a mispredict of a branch that no slot held, so the fix "
+     "is small."),
+    ("OBJECT_RELATIVE", "that_object_relative", True,
+     "The branch that no slot held was evicted."),
+    ("OBJECT_RELATIVE", "that_object_relative", True,
+     "Check that the value that the loop found is zero."),
+    # the zero form keeps its findings in the same frames
+    ("OBJECT_RELATIVE", "zero_object_relative", True,
+     "The case is a mispredict of a branch no slot held, so the fix is "
+     "small."),
+
+    # -- aux_object_relative: the verb after an auxiliary (TF-015,
+    # orc note s.5): 'a pop the p3 type does not have'
+    ("OBJECT_RELATIVE", "aux_object_relative", True,
+     "A pop the p3 type does not have is dropped."),
+    ("OBJECT_RELATIVE", "aux_object_relative", True,
+     "Drop every entry the cache does not hold."),
+    ("OBJECT_RELATIVE", "aux_object_relative", True,
+     "Log each field the decoder does read."),
+    ("OBJECT_RELATIVE", "aux_object_relative", True,
+     "Log the value the loop did not assign."),
+    ("OBJECT_RELATIVE", "aux_object_relative", True,
+     "Keep the counts the old tool did write."),
+    ("OBJECT_RELATIVE", "aux_object_relative", True,
+     "Keep every field the decoder can read."),
+    ("OBJECT_RELATIVE", "aux_object_relative", True,
+     "Skip every op the core cannot decode."),
+    ("OBJECT_RELATIVE", "aux_object_relative", True,
+     "List the slots the scheduler will fill."),
+    ("OBJECT_RELATIVE", "aux_object_relative", True,
+     "The driver the team will not ship supports the card."),
+    ("OBJECT_RELATIVE", "aux_object_relative", True,
+     "Drop every entry that the cache does not hold."),
+    # no head noun, an object after the verb, a pronoun subject, and a
+    # subordinate clause with no comma
+    ("OBJECT_RELATIVE", "aux_object_relative", False,
+     "The cache does not hold the entry."),
+    ("OBJECT_RELATIVE", "aux_object_relative", False,
+     "The team will not ship the driver."),
+    ("OBJECT_RELATIVE", "aux_object_relative", False,
+     "On each cycle the core does not drain the queue."),
+    ("OBJECT_RELATIVE", "aux_object_relative", False,
+     "Drop the entries we did not use."),
+    ("OBJECT_RELATIVE", "aux_object_relative", False,
+     "If the core can read the field the test passes."),
+    # the finite forms stay with zero_object_relative
+    ("OBJECT_RELATIVE", "aux_object_relative", False,
+     "Drop every entry the cache holds."),
+
+    # -- as_parenthetical: an 'as' clause whose verb needs an object and
+    # has none (TF-015, orc note s.5): 'as the planning documents use'
+    ("OBJECT_RELATIVE", "as_parenthetical", True,
+     "The fields are named as the planning documents use."),
+    ("OBJECT_RELATIVE", "as_parenthetical", True,
+     "Name the states as the reference model uses."),
+    ("OBJECT_RELATIVE", "as_parenthetical", True,
+     "Order the bits as the spec table has, then check them."),
+    # verbs that allow the gap
+    ("OBJECT_RELATIVE", "as_parenthetical", False,
+     "As you know, the cache is small."),
+    ("OBJECT_RELATIVE", "as_parenthetical", False,
+     "The field is set as the manual describes."),
+    ("OBJECT_RELATIVE", "as_parenthetical", False,
+     "The bits are ordered as the spec explains."),
+    ("OBJECT_RELATIVE", "as_parenthetical", False,
+     "The run fails as the design note says."),
+    ("OBJECT_RELATIVE", "as_parenthetical", False,
+     "The count rose, as the model expected."),
+    # 'as' clauses with an object, an intransitive verb, and a comparison
+    ("OBJECT_RELATIVE", "as_parenthetical", False,
+     "The names are kept as the planning documents use them."),
+    ("OBJECT_RELATIVE", "as_parenthetical", False,
+     "As the core uses the bus, the cache waits."),
+    ("OBJECT_RELATIVE", "as_parenthetical", False,
+     "As the cache grows, misses fall."),
+    ("OBJECT_RELATIVE", "as_parenthetical", False,
+     "Use the same names as the planning documents use."),
+    ("OBJECT_RELATIVE", "as_parenthetical", False,
+     "Store as many entries as the table holds."),
 ]
 
 # PATTERN_ROWS that fail before a fix lands (TF-010), keyed by

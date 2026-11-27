@@ -1825,6 +1825,8 @@ def _passive_rewrite(doc, np_start, rel_end, subj_start, v):
     loops'. Returns "" where the rewrite would read worse or is unknown."""
     if getInflection is None or v.lemma_.lower() in _NO_PASSIVE:
         return ""
+    if doc[np_start].lower_ == "whose":
+        return ""                       # TF-015: 'whose end placed by the FTB'
     nxt = doc[v.i + 1] if v.i + 1 < len(doc) else None
     if nxt is not None and nxt.pos_ == "ADP":
         return ""                       # stranded: 'the file the log writes to'
@@ -1838,8 +1840,42 @@ def _passive_rewrite(doc, np_start, rel_end, subj_start, v):
     return f"{head} {forms[0]} by {agent}"
 
 
-def _object_relatives(doc, with_relativiser):
-    """Shared core for both OBJECT_RELATIVE patterns.
+# TF-015: auxiliaries that aux_object_relative accepts before the verb.
+# 'cannot', "can't" and "won't" split into 'can'/'ca'/'wo' and a negation.
+_ORC_AUX = {"do", "does", "did", "can", "ca", "could", "will", "wo",
+            "would"}
+
+
+def _complement_clause(doc, sent, np_start, v):
+    """TF-015: True when 'NOUN that NP VERB' is a complement clause, not an
+    object relative: 'carries the rule that a defect found is fixed'.
+
+    The head comes after a main verb, and the matched verb is followed, in
+    the same clause, by another finite verb or a participle. 'a defect
+    found' is then the subject of 'is fixed', and the clause has no gap.
+    A head that opens the sentence ('The branch that no slot held was
+    evicted') or that follows 'that' or 'whether' ('Check that the value
+    that the loop found is zero') is the subject of the next verb, so the
+    clause is kept.
+    """
+    before = doc[sent.start:np_start]
+    verbs = [t for t in before if t.pos_ in ("VERB", "AUX")]
+    if not verbs:
+        return False
+    if any(t.lower_ in ("that", "whether", "if") and t.i > verbs[-1].i
+           for t in before):
+        return False
+    for t in doc[v.i + 1:sent.end]:
+        if t.pos_ in ("PUNCT", "CCONJ", "SCONJ") or t.lower_ in (
+                "that", "which", "who", "whom"):
+            return False
+        if t.tag_ in ("VBD", "VBZ", "VBP", "VBN", "MD"):
+            return True
+    return False
+
+
+def _object_relatives(doc, with_relativiser, after_aux=False):
+    """Shared core for the OBJECT_RELATIVE patterns.
 
     The check is on POS tags, not the dependency parse. On the dense cases
     the parser misreads the clause's subject as an object, or its verb as a
@@ -1849,6 +1885,12 @@ def _object_relatives(doc, with_relativiser):
 
     Pronoun subjects ('the file you sent') are not reported: they are the
     common, easy case. Light verbs are left to TRAILING_LIGHT_VERB.
+
+    with_relativiser: True needs 'that'/'which'/'whom', False needs none,
+    None takes either. after_aux (TF-015): the verb is a bare form after
+    an auxiliary and an optional 'not' ('a pop the p3 type does not
+    have'); otherwise it is finite and follows the subject directly.
+    Returns (span, subtype, confidence, has_relativiser).
     """
     LIGHT = {"make", "do", "perform", "execute", "issue", "conduct"}
     RELATIVISER = {"that", "which", "whom"}
@@ -1869,8 +1911,22 @@ def _object_relatives(doc, with_relativiser):
     for sent in doc.sents:
         verbs = [t for t in sent if t.pos_ in ("VERB", "AUX")]
         for v in sent:
-            if v.pos_ != "VERB" or v.tag_ not in ("VBD", "VBP", "VBZ", "VBN"):
+            if v.pos_ != "VERB":
                 continue
+            if after_aux:
+                if v.tag_ != "VB":
+                    continue
+                a = v.i - 1
+                if a > sent.start and doc[a].lower_ in ("not", "n't"):
+                    a -= 1
+                if a <= sent.start or doc[a].pos_ != "AUX" \
+                        or doc[a].lower_ not in _ORC_AUX:
+                    continue
+                subj_end = a
+            else:
+                if v.tag_ not in ("VBD", "VBP", "VBZ", "VBN"):
+                    continue
+                subj_end = v.i
             if v.lemma_.lower() in LIGHT:
                 continue
             nxt = doc[v.i + 1] if v.i + 1 < sent.end else None
@@ -1883,8 +1939,9 @@ def _object_relatives(doc, with_relativiser):
             if nxt is not None and nxt.lower_ not in TEMPORAL and (
                     nxt.pos_ in OBJ_START or nxt.lower_ == "so"):
                 continue
-            # The clause subject: DET [mods]* NOUN, ending just before v.
-            j = v.i - 1
+            # The clause subject: DET [mods]* NOUN, ending just before v
+            # (or before the auxiliary).
+            j = subj_end - 1
             if j < sent.start or doc[j].pos_ not in NP_MOD:
                 continue
             while j >= sent.start and doc[j].pos_ in NP_MOD:
@@ -1896,9 +1953,10 @@ def _object_relatives(doc, with_relativiser):
             subj_start = j
             # The relativiser, if this pattern wants one.
             h = subj_start - 1
-            if with_relativiser:
-                if h < sent.start or doc[h].lower_ not in RELATIVISER:
-                    continue
+            has_rel = h >= sent.start and doc[h].lower_ in RELATIVISER
+            if with_relativiser is not None and has_rel != with_relativiser:
+                continue
+            if has_rel:
                 rel_end = h             # head NP ends before 'that'
                 h -= 1
             else:
@@ -1936,11 +1994,14 @@ def _object_relatives(doc, with_relativiser):
             # this is just a fronted phrase: 'In the end the team decided.'
             if not any(t.i < np_start or t.i > v.i for t in verbs):
                 continue
+            # TF-015: 'the rule that a defect found is fixed' has no gap
+            if has_rel and _complement_clause(doc, sent, np_start, v):
+                continue
             prev = doc[np_start - 1] if np_start > sent.start else None
             nested = prev is not None and prev.pos_ == "ADP"
             stacked = (h - 1 >= k and doc[h - 1].pos_ in ("NOUN", "PROPN")) \
                 or head.pos_ == "VERB"
-            long_subj = v.i - subj_start >= 3
+            long_subj = subj_end - subj_start >= 3
             final = nxt is None or nxt.text in (".", ";", ":", "!", "?",
                                                 ")", ",")
             load = sum((nested, stacked, long_subj, final))
@@ -1949,9 +2010,11 @@ def _object_relatives(doc, with_relativiser):
             # harvest can group by it
             conf = "low"
             span = doc[np_start:v.i + 1]
-            span._.tf_suggestion = _passive_rewrite(doc, np_start, rel_end,
-                                                    subj_start, v)
-            out.append((span, f"load {load}", conf))
+            # no suggestion after an auxiliary: 'does not have' has no
+            # simple passive
+            span._.tf_suggestion = "" if after_aux else _passive_rewrite(
+                doc, np_start, rel_end, subj_start, v)
+            out.append((span, f"load {load}", conf, has_rel))
     return out
 
 
@@ -1966,16 +2029,96 @@ def _object_relatives(doc, with_relativiser):
 def zero_object_relative(doc, nlp):
     """Object relative with no relativiser: 'every variable the loops
     assign'. The form frontier models overuse (Clark et al. 2026)."""
-    return _object_relatives(doc, with_relativiser=False)
+    return [(s, sub, conf) for s, sub, conf, _ in
+            _object_relatives(doc, with_relativiser=False)]
 
 
 @pattern("OBJECT_RELATIVE")
 def that_object_relative(doc, nlp):
     """Object relative with 'that' or 'which': 'every variable that the
     loops assign'. Easier to read than the zero form, so its findings
-    always report at low confidence."""
-    return [(s, sub, "low") for s, sub, conf in
+    always report at low confidence. TF-015: complement clauses after a
+    noun ('the rule that a defect found is fixed') are skipped."""
+    return [(s, sub, "low") for s, sub, conf, _ in
             _object_relatives(doc, with_relativiser=True)]
+
+
+@pattern("OBJECT_RELATIVE")
+def aux_object_relative(doc, nlp):
+    """TF-015: the verb follows an auxiliary, with or without 'not': 'a
+    pop the p3 type does not have'. Both relativiser forms; the subtype
+    names the form and the load ('zero, load 2'). The finite forms stay
+    with the two patterns above."""
+    return [(s, f"{'that' if rel else 'zero'}, {sub}", "low")
+            for s, sub, conf, rel in
+            _object_relatives(doc, with_relativiser=None, after_aux=True)]
+
+
+# TF-015: verbs that need an object, for as_parenthetical. An allow-list,
+# because most verbs also run intransitive ('as the cache grows'), and
+# reporting verbs allow the gap ('as the manual describes').
+_AS_NEEDS_OBJECT = {
+    "use", "have", "hold", "contain", "include", "need", "assign", "take",
+    "give", "put", "produce", "cover", "carry", "store", "keep", "build",
+    "call", "name", "reference", "cite", "adopt", "employ", "provide",
+    "enforce", "implement", "expose", "emit", "own", "lack", "place",
+    "apply", "choose", "pick", "select", "prefer", "accept", "reject",
+}
+# Never reported, though some are in no list above: the gap is natural.
+_AS_GAP_OK = {"know", "say", "expect", "see", "note", "describe",
+              "mention", "show", "explain", "state", "suggest", "predict",
+              "define", "specify", "require", "intend", "report",
+              "discuss", "indicate", "recall", "assume", "claim"}
+
+
+@pattern("OBJECT_RELATIVE")
+def as_parenthetical(doc, nlp):
+    """TF-015: an 'as' clause whose verb needs an object and has none: 'as
+    the planning documents use'. POS tags only, like the patterns above:
+
+        as  DET [ADJ|NOUN]* NOUN  VERB  (no object follows)
+
+    The verb must be on an allow-list of verbs that need an object.
+    Comparisons ('the same names as the documents use', 'as many entries
+    as the table holds') allow the gap and are skipped."""
+    OBJ_START = {"DET", "NOUN", "PROPN", "PRON", "ADJ", "NUM", "PART"}
+    NP_MOD = {"ADJ", "NOUN", "PROPN", "NUM"}
+    out = []
+    for sent in doc.sents:
+        for t in sent:
+            if t.lower_ != "as":
+                continue
+            if any(x.lower_ in ("as", "same", "such")
+                   for x in doc[max(sent.start, t.i - 6):t.i]):
+                continue
+            j = t.i + 1
+            if j >= sent.end or doc[j].pos_ != "DET" or doc[j].lower_ in (
+                    "whose", "which", "what", "whichever"):
+                continue
+            k = j + 1
+            while k < sent.end and doc[k].pos_ in NP_MOD:
+                k += 1
+            if k == j + 1 or k >= sent.end \
+                    or doc[k - 1].pos_ not in ("NOUN", "PROPN"):
+                continue
+            v = doc[k]
+            lemma = v.lemma_.lower()
+            if v.tag_ not in ("VBD", "VBP", "VBZ"):
+                continue
+            nxt = doc[k + 1] if k + 1 < sent.end else None
+            # 'has' after 'as' is often tagged AUX; it is the main verb
+            # unless a verb follows
+            if v.pos_ != "VERB" and not (
+                    lemma == "have" and v.pos_ == "AUX" and (
+                        nxt is None or nxt.pos_ not in ("VERB", "AUX"))):
+                continue
+            if lemma in _AS_GAP_OK or lemma not in _AS_NEEDS_OBJECT:
+                continue
+            if nxt is not None and (nxt.pos_ in OBJ_START
+                                    or nxt.lower_ == "so"):
+                continue
+            out.append((doc[t.i:v.i + 1], lemma, "low"))
+    return out
 
 
 # ------------------------------------------------- lexical / phrasal layer
