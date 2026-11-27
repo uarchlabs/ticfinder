@@ -2,7 +2,7 @@
 
 Terms used in the ticfinder roadmap, task files and notes, grouped by
 where they come from. Table 1 holds standard terms. Table 2 holds
-ticfinder's own terms, often an ordinary word with a stretched meaning. Table 3 holds terms coined in TF-003 to TF-014, which have no
+ticfinder's own terms, often an ordinary word with a stretched meaning. Table 3 holds terms coined in TF-003 to TF-015, which have no
 meaning outside this project.
 
 ## Table 1. Standard terms, used in their usual sense
@@ -67,7 +67,7 @@ meaning outside this project.
 | waiver, stale waiver | a fingerprint the editor marked as acceptable; stale when no current finding matches it | a detector fix can make a waiver stale without invalidating it; `--prune-stale` removes it |
 | all sections, body sections | in TF-005, all four section types together, against the `body` section type alone | the TF-005 `HOLLOW_BOOSTER` ratio 3.31 is body sections; all sections give 2.98 |
 
-## Table 3. Terms from TF-003 to TF-014 with no outside standing
+## Table 3. Terms from TF-003 to TF-015 with no outside standing
 
 | term | meaning | where |
 |---|---|---|
@@ -150,3 +150,12 @@ meaning outside this project.
 | load | the 0 to 4 score in an `OBJECT_RELATIVE` label, one point each for a noun after a preposition, a stacked or verb-like noun, a subject of three or more words, and a verb that ends the clause | TF-014 phase 2 |
 | suggestion | a rewrite ticfinder offers for an `OBJECT_RELATIVE` finding (`try: ...`, `suggestion` in `--json`), made with the optional `lemminflect`; never part of the fingerprint | TF-014 phase 2 |
 | rewritten share | rewritten over rewritten plus open; used where no finding is waived, so there is no prec*; open findings stand in for findings left in place by the editor | TF-014 phase 3 |
+| complement-clause guard | the check that stops `that_object_relative` firing on a `that` clause that states what a noun says ("the rule that a defect found is fixed"): such a clause has no gap, so nothing waits for its verb | TF-015 phase 1 |
+| aux form | `aux_object_relative`: an object relative whose verb follows `do`, `does`, `did`, `can`, `could`, `will` or `would`, with or without `not` ("a branch the table does not hold") | TF-015 phase 1 |
+| as-parenthetical | `as_parenthetical`: an `as` clause whose verb needs an object and has none ("named as the planning documents use"); verbs that allow the gap, such as `know`, are left out | TF-015 phase 1 |
+| load group | the zero form's loads summed into two rows, 0 to 1 and 2 or more, so each has enough findings to rate | TF-015 phase 2 |
+| zero to `that` ratio | the `zero_object_relative` rate over the `that_object_relative` rate in one corpus, both from the same bootstrap draw, so the interval is paired | TF-015 phase 2 |
+| ratio of ratios (TF-015) | one corpus's zero to `that` ratio over another's, dividing draws of the same index: arXiv post over pre, and the LLM corpus over the pool; distinct from the TF-005 body over abstract sense | TF-015 phase 2 |
+| light-verb closure | an object relative that ends on a light verb (`made`, `did`), the shape `TRAILING_LIGHT_VERB` reports; counted in the sanity readings | TF-015 phase 2 |
+| relcl arc | a dependency arc labelled `relcl` from a head noun to the verb of the relative clause that describes it; the parse agreement check counts it per model | TF-015 phase 3 |
+| parse agreement | whether a parser gives the arc a detector's match implies, here `relcl` from the head noun to the clause verb, counted on the test rows for `md` and `trf` | roadmap 5.6, TF-015 phase 3 |

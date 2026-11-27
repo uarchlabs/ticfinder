@@ -391,8 +391,7 @@ Tidied after TF-004. Step numbers are kept stable because task files
 cite them, so they do not give the order of work. The order is listed
 after the steps.
 
-Done: steps 1 to 11, 14, 16 and 17, and step 15 items 1 to 3. Planned:
-steps 12 and 13, and step 15 items 4 to 6. The list stays in step
+Done: steps 1 to 11 and 14 to 17. Planned: steps 12 and 13. The list stays in step
 order, so the numbers render as written.
 
 1. Drop `harvest.py` into `ticfinder/eval/`, run it, and confirm the
@@ -507,8 +506,8 @@ order, so the numbers render as written.
     candidate for `med`. `GAPPED_ANTITHESIS` and `NEG_ESCALATION` read
     poorly in papers. The reports and their JSON summaries are inputs
     for step 8.
-15. **Object relatives and trailing verbs.** Items 1 to 3 done
-    (TF-014); items 4 to 6 left for TF-015. The design, the vocabulary
+15. **Object relatives and trailing verbs.** Done: items 1 to 3
+    (TF-014) and items 4 to 6 (TF-015, section 22). The design, the vocabulary
     and the evidence are in `notes/ticfinder-orc-context.md`, with a
     patch, `notes/adv1-object-relative.patch`, built against c0d95d4.
     The target is a verb that ends its phrase after the clause's own
@@ -534,23 +533,34 @@ order, so the numbers render as written.
        `that_object_relative` findings and 2 of 2 `TRAILING_LIGHT_VERB`
        findings are real. The `that` pattern mostly finds complement
        clauses after a noun ("the rule that a defect found is fixed").
-    4. One combined corpus pass at a pinned version: arXiv bodies, the
-       spec baseline and the `pacino` specs. It reports rates and LRs
-       for the three patterns and the zero:that ratio, which needs a row
-       type the analysis scripts lack today.
-    5. Parse agreement on the new test rows with `en_core_web_trf`
-       (5.6). If `trf` parses them correctly, a dependency path may
-       raise precision.
-    6. The design's known gaps, each with test rows first: verbs after
-       an auxiliary ("a pop the p3 type does not have") and
-       as-parentheticals ("as the planning documents use").
+    4. Done (TF-015 phase 2). The spec baseline, the arXiv full run
+       and the LLM corpus were rerun at 22cf4fa with no change to any
+       existing row. The analysis scripts gained a zero to `that`
+       ratio row with a paired bootstrap. In arXiv bodies the ratio
+       rose from 2.89 to 4.59 (post over pre 1.59, 1.12 to 2.27). The
+       zero form's LR over the pool is 8.70 (5.06 to 14.01), which set
+       C would band `high`; the other patterns and the light verbs have
+       too few LLM findings. In a reading only 9 of 20 pool findings of
+       the zero form are real, against 17 of 20 in the LLM corpus.
+    5. Done (TF-015 phase 3). `trf` gives the relative-clause arc on
+       29 of 33 positive test rows and `md` on 19, and `trf` gives none
+       on the 3 complement-clause rows where `md` gives 2. A dependency
+       path is worth a later task.
+    6. Done (TF-015 phase 1). `aux_object_relative` and
+       `as_parenthetical` landed at `low` with test rows first, with a
+       complement-clause guard on `that_object_relative` and no
+       suggestion on a `whose` head.
 
-    Left for TF-015: items 4 to 6; complement-clause negative rows for
-    `that_object_relative` before its LR is read, since the reading
-    found 3 of 5 findings were complement clauses; and accepted labels,
-    which come only from blogs edited and waived after this step. The
-    surprisal prototype, a checker for comments in source code, and new
-    entries in the CLAUDE.md used for generation stay out of this step.
+    Left after TF-015: every pattern stays at `low`, and levels for the
+    new patterns wait on a decision by the user; a precision fix for
+    the zero form in human specs (embedded questions, a participle
+    after a pronoun, `There are no X defined`); `as_parenthetical`,
+    which found 0 real of 3 in the pool and nothing in the LLM corpus,
+    needs a fix or a null result; a dependency path with `trf`, timed
+    on the blogs; and accepted labels, which come only from blogs
+    edited and waived after this step. The surprisal prototype, a
+    checker for comments in source code, and new entries in the
+    CLAUDE.md used for generation stay out of this step.
 16. **Precision fixes for the spec register** (TF-010). Done.
     `cc_coordinated` needs the negation in the first conjunct, and the
     additive `not only X but also Y` is now its own pattern,
@@ -589,9 +599,9 @@ reports 16 reran, at one ticfinder version. 17 goes after 16 and before 8; it
 changed no code, so 8 reads the TF-010 reports. Both parts of 8 are done,
 so 15 can start at levels set from measured LRs. 12 needs new labels from blog editing, so
 it goes when they exist. 13 comes after 8. 15 comes after 8, so its
-levels come from measured LRs. Its items 1 to 3 are done (TF-014), at
-`low`. Items 4 to 6 (TF-015) can go before 13, or during 12's blog
-editing, which also collects accepted labels for the new
+levels come from measured LRs. It is done (TF-014, TF-015), with
+every pattern at `low` until the user sets levels from section 22.
+12's blog editing also collects accepted labels for the new
 constructions. Step 13's mining can also
 check whether it finds reduced object relatives without being told, since its
 corpora do not depend on the detector, as long as the miner is not tuned
@@ -3069,3 +3079,230 @@ outside it, fixed at the user's choice. H2 holds. H3 cannot be tested
 on the current blogs. The new detectors read about 4 in 5 real for
 the zero form and 2 in 5 for the `that` form in this LLM text, and
 both stay at `low` until step 15 item 4 measures their LRs.
+
+## 22. TF-015 results (2026-11-27)
+
+Step 15, items 4 to 6, and the two guards TF-014 found were needed.
+Three phases, each committed: 22cf4fa (the detector work), c6014f0
+(the corpus runs) and the phase 3 records.
+
+### Phase 1: guards and gaps
+
+ticfinder was at c435667005e1 (TF-014) before the change and is at
+0aa23656bb24 after it. Harvest on a migrated copy of `$PACINO/waivers`
+gave 132 accepted, 54 rewritten, 302 deleted and 9 open before, as in
+TF-014 phase 3.
+
+**Test rows first.** 37 pattern rows, 2 level rows and 1 suggestion
+row. 20 checks failed before the change: the 2 new registry entries, 2
+of the 3 complement-clause rows, the 10 positive `aux_object_relative`
+rows, the 3 positive `as_parenthetical` rows, the 2 level rows and the
+`whose` row. The third complement-clause row passed already, because
+`md` tags its verb as a participle before `by`.
+
+**Change.**
+- `that_object_relative` drops a match when a verb comes before the
+  head noun and the matched verb is followed, in its own clause, by a
+  finite verb or a participle. This is the shape of "the rule that a
+  defect found is fixed". A head that opens the sentence, or follows
+  `that`, is kept. The rule reads the shape of the sentence and has
+  no list of head nouns.
+- A head that starts with `whose` gets no suggestion. Extending this
+  to `which` and `what` changed a second suggestion, so it stays at
+  `whose`.
+- `aux_object_relative`: the clause verb follows `do`, `does`, `did`,
+  `can`, `could`, `will` or `would`, with or without `not`. Its label
+  gives the form and the load (`zero, load 2`). It gives no
+  suggestion.
+- `as_parenthetical`: `as`, a noun phrase, then a verb from a list of
+  verbs that need an object, with no object after it. Verbs that allow
+  the gap (`know`, `say`, `describe` and others) are never reported,
+  and comparisons (`the same names as`, `as many as`) are skipped. A
+  list of allowed verbs is used because most verbs can also run
+  without an object ("as the cache grows").
+
+**Measure.** `make regress` passes.
+- H2, phase 1 part, holds. Every finding of every other construction
+  is identical in README (24), `notes/` (47) and the blogs (1,137).
+  All 28 blog `zero_object_relative` findings keep their span,
+  fingerprint, label, confidence and context; one loses its
+  suggestion, the `whose` case.
+- H1, blog part, holds. The 3 complement clauses are gone and the 2
+  real `that` findings kept.
+- New: 14 `aux_object_relative` findings in the blogs (about 12 real
+  on a console look; the misses are fronted phrases) and 2
+  `as_parenthetical` findings in `notes/ticfinder-orc-context.md`,
+  where the note quotes its own example.
+- Harvest after: 132, 54, 303, 9. Every row of an existing pattern is
+  unchanged; the one new row is a deleted `aux_object_relative`
+  finding (zero form, load 1).
+
+### Phase 2: the corpus pass
+
+**Runs.** At 22cf4fa, nice 19, one process. Before each run the
+TF-010 and TF-012 tables were checked against their checksum files
+and snapshotted to `private/specs-tf015/`,
+`private/arxiv/bodies-tf015/` and `private/llm-specs-tf015/`.
+
+| run | load average before | time |
+|---|---|---|
+| `spec_baseline.py analyse` | 0.73 | 1,344 s |
+| `arxiv_bodies.py analyse --sample-name full --seed 8008` | 2.48 | 7,683 s |
+| `llm_specs.py analyse` | 25 (other jobs) | 231 s |
+
+The arXiv process had loaded its script before the report code was
+patched, so its report was rebuilt from the new tables with
+`--report-only`. All 1,006 rows of the run's JSON are unchanged in the
+rebuild. The spec report was rebuilt after its arXiv pin moved to
+0aa23656bb24; all 144 rows of `spec-baseline-2026-11-25.json` are
+unchanged in it.
+
+**H2, corpus part: holds.** Per document, every construction and
+pattern count of a construction in the old tables is equal, and no
+word count changed: 11,014 pool and 608 author findings, 110,962 arXiv
+findings over 1,556 papers, and 1,411 LLM-corpus findings over 70
+documents. The LLM run's pin checks give 43 of 43 pool rows and 48 of
+48 arXiv rows equal to the new JSON.
+
+**New rows.** The three scripts report the rows of the first table
+below. They also report a zero to `that` ratio: the zero form's rate
+over the `that` form's rate, from the same bootstrap draw. A ratio of ratios divides two
+corpora's ratio draws of the same index. `eval/jsoncheck.py` renders
+both row types and gives MATCH on the three new reports (168, 1,028
+and 67 rows) and on the 2026-11-25 and 2026-11-26 reports.
+Reports: `eval/spec-baseline-2026-11-27.md`,
+`eval/arxiv-bodies-full-2026-11-27.md` and `eval/llm-lr-2026-11-27.md`,
+each with its JSON.
+
+Rates per 1,000 words, and the LR over the equal-weight pool. The
+arXiv column is post over pre, all sections.
+
+| row | pool n | pool rate | arXiv ratio | LLM n | LR (95% CI) | set C |
+|---|---|---|---|---|---|---|
+| `OBJECT_RELATIVE` | 125 | 0.07 | 0.94, flat | 54 | 5.74 (3.69 to 8.31) | high |
+| `zero_object_relative` | 57 | 0.03 | 1.08, flat | 41 | 8.70 (5.06 to 14.01) | high |
+| zero form, load 0 to 1 | 33 | 0.02 | 1.20, flat | 30 | 12.49 (6.94 to 22.69) | high |
+| zero form, load 2 or more | 24 | 0.02 | 0.98, flat | 11 | too few | low |
+| `that_object_relative` | 42 | 0.02 | 0.68 (0.47 to 0.94), fell | 1 | too few | low |
+| `aux_object_relative` | 23 | 0.01 | 0.80, flat | 12 | too few | low |
+| `as_parenthetical` | 3 | 0.00 | too few | 0 | too few | low |
+| `TRAILING_LIGHT_VERB` | 5 | 0.00 | too few | 0 | too few | low |
+
+Zero to `that` ratio:
+
+| corpus | zero n | that n | ratio (95% CI) |
+|---|---|---|---|
+| pool, equal-weight | 57 | 42 | 1.87 (1.16 to 3.20) |
+| IETF RFCs | 27 | 26 | 1.04 (0.58 to 1.83) |
+| arXiv pre, all | 411 | 142 | 2.89 (2.36 to 3.59) |
+| arXiv post, all | 340 | 74 | 4.59 (3.49 to 6.19) |
+| LLM corpus | 41 | 1 | too few |
+
+The other four sources and the author's specs have too few. The
+arXiv post over pre ratio of ratios is 1.59 (1.12 to 2.27) over all
+sections. The LLM over pool ratio of ratios is too few.
+
+**H3: holds for arXiv, too few for the LLM corpus.** The arXiv rise
+comes from the `that` form, which fell (0.68), while the zero form
+was flat (1.08). The LLM corpus has 41 zero findings and 1 `that`
+finding, which leans the predicted way but is under the 20-finding
+minimum.
+
+**H4: fails as stated.** The zero form's interval lies above 1, as
+predicted. Its lower end, 5.06, is past 3, so set C gives `high`, one
+level above the predicted `med`. The load 0 to 1 group also gives `high`; load 2 or more is
+too few. `TRAILING_LIGHT_VERB` has no LLM findings, so it gives
+`low`.
+
+**Reading.** On the console, 20 random findings per pattern (all if
+fewer), seed `15015-{corpus}-{pattern}`. Counts only.
+
+| pattern | pool | LLM corpus |
+|---|---|---|
+| `zero_object_relative` | 9 / 20 | 17 / 20 |
+| `that_object_relative` | 14 / 20 | 1 / 1 |
+| `aux_object_relative` | 13 / 20 | 10 / 12 |
+| `as_parenthetical` | 0 / 3 | none |
+| `TRAILING_LIGHT_VERB` | 2 / 5 | none |
+
+H1, pool part, holds at 14 of 20; the misses are `that` clauses after
+nouns of possibility or expectation and after verbs such as `note` and
+`show`. The zero form's pool misses are a verb tagged as a noun after
+a pronoun, with a participle after it; subordinate clauses with no
+comma; and `There are no X defined`. The aux form's misses are
+embedded questions with `what` or `which` and a fronted phrase. The 3
+pool `as_parenthetical` findings are intransitive or particle uses. No
+light-verb closure turned up in the LLM reading.
+
+The zero form reads 17 of 20 real in the LLM corpus and 9 of 20 in the
+pool. The pool rate holds more false positives, so the measured LR
+likely understates the LR for real object relatives.
+
+### Phase 3: parse agreement and records
+
+**H5: holds.** Every `OBJECT_RELATIVE` and `TRAILING_LIGHT_VERB` row of
+`tests.py` (77 rows, 75 distinct sentences) was parsed with `md` and
+with `en_core_web_trf` 3.8.0 on the CPU. The two models tokenise every
+row the same way. For a positive row, `md`'s match gives the clause
+verb and the head noun's range, and a model gets the arc when the verb
+is a `relcl` whose head is a noun in that range.
+
+| positive rows | rows | `md` | `trf` |
+|---|---|---|---|
+| `zero_object_relative` | 8 | 4 | 8 |
+| `that_object_relative` | 6 | 4 | 6 |
+| `aux_object_relative` | 10 | 8 | 10 |
+| `TRAILING_LIGHT_VERB` | 6 | 3 | 5 |
+| `as_parenthetical` | 3 | 0 | 0 |
+| all | 33 | 19 (58%) | 29 (88%) |
+| all but `as_parenthetical` | 30 | 19 (63%) | 29 (97%) |
+
+An as-parenthetical has no head noun, so neither model gives it a
+`relcl` arc; it would need its own path. `trf`'s one other miss parses
+the imperative `Undo` as a preposition.
+
+On negative rows, a `relcl` arc anywhere in the sentence comes from
+`md` on 13 of 44 and from `trf` on 12. Most of these are correct arcs:
+the negatives include subject relatives, short pronoun-subject
+clauses and heavy-verb relatives that the detectors exclude by
+design. On the 3 complement-clause rows `md` gives a `relcl` arc on 2
+and `trf` on none; `trf` labels those clauses `acl`, which is the
+distinction the phase 1 guard draws by sentence shape.
+
+`trf` parsed the 77 rows with both models in 22 s on one thread. A
+dependency path on `relcl` is worth a later task. It needs a speed
+check on the blogs, where `trf` is much slower than `md`, and
+precision measured against the phase 2 readings. With
+`spacy-curated-transformers` installed, every ticfinder run prints a
+`torch.jit.script` deprecation warning on stderr; the findings are
+unchanged.
+
+**Proposed levels.** No level was changed. Set C from the phase 2
+LRs, next to the readings and the blog harvest (TF-014 phase 3 and
+TF-015 phase 1; rewritten, deleted, open):
+
+| row | set C | pool reading | LLM reading | blog reading | blog harvest |
+|---|---|---|---|---|---|
+| `zero_object_relative`, load 0 to 1 | high | | | | 2, 6, 4 |
+| `zero_object_relative`, load 2 or more | low (too few) | | | | 0, 3, 2 |
+| `zero_object_relative`, all | high | 9 / 20 | 17 / 20 | 16 / 20 | 2, 9, 6 |
+| `that_object_relative` | low (too few) | 14 / 20 | 1 / 1 | 2 / 5 before the guard, 2 / 2 after | none |
+| `aux_object_relative` | low (too few) | 13 / 20 | 10 / 12 | about 12 / 14 | 0, 1, 0 |
+| `as_parenthetical` | low (too few) | 0 / 3 | none | none | none |
+| `TRAILING_LIGHT_VERB` | low (too few) | 2 / 5 | none | 2 / 2 | 0, 1, 0 |
+
+The zero form is the one row set C would raise. Its LR rests on 41
+LLM findings from one steered corpus. Its pool precision is 9 of 20,
+so the precision fix may come before a level change. The user
+chooses in a later task.
+
+**README.** The `OBJECT_RELATIVE` passage now describes the guard and
+the two new patterns. Its examples are in backticks. It ends with the
+corpus result.
+`make` reports the same 24 findings as before.
+
+**Verdict.** H1 holds (blogs and pool). H2 holds for the
+documents and for all three corpora. H3 holds for arXiv and has too few
+findings for the LLM corpus. H4 fails as stated: the zero form would
+be `high`, and `TRAILING_LIGHT_VERB` has too few findings. H5 holds:
+`trf` gives the arc on 88% of positive rows against 58% for `md`.

@@ -213,6 +213,15 @@ form with no `that`, which frontier models use more than human writers
 do (Clark et al. 2026, arXiv:2610.29162).
 `that_object_relative` finds the form with `that` or `which`. Adding
 `that` leaves the verb at the end, so it does not help the reader much.
+It skips a `that` clause that states what a noun such as `rule` or
+`claim` says, because that clause has no gap.
+`aux_object_relative` finds the same clause when its verb follows
+`does`, `did`, `can`, `could`, `will` or `would`, with or without
+`not`: `a branch the table does not hold`.
+`as_parenthetical` finds an `as` clause whose verb needs an object and
+has none, as in `named as the planning documents use`. Verbs that
+can stand alone after `as`, such as `know`, `describe` and `expect`,
+are left out.
 `TRAILING_LIGHT_VERB` finds a phrase whose real action has become a
 noun and whose last word is a light verb, an empty verb such as `made`
 or `did`: `the array write the last primitive made`.
@@ -223,11 +232,12 @@ noun or is a verb used as a noun, the clause's subject is three or more
 words, and the verb ends the clause. A short one with a pronoun subject
 ("the file you sent") is ordinary English and is not reported.
 
-Both constructions report at low confidence, every load included, until
-they are measured against human and LLM corpora. In a reading of the
-pacino blogs, 16 of 20 `zero_object_relative` findings were real object
-relatives and 2 of 5 `that_object_relative` findings were; the others
-were mostly `that` clauses after a noun such as `rule` or `hypothesis`.
+Both constructions report at low confidence for now. In a reading of
+the pacino blogs, 16 of 20 `zero_object_relative` findings were real
+object relatives. The zero form is about 9 times as common in LLM specs
+as in human specs. In the human specs only 9 of 20 of its findings were
+real, so its level is set in a later step, after a precision fix. The
+other patterns have too few findings in the LLM specs to measure.
 
 ## Working through a document
 

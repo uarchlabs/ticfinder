@@ -6,3 +6,4 @@ else
   export SPACY_INSTALLED="no"
 fi
 export CLAUDE_CODE_MAX_OUTPUT_TOKENS=64000
+export PYTHONWARNINGS="ignore::FutureWarning:torch.jit._script"
